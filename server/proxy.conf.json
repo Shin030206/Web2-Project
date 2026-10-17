@@ -1,0 +1,7 @@
+{
+    "context": "/packages",
+    "target": "http://localhost:3005",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+}
