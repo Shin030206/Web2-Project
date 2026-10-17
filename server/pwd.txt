@@ -1,0 +1,2 @@
+//mongo-atlas-account:admin;hmDgbTgVjOPIHgQZ
+//url:mongodb+srv://admin:hmDgbTgVjOPIHgQZ@cluster0.a4bapv4.mongodb.net/KyUcStudioDB?retryWrites=true&w=majority
