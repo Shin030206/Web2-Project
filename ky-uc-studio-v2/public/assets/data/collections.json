@@ -1,0 +1,207 @@
+[
+  {
+    "collection_id": "COL01",
+    "collection_name": "EM VÀ NẮNG",
+    "category": "Chân Dung Đơn",
+    "slogan": "Thanh xuân rực rỡ nhất dưới nắng.",
+    "introduction": "Mỗi người con gái là một bài thơ đẹp nhất của thời gian. Chúng tôi lưu giữ nụ cười trong trẻo và những khoảnh khắc dịu dàng nhất của em dưới ánh mặt trời.",
+    "concepts": [
+      {
+        "concept_code": "BP01",
+        "concept_name": "CD NẮNG",
+        "category": "Chân dung",
+        "starting_price": 3800000,
+        "starting_price_formatted": "từ 3.800.000đ",
+        "description": "Nắng hoàng hôn nhuộm vàng kẽ tóc, váy trắng nhẹ nhàng. Khoảnh khắc thanh xuân trong ngần dưới ánh chiều tà."
+      },
+      {
+        "concept_code": "BP02",
+        "concept_name": "CD BÊN CỬA",
+        "category": "Chân dung",
+        "starting_price": 3800000,
+        "starting_price_formatted": "từ 3.800.000đ",
+        "description": "Ánh sáng dịu nhẹ bên bậu cửa sổ mờ sương, áo len rộng mộc mạc. Góc bình yên sâu lắng giữa không gian quen thuộc."
+      },
+      {
+        "concept_code": "BP03",
+        "concept_name": "CD RETRO",
+        "category": "Chân dung",
+        "starting_price": 3800000,
+        "starting_price_formatted": "từ 3.800.000đ",
+        "description": "Tone màu phim ấm áp, trang phục cổ điển những năm 90s. Chân dung hoài cổ mang đậm màu sắc điện ảnh tháng năm."
+      },
+      {
+        "concept_code": "BP04",
+        "concept_name": "CD PHỐ ĐÊM",
+        "category": "Chân dung",
+        "starting_price": 3800000,
+        "starting_price_formatted": "từ 3.800.000đ",
+        "description": "Ánh đèn neon đường phố lung linh, bóng người một mình lướt qua. Nốt trầm suy tư giữa lòng thành phố lúc lên đèn."
+      }
+    ]
+  },
+  {
+    "collection_id": "COL02",
+    "collection_name": "KÝ ỨC ĐÔI TA",
+    "category": "Ảnh Cặp Đôi & Cưới Phóng Sự",
+    "slogan": "Kể câu chuyện tình bằng thước phim bình dị.",
+    "introduction": "Tình yêu không cần bối cảnh cầu kỳ, chỉ cần một ánh mắt ấm áp hay cái nắm tay siết chặt. Hãy để KÝ ỨC cùng hai bạn viết tiếp bản tình ca của riêng mình qua những khung hình đầy cảm xúc.",
+    "concepts": [
+      {
+        "concept_code": "BP05",
+        "concept_name": "CP HOÀNG HÔN",
+        "category": "Couple",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Chạy trốn khỏi phố thị, nắm tay nhau trên đồi cỏ lau ngập nắng vàng. Thước phim tình yêu tự do, lãng mạn và phóng khoáng."
+      },
+      {
+        "concept_code": "BP06",
+        "concept_name": "CP PHIM CŨ",
+        "category": "Couple",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Tone màu ảnh phim HongKong cổ điển, trang phục retro dạo bước qua hiên nhà cũ. Những cái ôm bình dị mang màu sắc hoài niệm."
+      },
+      {
+        "concept_code": "BP07",
+        "concept_name": "WD PHÓNG SỰ",
+        "category": "Couple / Wedding",
+        "starting_price": 5800000,
+        "starting_price_formatted": "từ 5.800.000đ",
+        "description": "Không tạo dáng cứng nhắc, bắt trọn nụ cười rạng rỡ và những giọt nước mắt hạnh phúc. Cuốn phim ngày cưới chân thực, tự nhiên nhất."
+      },
+      {
+        "concept_code": "BP08",
+        "concept_name": "CP CƠN MƯA",
+        "category": "Couple",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Che chung chiếc ô dưới cơn mưa bất chợt của thành phố, ánh mắt chạm nhau. Khoảnh khắc ngọt ngào, lãng mạn như một bộ phim điện ảnh."
+      }
+    ]
+  },
+  {
+    "collection_id": "COL03",
+    "collection_name": "NHÀ LÀ NƠI ĐỂ VỀ",
+    "category": "Ảnh Gia Đình",
+    "slogan": "Gói ghém bình yên vào miền ký ức.",
+    "introduction": "Gia đình là bến đỗ ấm áp nhất sau những giông bão ngoài kia. Chúng tôi giúp bạn lưu giữ tiếng cười trẻ thơ và hơi ấm của sự sum vầy trong những bức ảnh ngập tràn tình thân.",
+    "concepts": [
+      {
+        "concept_code": "BP09",
+        "concept_name": "GD SUM VẦY",
+        "category": "Gia đình",
+        "starting_price": 5800000,
+        "starting_price_formatted": "từ 5.800.000đ",
+        "description": "Bữa cơm ấm cúng, tiếng cười rộn rã nơi phòng khách ngập nắng của cả gia đình."
+      },
+      {
+        "concept_code": "BP10",
+        "concept_name": "GD NGÀY XƯA",
+        "category": "Gia đình",
+        "starting_price": 5800000,
+        "starting_price_formatted": "từ 5.800.000đ",
+        "description": "Cả nhà mặc áo dài truyền thống, ghi lại nét trang nghiêm mà hoài cổ trong nếp nhà xưa."
+      },
+      {
+        "concept_code": "BP11",
+        "concept_name": "GD THƠ ẤU",
+        "category": "Gia đình",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Bố mẹ cùng con trẻ dạo chơi trên đồng cỏ, bắt trọn khoảnh khắc lớn khôn tự nhiên của bé."
+      },
+      {
+        "concept_code": "BP12",
+        "concept_name": "GD BA THẾ HỆ",
+        "category": "Gia đình",
+        "starting_price": 6800000,
+        "starting_price_formatted": "từ 6.800.000đ",
+        "description": "Khung hình đầy đủ từ ông bà, cha mẹ đến con cháu với những cái ôm đầy gắn kết."
+      }
+    ]
+  },
+  {
+    "collection_id": "COL04",
+    "collection_name": "CHÚNG TA CỦA SAU NÀY",
+    "category": "Ảnh Nhóm Bạn / Kỷ Yếu",
+    "slogan": "Lưu giữ tiếng cười của những năm tháng có nhau.",
+    "introduction": "Thương tặng những năm tháng chúng ta từng cùng cười, cùng khóc bên những người bạn tri kỷ. Dẫu mai này mỗi người một phương, những bức ảnh này sẽ mãi là mảnh ký ức rực rỡ nhất của tuổi trẻ.",
+    "concepts": [
+      {
+        "concept_code": "BP13",
+        "concept_name": "NB THANH XUÂN",
+        "category": "Bạn bè",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Những nụ cười vô tư dưới bóng râm sân trường, lưu giữ vẹn nguyên tình bạn năm tháng ấy."
+      },
+      {
+        "concept_code": "BP14",
+        "concept_name": "NB LÃNG DU",
+        "category": "Bạn bè",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Cùng nhóm bạn thân đi trốn phố thị, đón gió trên chiếc xe hoài cổ dọc những cung đường."
+      },
+      {
+        "concept_code": "BP15",
+        "concept_name": "NB NIÊN THIẾU",
+        "category": "Bạn bè",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Tone màu ảnh phim HongKong, cả nhóm cùng ngồi hóng mát bên quán nước hay con hẻm nhỏ."
+      },
+      {
+        "concept_code": "BP16",
+        "concept_name": "NB TRI KỶ",
+        "category": "Bạn bè",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Khung hình cận cảnh ấm áp của những người bạn thân thiết, không ồn ào nhưng đầy gắn kết."
+      }
+    ]
+  },
+  {
+    "collection_id": "COL05",
+    "collection_name": "TÌM LẠI DẤU XƯA",
+    "category": "Ảnh Áo Dài / Cổ Phục / Retro",
+    "slogan": "Hoài niệm nét duyên giữa dòng chảy thời gian.",
+    "introduction": "Tìm về vạt áo dài thướt tha bên những mái rêu nhuốm màu thời gian. Tấm vé đưa bạn trở về với những ký ức bảng lảng khói sương và nét hoài cổ đầy chất thơ của ngày xưa cũ.",
+    "concepts": [
+      {
+        "concept_code": "BP17",
+        "concept_name": "DX HỒN VIỆT",
+        "category": "Áo dài",
+        "starting_price": 3800000,
+        "starting_price_formatted": "từ 3.800.000đ",
+        "description": "Tà áo dài thướt tha bên mái rêu phong dinh thự cổ, nét duyên dáng vượt thời gian."
+      },
+      {
+        "concept_code": "BP18",
+        "concept_name": "DX CỔ PHỤC",
+        "category": "Áo dài",
+        "starting_price": 4800000,
+        "starting_price_formatted": "từ 4.800.000đ",
+        "description": "Kiêu sa trong phục trang Nhật Bình, Áo Tấc, sống lại những thước phim lịch sử đầy tự hào."
+      },
+      {
+        "concept_code": "BP19",
+        "concept_name": "DX SÀI THÀNH",
+        "category": "Áo dài",
+        "starting_price": 3800000,
+        "starting_price_formatted": "từ 3.800.000đ",
+        "description": "Kính râm, tóc uốn và váy chấm bi phong cách những năm 70s dạo bước ngắm phố thị lên đèn."
+      },
+      {
+        "concept_code": "BP20",
+        "concept_name": "DX CHỢ XƯA",
+        "category": "Áo dài",
+        "starting_price": 3800000,
+        "starting_price_formatted": "từ 3.800.000đ",
+        "description": "Mộc mạc với chiếc áo bà ba và nón lá, lưu giữ nét bình dị giữa nhịp sống vội vã."
+      }
+    ]
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "addon_id": 1,
+    "addon_name": "Thuê thêm trang phục Việt phục cách tân",
+    "price": 150000,
+    "unit": "bộ / buổi",
+    "description": "Trang phục thiết kế riêng kết hợp họa tiết truyền thống và form dáng hiện đại."
+  },
+  {
+    "addon_id": 2,
+    "addon_name": "Trang điểm và làm tóc chuyên sâu",
+    "price": 300000,
+    "unit": "người",
+    "description": "Nâng cấp layout makeup theo concept đặc biệt cho gói Tiêu Chuẩn."
+  },
+  {
+    "addon_id": 3,
+    "addon_name": "Thuê bối cảnh studio theo giờ",
+    "price": 400000,
+    "unit": "giờ",
+    "description": "Dành cho khách hàng tự thực hiện buổi chụp với ê-kíp riêng."
+  },
+  {
+    "addon_id": 4,
+    "addon_name": "Album Photobook cao cấp",
+    "price": 450000,
+    "unit": "cuốn",
+    "description": "In giấy mỹ thuật cao cấp, bìa da/vải tùy chọn."
+  },
+  {
+    "addon_id": 5,
+    "addon_name": "Khung ảnh gỗ nghệ thuật",
+    "price": 200000,
+    "unit": "khung",
+    "description": "Khung ảnh gỗ thủ công sang trọng trưng bày bàn làm việc/phòng khách."
+  }
+]
