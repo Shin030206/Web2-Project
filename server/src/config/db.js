@@ -30,17 +30,22 @@ async function connectDB() {
   return db;
 }
 
+// Unique chỉ áp dụng cho bản ghi có mã, để dữ liệu cũ (thiếu mã) trên Atlas không làm lỗi tạo index
+function uniqueIfPresent(field, type) {
+  return { unique: true, partialFilterExpression: { [field]: { $type: type } } };
+}
+
 async function createIndexes() {
   const c = collections;
   await Promise.all([
-    c.userCollection.createIndex({ email: 1 }, { unique: true }),
-    c.userCollection.createIndex({ phone: 1 }, { unique: true }),
-    c.packageCollection.createIndex({ package_id: 1 }, { unique: true }),
-    c.conceptCollection.createIndex({ concept_code: 1 }, { unique: true }),
-    c.albumCollection.createIndex({ collection_id: 1 }, { unique: true }),
-    c.addonCollection.createIndex({ addon_id: 1 }, { unique: true }),
-    c.voucherCollection.createIndex({ voucher_code: 1 }, { unique: true }),
-    c.bookingCollection.createIndex({ bookingCode: 1 }, { unique: true }),
+    c.userCollection.createIndex({ email: 1 }, uniqueIfPresent("email", "string")),
+    c.userCollection.createIndex({ phone: 1 }, uniqueIfPresent("phone", "string")),
+    c.packageCollection.createIndex({ package_id: 1 }, uniqueIfPresent("package_id", "number")),
+    c.conceptCollection.createIndex({ concept_code: 1 }, uniqueIfPresent("concept_code", "string")),
+    c.albumCollection.createIndex({ collection_id: 1 }, uniqueIfPresent("collection_id", "string")),
+    c.addonCollection.createIndex({ addon_id: 1 }, uniqueIfPresent("addon_id", "number")),
+    c.voucherCollection.createIndex({ voucher_code: 1 }, uniqueIfPresent("voucher_code", "string")),
+    c.bookingCollection.createIndex({ bookingCode: 1 }, uniqueIfPresent("bookingCode", "string")),
     c.bookingCollection.createIndex({ bookingDate: 1, startTime: 1 }),
     c.bookingCollection.createIndex({ "customer.phone": 1 }),
     c.bookingCollection.createIndex({ userId: 1 }),
