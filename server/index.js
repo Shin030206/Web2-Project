@@ -24,6 +24,7 @@ connectDB();
 app.use('/packages', require('./src/routes/package.route'));
 app.use('/slots', require('./src/routes/slot.route'));
 app.use('/bookings', require('./src/routes/booking.route'));
+app.use('/payments', require('./src/routes/payment.route'));
 
 app.get('/', (req, res) => {
   res.send('Ky Uc Studio Web server is processed for MongoDB');

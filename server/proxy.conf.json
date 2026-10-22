@@ -1,7 +1,22 @@
 {
-    "context": "/packages",
-    "target": "http://localhost:3005",
-    "secure": true,
-    "changeOrigin": true,
-    "logLevel": "debug"
+    "/packages": {
+        "target": "http://localhost:3005",
+        "secure": false,
+        "changeOrigin": true
+    },
+    "/slots": {
+        "target": "http://localhost:3005",
+        "secure": false,
+        "changeOrigin": true
+    },
+    "/bookings": {
+        "target": "http://localhost:3005",
+        "secure": false,
+        "changeOrigin": true
+    },
+    "/payments": {
+        "target": "http://localhost:3005",
+        "secure": false,
+        "changeOrigin": true
+    }
 }
