@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const packageCtrl = require('../controllers/package.controller');
+const { optionalAuth, requireAdmin } = require('../middlewares/auth');
 
-router.get('/', packageCtrl.getAllPackages);
-router.get('/:identifier', packageCtrl.getPackageByIdentifier);
-router.post('/', packageCtrl.createPackage);
-router.put('/', packageCtrl.updatePackage);
-router.delete('/:id', packageCtrl.deletePackage);
+router.get('/', optionalAuth, packageCtrl.getAllPackages);
+router.get('/:id', packageCtrl.getPackageByIdentifier);
+router.post('/', requireAdmin, packageCtrl.createPackage);
+router.put('/:id', requireAdmin, packageCtrl.updatePackage);
+router.delete('/:id', requireAdmin, packageCtrl.deletePackage);
 
 module.exports = router;

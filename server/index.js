@@ -1,34 +1,27 @@
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const bodyParser = require('body-parser');
-const path = require('path');
 require('dotenv').config();
 
 const { connectDB } = require('./src/config/db');
+const { expireUnpaidBookings } = require('./src/services/booking.service');
+const app = require('./src/app');
 
-const app = express();
 const port = process.env.PORT || 3005;
+const EXPIRE_CHECK_MS = 5 * 60 * 1000;
 
-// Middleware theo bài Thầy dạy
-app.use(morgan('combined'));
-app.use(cors());
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+async function start() {
+  // Kết nối CSDL MongoDB Atlas xong mới mở server
+  await connectDB();
 
-// Khởi chạy kết nối CSDL MongoDB Atlas
-connectDB();
+  // Định kỳ hủy các đơn quá hạn chưa cọc để nhả slot
+  setInterval(() => {
+    expireUnpaidBookings().catch(err => console.error("Lỗi tự hủy đơn quá hạn:", err.message));
+  }, EXPIRE_CHECK_MS);
 
-// Đăng ký các Route Router (MCR)
-app.use('/packages', require('./src/routes/package.route'));
-app.use('/slots', require('./src/routes/slot.route'));
-app.use('/bookings', require('./src/routes/booking.route'));
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+}
 
-app.get('/', (req, res) => {
-  res.send('Ky Uc Studio Web server is processed for MongoDB');
-});
-
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+start().catch(err => {
+  console.error("❌ Lỗi kết nối CSDL:", err.message);
+  process.exit(1);
 });

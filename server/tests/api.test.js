@@ -1,0 +1,297 @@
+// Test luồng đặt lịch end-to-end. Cần 1 MongoDB để chạy (mặc định localhost, DB riêng cho test).
+// Chạy: npm test   (hoặc MONGO_URI=... npm test). DB test sẽ bị xóa sau khi chạy xong.
+process.env.NODE_ENV = 'test';
+process.env.DB_NAME = process.env.TEST_DB_NAME || 'KyUcStudioDB_test';
+process.env.JWT_SECRET = 'test-secret';
+
+const { test, before, after } = require('node:test');
+const assert = require('node:assert/strict');
+const bcrypt = require('bcryptjs');
+const { connectDB, closeDB, collections, ObjectId } = require('../src/config/db');
+const { expireUnpaidBookings } = require('../src/services/booking.service');
+const app = require('../src/app');
+
+let server;
+let db;
+let baseUrl;
+
+async function api(method, url, body, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(baseUrl + url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  return { status: res.status, body: await res.json().catch(() => null) };
+}
+
+function futureDate(days) {
+  return new Date(Date.now() + 7 * 3600 * 1000 + days * 24 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+const DATE = futureDate(10);
+let adminToken;
+let userToken;
+
+before(async () => {
+  db = await connectDB();
+  await db.dropDatabase();
+  await connectDB(); // tạo lại index sau khi drop
+
+  await collections.packageCollection.insertMany([
+    { package_id: 102, category: 'Chân Dung', package_name: 'Chân Dung – Nâng Cao', price: 2500000, duration_minutes: 90, status: 'ACTIVE' },
+    { package_id: 201, category: 'Cặp Đôi', package_name: 'Cặp Đôi – Tiêu Chuẩn', price: 2200000, duration_minutes: 60, status: 'ACTIVE' }
+  ]);
+  await collections.addonCollection.insertOne({ addon_id: 1, addon_name: 'Việt phục', price: 150000, unit: 'bộ' });
+  await collections.conceptCollection.insertOne({ concept_code: 'BP01', concept_name: 'CD Nắng', category: 'Chân Dung' });
+  await collections.voucherCollection.insertMany([
+    { voucher_code: 'KYUC2026', voucher_name: 'Khách mới', discount_value: 100000, required_points: 0, min_order_value: 1500000, is_active: true },
+    { voucher_code: 'XU200K', voucher_name: 'Đổi 200 xu', discount_value: 200000, required_points: 200, min_order_value: 2000000, is_active: true }
+  ]);
+  await collections.userCollection.insertOne({
+    fullName: 'Admin', email: 'admin@test.vn', phone: '0900000000', role: 'admin', points: 0,
+    passwordHash: await bcrypt.hash('admin123', 10), createdAt: new Date()
+  });
+
+  server = app.listen(0);
+  baseUrl = `http://127.0.0.1:${server.address().port}/api`;
+
+  adminToken = (await api('POST', '/auth/login', { account: 'admin@test.vn', password: 'admin123' })).body.token;
+});
+
+after(async () => {
+  server?.close();
+  await db.dropDatabase();
+  await closeDB();
+});
+
+test('đăng ký, đăng nhập, xem thông tin tài khoản', async () => {
+  const reg = await api('POST', '/auth/register', { fullName: 'Thanh Vy', email: 'vy@test.vn', phone: '0901234567', password: '123456' });
+  assert.equal(reg.status, 201);
+  assert.equal(reg.body.user.passwordHash, undefined);
+
+  const dup = await api('POST', '/auth/register', { fullName: 'X', email: 'vy@test.vn', phone: '0911111111', password: '123456' });
+  assert.equal(dup.status, 409);
+
+  const bad = await api('POST', '/auth/login', { account: 'vy@test.vn', password: 'wrong' });
+  assert.equal(bad.status, 401);
+
+  const login = await api('POST', '/auth/login', { account: '0901234567', password: '123456' });
+  assert.equal(login.status, 200);
+  userToken = login.body.token;
+
+  const me = await api('GET', '/auth/me', null, userToken);
+  assert.equal(me.body.email, 'vy@test.vn');
+  assert.equal(me.body.role, 'customer');
+});
+
+test('phân quyền: khách không gọi được API admin', async () => {
+  assert.equal((await api('GET', '/bookings')).status, 401);
+  assert.equal((await api('GET', '/bookings', null, userToken)).status, 403);
+  assert.equal((await api('POST', '/packages', { package_id: 999 }, userToken)).status, 403);
+  assert.equal((await api('GET', '/admin/stats', null, adminToken)).status, 200);
+});
+
+test('CRUD gói chụp + lọc giá + validate dữ liệu', async () => {
+  const missing = await api('POST', '/packages', { package_id: 999 }, adminToken);
+  assert.equal(missing.status, 400);
+
+  const created = await api('POST', '/packages', {
+    package_id: 999, category: 'Test', package_name: 'Gói test', price: 1000000, duration_minutes: 60, hacker: 'x'
+  }, adminToken);
+  assert.equal(created.status, 201);
+  assert.equal(created.body.hacker, undefined);
+
+  const filtered = await api('GET', '/packages?minPrice=2000000&maxPrice=2400000');
+  assert.deepEqual(filtered.body.map(p => p.package_id), [201]);
+
+  const updated = await api('PUT', '/packages/999', { status: 'INACTIVE' }, adminToken);
+  assert.equal(updated.body.status, 'INACTIVE');
+  const list = await api('GET', '/packages');
+  assert.ok(!list.body.some(p => p.package_id === 999), 'gói INACTIVE bị ẩn với khách');
+
+  assert.equal((await api('DELETE', '/packages/999', null, adminToken)).status, 200);
+  assert.equal((await api('GET', '/packages/999')).status, 404);
+});
+
+test('báo giá: gói + dịch vụ thêm + voucher khớp với bookingDraft của frontend', async () => {
+  const quote = await api('POST', '/bookings/quote', { packageId: 102, addons: [{ addon_id: 1 }], voucherCode: 'kyuc2026' });
+  assert.equal(quote.status, 200);
+  assert.equal(quote.body.subtotal, 2650000);
+  assert.equal(quote.body.discountAmount, 100000);
+  assert.equal(quote.body.totalAmount, 2550000);
+  assert.equal(quote.body.depositAmount, 765000);
+
+  const needLogin = await api('POST', '/vouchers/validate', { packageId: 102, voucherCode: 'XU200K' });
+  assert.equal(needLogin.status, 401);
+  const notEnough = await api('POST', '/vouchers/validate', { packageId: 102, voucherCode: 'XU200K' }, userToken);
+  assert.equal(notEnough.status, 400);
+});
+
+test('giữ slot: chống trùng giờ, chồng giờ và 2 request cùng lúc', async () => {
+  const slots = await api('GET', `/slots?date=${DATE}&packageId=102`);
+  assert.equal(slots.status, 200);
+  assert.equal(slots.body.slots[0].timeSlot, '08:00 - 09:30');
+
+  const outside = await api('POST', '/slots/hold', { packageId: 102, bookingDate: DATE, startTime: '19:00', customerPhone: '0911111111' });
+  assert.equal(outside.status, 400, 'buổi chụp vượt quá giờ đóng cửa');
+
+  const results = await Promise.all(['0911111111', '0922222222', '0933333333', '0944444444', '0955555555'].map(phone =>
+    api('POST', '/slots/hold', { packageId: 102, bookingDate: DATE, startTime: '13:00', customerPhone: phone })
+  ));
+  assert.equal(results.filter(r => r.status === 201).length, 1, 'chỉ 1 người giữ được slot');
+  assert.equal(results.filter(r => r.status === 409).length, 4);
+
+  // 12:30 + 90 phút chồng lên 13:00
+  const overlap = await api('POST', '/slots/hold', { packageId: 102, bookingDate: DATE, startTime: '12:30', customerPhone: '0966666666' });
+  assert.equal(overlap.status, 409);
+
+  const occupied = await api('GET', `/slots/occupied?date=${DATE}`);
+  assert.deepEqual(occupied.body.occupiedSlots.map(s => s.slot), ['13:00', '13:30', '14:00']);
+  assert.ok(occupied.body.occupiedSlots.every(s => s.status === 'HOLDING'));
+
+  const winner = results.find(r => r.status === 201).body;
+  const release = await api('DELETE', `/slots/hold/${winner.holdId}`, { customerPhone: winner.holdData.customerPhone });
+  assert.equal(release.status, 200);
+  assert.equal((await api('GET', `/slots/occupied?date=${DATE}`)).body.occupiedSlots.length, 0);
+});
+
+let booking;
+
+test('luồng đặt lịch: giữ slot -> tạo đơn -> tra cứu -> thanh toán cọc -> admin xác nhận', async () => {
+  const hold = await api('POST', '/slots/hold', { packageId: 102, bookingDate: DATE, timeSlot: '10:30 - 12:00', customerPhone: '0901234567' }, userToken);
+  assert.equal(hold.status, 201);
+
+  const wrongPhone = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'X', customerPhone: '0999999999' });
+  assert.equal(wrongPhone.status, 403);
+
+  const created = await api('POST', '/bookings', {
+    holdId: hold.body.holdId,
+    conceptCode: 'BP01',
+    addons: [{ addon_id: 1, quantity: 1 }],
+    voucherCode: 'KYUC2026',
+    customerName: 'Võ Thị Thanh Vy',
+    customerPhone: '0901234567',
+    customerEmail: 'vy.vtt@gmail.com',
+    note: 'Tone màu ấm'
+  }, userToken);
+  assert.equal(created.status, 201);
+  booking = created.body.data;
+  assert.equal(booking.bookingStatus, 'Pending');
+  assert.equal(booking.paymentStatus, 'Unpaid');
+  assert.equal(booking.pricing.totalAmount, 2550000);
+  assert.equal(booking.timeSlot, '10:30 - 12:00');
+  assert.equal(created.body.paymentInfo.amount, 765000);
+
+  const reuse = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'X', customerPhone: '0901234567' });
+  assert.equal(reuse.status, 410, 'holdId chỉ dùng được 1 lần');
+
+  const occupied = await api('GET', `/slots/occupied?date=${DATE}`);
+  assert.ok(occupied.body.occupiedSlots.every(s => s.status === 'BOOKED'));
+
+  const lookup = await api('GET', `/bookings/lookup?code=${booking.bookingCode}&phone=0901234567`);
+  assert.equal(lookup.status, 200);
+  assert.equal((await api('GET', `/bookings/lookup?code=${booking.bookingCode}&phone=0900000001`)).status, 404);
+
+  const my = await api('GET', '/bookings/my', null, userToken);
+  assert.equal(my.body.length, 1);
+
+  const pay = await api('POST', '/payments', { bookingId: booking._id, phone: '0901234567', method: 'bank_transfer', amount: 1 });
+  assert.equal(pay.status, 201);
+  assert.equal(pay.body.data.amount, 765000, 'số tiền do server tính');
+  assert.equal((await api('POST', '/payments', { bookingId: booking._id, phone: '0901234567', method: 'momo' })).status, 409);
+
+  const confirm = await api('PUT', `/payments/${pay.body.data._id}/confirm`, null, adminToken);
+  assert.equal(confirm.status, 200);
+  assert.equal(confirm.body.booking.bookingStatus, 'Confirmed');
+  assert.equal(confirm.body.booking.paymentStatus, 'Deposit_Paid');
+});
+
+test('đổi lịch: lùi 30 phút trong cùng ngày, không đè lên đơn khác', async () => {
+  const other = await api('POST', '/slots/hold', { packageId: 201, bookingDate: DATE, startTime: '15:00', customerPhone: '0977777777' });
+  await api('POST', '/bookings', { holdId: other.body.holdId, customerName: 'Khách B', customerPhone: '0977777777' });
+
+  const noPerm = await api('PUT', `/bookings/${booking._id}/reschedule`, { bookingDate: DATE, startTime: '11:00', phone: '0977777777' });
+  assert.equal(noPerm.status, 403);
+
+  const moved = await api('PUT', `/bookings/${booking._id}/reschedule`, { bookingDate: DATE, startTime: '11:00' }, userToken);
+  assert.equal(moved.status, 200);
+  assert.equal(moved.body.data.timeSlot, '11:00 - 12:30');
+  assert.equal(moved.body.data.rescheduleCount, 1);
+
+  const clash = await api('PUT', `/bookings/${booking._id}/reschedule`, { bookingDate: DATE, startTime: '14:00' }, userToken);
+  assert.equal(clash.status, 409);
+
+  const occupied = await api('GET', `/slots/occupied?date=${DATE}`);
+  assert.deepEqual(occupied.body.occupiedSlots.map(s => s.slot), ['11:00', '11:30', '12:00', '15:00', '15:30']);
+});
+
+test('hủy đơn trước 48h được hoàn cọc và nhả slot', async () => {
+  const cancel = await api('PUT', `/bookings/${booking._id}/cancel`, { reason: 'Bận việc', phone: '0901234567' });
+  assert.equal(cancel.status, 200);
+  assert.equal(cancel.body.data.bookingStatus, 'Cancelled');
+  assert.equal(cancel.body.data.paymentStatus, 'Refunded');
+
+  const occupied = await api('GET', `/slots/occupied?date=${DATE}`);
+  assert.deepEqual(occupied.body.occupiedSlots.map(s => s.slot), ['15:00', '15:30']);
+  assert.equal((await api('PUT', `/bookings/${booking._id}/cancel`, { phone: '0901234567' })).status, 400);
+});
+
+test('hoàn thành buổi chụp được tích xu, đổi xu lấy voucher, hủy thì hoàn xu', async () => {
+  const hold = await api('POST', '/slots/hold', { packageId: 102, bookingDate: DATE, startTime: '08:00', customerPhone: '0901234567' }, userToken);
+  const created = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'Vy', customerPhone: '0901234567' }, userToken);
+  const id = created.body.bookingId;
+
+  assert.equal((await api('PATCH', `/bookings/${id}/status`, { status: 'Completed' }, adminToken)).status, 400, 'Pending không chuyển thẳng sang Completed');
+  await api('PATCH', `/bookings/${id}/status`, { status: 'Confirmed' }, adminToken);
+  assert.equal((await api('PATCH', `/bookings/${id}/status`, { status: 'Completed' }, adminToken)).status, 400, 'chưa tới giờ chụp');
+
+  await collections.bookingCollection.updateOne({ _id: new ObjectId(id) }, { $set: { shootAt: new Date(Date.now() - 3600 * 1000) } });
+  const done = await api('PATCH', `/bookings/${id}/status`, { status: 'Completed' }, adminToken);
+  assert.equal(done.status, 200);
+  assert.equal(done.body.pointsAwarded, 250);
+
+  const points = await api('GET', '/auth/me/points', null, userToken);
+  assert.equal(points.body.points, 250);
+
+  const hold2 = await api('POST', '/slots/hold', { packageId: 102, bookingDate: futureDate(20), startTime: '09:00', customerPhone: '0901234567' }, userToken);
+  const withVoucher = await api('POST', '/bookings', { holdId: hold2.body.holdId, voucherCode: 'XU200K', customerName: 'Vy', customerPhone: '0901234567' }, userToken);
+  assert.equal(withVoucher.status, 201);
+  assert.equal(withVoucher.body.data.pricing.discountAmount, 200000);
+  assert.equal((await api('GET', '/auth/me/points', null, userToken)).body.points, 50);
+
+  await api('PUT', `/bookings/${withVoucher.body.bookingId}/cancel`, {}, userToken);
+  assert.equal((await api('GET', '/auth/me/points', null, userToken)).body.points, 250);
+});
+
+test('đơn quá hạn cọc tự hủy và nhả slot', async () => {
+  const date = futureDate(30);
+  const hold = await api('POST', '/slots/hold', { packageId: 201, bookingDate: date, startTime: '09:00', customerPhone: '0988888888' });
+  const created = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'C', customerPhone: '0988888888' });
+  await collections.bookingCollection.updateOne({ bookingCode: created.body.bookingCode }, { $set: { depositDeadline: new Date(Date.now() - 1000) } });
+
+  await expireUnpaidBookings();
+  const lookup = await api('GET', `/bookings/lookup?code=${created.body.bookingCode}&phone=0988888888`);
+  assert.equal(lookup.body.bookingStatus, 'Cancelled');
+  assert.equal((await api('GET', `/slots/occupied?date=${date}`)).body.occupiedSlots.length, 0);
+});
+
+test('slot giữ chỗ hết hạn thì không tạo đơn được', async () => {
+  const hold = await api('POST', '/slots/hold', { packageId: 201, bookingDate: DATE, startTime: '17:00', customerPhone: '0912121212' });
+  await collections.holdSlotCollection.updateOne({ customerPhone: '0912121212' }, { $set: { expiresAt: new Date(Date.now() - 1000) } });
+  const created = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'D', customerPhone: '0912121212' });
+  assert.equal(created.status, 410);
+});
+
+test('lỗi đầu vào trả mã lỗi rõ ràng thay vì 500', async () => {
+  assert.equal((await api('GET', '/bookings/abc', null, adminToken)).status, 400);
+  assert.equal((await api('GET', '/slots?date=2026-02-30')).status, 400);
+  assert.equal((await api('GET', '/khong-ton-tai')).status, 404);
+  const res = await fetch(baseUrl + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{bad' });
+  assert.equal(res.status, 400);
+});
+
+test('thống kê admin', async () => {
+  const stats = await api('GET', '/admin/stats', null, adminToken);
+  assert.equal(stats.status, 200);
+  assert.ok(stats.body.bookings.total >= 4);
+  assert.equal(stats.body.bookings.byStatus.Completed, 1);
+  assert.equal(stats.body.revenue.collected, 2500000);
+});

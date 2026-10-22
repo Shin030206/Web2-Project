@@ -1,7 +1,13 @@
 {
-    "context": "/packages",
+  "/api": {
     "target": "http://localhost:3005",
-    "secure": true,
+    "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
+  },
+  "/uploads": {
+    "target": "http://localhost:3005",
+    "secure": false,
+    "changeOrigin": true
+  }
 }
