@@ -13,6 +13,7 @@ npm run dev              # chạy với nodemon (npm start để chạy producti
 ```
 
 - `npm run seed` chỉ **thêm** bản ghi chưa có, không đụng dữ liệu đang có. Thêm `-- --force` để ghi đè theo file JSON.
+- Test bằng Postman: Import file `server/postman/KyUcStudio.postman_collection.json` → bấm **Run collection** để chạy hết theo thứ tự (token, holdId, bookingId tự lưu vào biến).
 - `npm test` chạy test end-to-end trên DB riêng `KyUcStudioDB_test` (tự xóa khi xong). Mặc định dùng `mongodb://127.0.0.1:27017`, muốn dùng Atlas thì đặt `MONGO_URI`.
 - Frontend Angular: copy `server/proxy.conf.json` vào `ky-uc-studio-v2/` và thêm `"proxyConfig": "proxy.conf.json"` vào `serve.options` trong `angular.json`, rồi gọi API bằng đường dẫn tương đối `/api/...`.
 
