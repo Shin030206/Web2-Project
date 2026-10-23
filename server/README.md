@@ -54,11 +54,15 @@ server/
 **Trạng thái đơn:** `Pending` (chờ cọc) → `Confirmed` (đã nhận cọc) → `Completed` / `No_Show`; `Pending`/`Confirmed` → `Cancelled`.
 **Trạng thái thanh toán:** `Unpaid` → `Deposit_Paid` → `Fully_Paid`; hoặc `Refunded` / `Lost_Deposit`.
 
-## Xác thực
+## Xác thực & lưu đăng nhập
 
-- Đăng nhập trả về `token`, gửi kèm header `Authorization: Bearer <token>`.
+- Đăng nhập/đăng ký trả token **và** đặt cookie httpOnly `kyuc_token` (JavaScript không đọc được cookie này nên khó bị lấy cắp token).
+  - Gửi `rememberMe: true` (tick "Lưu đăng nhập") → đăng nhập 30 ngày, tắt trình duyệt vẫn còn.
+  - Không tick → cookie phiên, tắt trình duyệt là mất (token sống tối đa 24h).
+- **Frontend Angular** chỉ cần gọi API qua proxy (`/api/...`) và bật `withCredentials: true` (vd dùng một HTTP interceptor), không cần tự lưu token vào localStorage. Muốn biết đã đăng nhập chưa thì gọi `GET /api/auth/me` (401 = chưa đăng nhập).
+- Postman/mobile vẫn dùng header `Authorization: Bearer <token>` như cũ.
 - 🔓 = ai cũng gọi được, 👤 = cần đăng nhập, 🛡️ = chỉ admin.
-- Khách **không cần tài khoản** vẫn đặt lịch được. Khi đó quyền xem/đổi/hủy đơn được xác minh bằng số điện thoại đặt lịch (gửi `phone` trong body hoặc query).
+- **Tạo đơn (bước thanh toán) bắt buộc đăng nhập** (tắt bằng `REQUIRE_LOGIN_TO_BOOK=false`). Xem/giữ slot, báo giá, lưu bản nháp thì khách vãng lai vẫn dùng được. Đơn cũ của khách vãng lai vẫn tra cứu/hủy bằng mã đơn + SĐT.
 - Lỗi luôn trả `{ "error": "..." }` với mã HTTP: 400 dữ liệu sai, 401 chưa đăng nhập, 403 không có quyền, 404 không tìm thấy, 409 trùng/xung đột, 410 slot giữ chỗ đã hết hạn.
 
 ## Danh sách API (prefix `/api`)
@@ -67,7 +71,8 @@ server/
 | Method | URL | Quyền | Body / ghi chú |
 |---|---|---|---|
 | POST | `/register` | 🔓 | `fullName, email, phone, password` → `{ token, user }`. Họ tên: chỉ chữ cái + khoảng trắng, 2–50 ký tự (tự viết hoa chữ đầu). Mật khẩu: 8–32 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt, không dấu, không khoảng trắng |
-| POST | `/login` | 🔓 | `account` (email hoặc SĐT), `password` → `{ token, user }` |
+| POST | `/login` | 🔓 | `account` (email hoặc SĐT), `password`, `rememberMe?` → `{ token, user, draftRestored }` |
+| POST | `/logout` | 🔓 | xóa cookie đăng nhập |
 | GET | `/me` | 👤 | thông tin tài khoản |
 | PUT | `/me` | 👤 | `fullName, phone, email, avatar_url` |
 | PUT | `/change-password` | 👤 | `oldPassword, newPassword` |
@@ -114,6 +119,15 @@ Bộ lọc:
 
 `paymentInfo` gồm số tiền cọc, nội dung chuyển khoản và `qrUrl` (ảnh VietQR, frontend chỉ cần `<img [src]="qrUrl">`).
 
+### Bản nháp đặt lịch – `/api/booking-draft`
+Lưu tiến trình đặt lịch để khách không phải nhập lại. Khách vãng lai được nhận diện bằng cookie `kyuc_draft` (giữ 7 ngày); khi đăng nhập/đăng ký, bản nháp tự chuyển sang tài khoản (`draftRestored: true`).
+
+| Method | URL | Quyền | Ghi chú |
+|---|---|---|---|
+| PUT | `/` | 🔓 | lưu từng phần, gửi field nào cập nhật field đó: `packageId, conceptCode, addons, voucherCode, bookingDate, startTime, holdId, customer: {name, phone, email, note}, step` |
+| GET | `/` | 🔓 | `{ draft: { step, data }, quote, hold: { valid, secondsLeft } }` hoặc `{ draft: null }` |
+| DELETE | `/` | 🔓 | xóa bản nháp (tự xóa khi tạo đơn thành công) |
+
 ### Thanh toán – `/api/payments`
 | Method | URL | Quyền | Ghi chú |
 |---|---|---|---|
@@ -133,8 +147,10 @@ Bộ lọc:
 ## Luồng đặt lịch cho frontend
 
 1. `GET /api/slots?date=...&packageId=...` → hiển thị các giờ `available`.
-2. Khách chọn giờ → `POST /api/slots/hold` → lưu `holdId`, hiện đếm ngược 10 phút.
-3. Khách chọn concept, dịch vụ thêm, voucher → `POST /api/bookings/quote` để hiện tổng tiền.
-4. Khách điền thông tin → `POST /api/bookings` với `holdId` → nhận `bookingCode` + `paymentInfo` (QR).
-5. Khách chuyển khoản → `POST /api/payments` → admin `PUT /api/payments/:id/confirm`.
-6. Khách tra cứu / đổi / hủy bằng `bookingCode` + SĐT, hoặc vào "Lịch của tôi" nếu đã đăng nhập.
+2. Khách chọn gói, concept, dịch vụ thêm, giờ → `POST /api/slots/hold` (lưu `holdId`, hiện đếm ngược 10 phút) và `POST /api/bookings/quote` để hiện tổng tiền.
+3. **Sau mỗi bước** gọi `PUT /api/booking-draft` để lưu lại lựa chọn + thông tin khách đã nhập.
+4. Tới bước thanh toán mà chưa đăng nhập (`GET /api/auth/me` trả 401) → chuyển sang trang đăng nhập/đăng ký, kèm đường dẫn quay về (vd `/dang-nhap?returnUrl=/dat-lich`).
+5. Đăng nhập/đăng ký xong → quay lại trang đặt lịch → `GET /api/booking-draft` để điền lại form đúng bước `step`. Nếu `hold.valid = false` thì cho khách chọn lại giờ.
+6. `POST /api/bookings` với `holdId` → nhận `bookingCode` + `paymentInfo` (QR). Bản nháp tự xóa.
+7. Khách chuyển khoản → `POST /api/payments` → admin `PUT /api/payments/:id/confirm`.
+8. Khách xem/đổi/hủy trong "Lịch của tôi" (`GET /api/bookings/my`).

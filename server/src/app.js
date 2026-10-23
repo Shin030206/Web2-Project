@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const path = require('path');
 
@@ -9,8 +10,10 @@ const { conceptRouter, collectionRouter, addonRouter, voucherRouter } = require(
 const app = express();
 
 // CLIENT_URL có thể ghi nhiều domain, cách nhau bởi dấu phẩy. Bỏ trống = cho phép tất cả (khi dev)
+// credentials: true để trình duyệt gửi kèm cookie đăng nhập / bản nháp đặt lịch
 const allowedOrigins = (process.env.CLIENT_URL || "").split(",").map(s => s.trim()).filter(Boolean);
-app.use(cors(allowedOrigins.length ? { origin: allowedOrigins } : {}));
+app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : true, credentials: true }));
+app.use(cookieParser());
 if (process.env.NODE_ENV !== "test") app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ limit: '1mb', extended: true }));
@@ -25,6 +28,7 @@ app.use('/api/addons', addonRouter);
 app.use('/api/vouchers', voucherRouter);
 app.use('/api/slots', require('./routes/slot.route'));
 app.use('/api/bookings', require('./routes/booking.route'));
+app.use('/api/booking-draft', require('./routes/draft.route'));
 app.use('/api/payments', require('./routes/payment.route'));
 app.use('/api/admin', require('./routes/admin.route'));
 

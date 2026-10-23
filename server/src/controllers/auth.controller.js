@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { collections } = require('../config/db');
-const { signToken } = require('../middlewares/auth');
+const { signToken, setAuthCookie, clearAuthCookie } = require('../middlewares/auth');
+const { claimGuestDraft } = require('../services/draft.service');
 const { ROLES } = require('../config/constants');
 const {
   httpError, toObjectId, requireFields, isValidEmail, isValidPhone, normalizePhone, normalizeFullName, validatePassword,
@@ -11,6 +12,16 @@ const {
 function publicUser(user) {
   const { passwordHash, ...rest } = user;
   return rest;
+}
+
+// Đăng nhập thành công: gửi token về cả cookie (trình duyệt) lẫn body (Postman/mobile),
+// đồng thời chuyển bản nháp đặt lịch lúc chưa đăng nhập sang tài khoản
+async function startSession(req, res, user) {
+  const remember = req.body.rememberMe === true || req.body.rememberMe === "true";
+  const token = signToken(user, remember);
+  setAuthCookie(res, token, remember);
+  const draftRestored = await claimGuestDraft(req, res, user._id);
+  return { token, rememberMe: remember, draftRestored, user: publicUser(user) };
 }
 
 function validateProfile({ email, phone }) {
@@ -44,7 +55,7 @@ exports.register = async (req, res) => {
   const result = await collections.userCollection.insertOne(user);
   user._id = result.insertedId;
 
-  res.status(201).send({ message: "Đăng ký thành công!", token: signToken(user), user: publicUser(user) });
+  res.status(201).send({ message: "Đăng ký thành công!", ...(await startSession(req, res, user)) });
 };
 
 // Đăng nhập bằng email hoặc số điện thoại
@@ -59,7 +70,12 @@ exports.login = async (req, res) => {
   }
   if (user.isLocked) throw httpError(403, "Tài khoản đã bị khóa, vui lòng liên hệ studio!");
 
-  res.send({ message: "Đăng nhập thành công!", token: signToken(user), user: publicUser(user) });
+  res.send({ message: "Đăng nhập thành công!", ...(await startSession(req, res, user)) });
+};
+
+exports.logout = async (req, res) => {
+  clearAuthCookie(res);
+  res.send({ message: "Đã đăng xuất!" });
 };
 
 exports.getMe = async (req, res) => {

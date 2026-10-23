@@ -3,6 +3,7 @@
 process.env.NODE_ENV = 'test';
 process.env.DB_NAME = process.env.TEST_DB_NAME || 'KyUcStudioDB_test';
 process.env.JWT_SECRET = 'test-secret';
+process.env.REQUIRE_LOGIN_TO_BOOK = 'false'; // phần lớn test đặt lịch bằng khách vãng lai; test cookie bật lại
 
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
@@ -15,11 +16,28 @@ let server;
 let db;
 let baseUrl;
 
-async function api(method, url, body, token) {
+async function api(method, url, body, token, cookie) {
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
+  if (cookie) headers.Cookie = cookie;
   const res = await fetch(baseUrl + url, { method, headers, body: body ? JSON.stringify(body) : undefined });
-  return { status: res.status, body: await res.json().catch(() => null) };
+  return { status: res.status, body: await res.json().catch(() => null), cookies: res.headers.getSetCookie() };
+}
+
+// Giả lập trình duyệt: giữ cookie server gửi về và gửi kèm ở các request sau
+function browser() {
+  const jar = {};
+  return async (method, url, body) => {
+    const cookie = Object.entries(jar).map(([k, v]) => `${k}=${v}`).join('; ');
+    const res = await api(method, url, body, null, cookie);
+    for (const c of res.cookies) {
+      const [pair] = c.split(';');
+      const [k, v] = pair.split('=');
+      if (v === '' || /Expires=Thu, 01 Jan 1970/.test(c)) delete jar[k]; else jar[k] = v;
+    }
+    res.jar = { ...jar };
+    return res;
+  };
 }
 
 function futureDate(days) {
@@ -316,4 +334,92 @@ test('thống kê admin', async () => {
   assert.ok(stats.body.bookings.total >= 4);
   assert.equal(stats.body.bookings.byStatus.Completed, 1);
   assert.equal(stats.body.revenue.collected, 2500000);
+});
+
+test('lưu đăng nhập bằng cookie httpOnly (có / không tick "Lưu đăng nhập")', async () => {
+  const noRemember = await api('POST', '/auth/login', { account: '0901234567', password: 'Vy@12345' });
+  const sessionCookie = noRemember.cookies.find(c => c.startsWith('kyuc_token='));
+  assert.ok(sessionCookie.includes('HttpOnly'));
+  assert.ok(!sessionCookie.includes('Max-Age'), 'không lưu đăng nhập -> cookie phiên');
+  assert.equal(noRemember.body.rememberMe, false);
+
+  const remember = await api('POST', '/auth/login', { account: '0901234567', password: 'Vy@12345', rememberMe: true });
+  const longCookie = remember.cookies.find(c => c.startsWith('kyuc_token='));
+  assert.match(longCookie, new RegExp(`Max-Age=${30 * 24 * 3600}`), 'lưu đăng nhập 30 ngày');
+
+  const b = browser();
+  await b('POST', '/auth/login', { account: '0901234567', password: 'Vy@12345', rememberMe: true });
+  const me = await b('GET', '/auth/me');
+  assert.equal(me.status, 200, 'chỉ cần cookie, không cần header Authorization');
+  assert.equal(me.body.phone, '0901234567');
+
+  await b('POST', '/auth/logout');
+  assert.equal((await b('GET', '/auth/me')).status, 401, 'đăng xuất xong mất đăng nhập');
+
+  // Cookie hỏng/hết hạn không làm lỗi các trang khách vãng lai xem được
+  const stale = await api('GET', '/packages', null, null, 'kyuc_token=abc.def.ghi');
+  assert.equal(stale.status, 200);
+});
+
+test('khách vãng lai đặt lịch -> đi đăng ký -> quay lại không phải nhập lại', async () => {
+  process.env.REQUIRE_LOGIN_TO_BOOK = 'true';
+  try {
+    const b = browser();
+    const date = futureDate(40);
+
+    // Bước 1-3: chọn gói, concept, dịch vụ thêm, giờ, nhập thông tin
+    const saved = await b('PUT', '/booking-draft', { packageId: 102, conceptCode: 'BP01', addons: [{ addon_id: 1 }], step: 'chon-goi' });
+    assert.equal(saved.status, 200);
+    assert.ok(saved.jar.kyuc_draft, 'khách vãng lai được cấp cookie bản nháp');
+    assert.equal(saved.body.quote.subtotal, 2650000);
+
+    const hold = await b('POST', '/slots/hold', { packageId: 102, bookingDate: date, startTime: '09:00', customerPhone: '0939393939' });
+    await b('PUT', '/booking-draft', {
+      bookingDate: date, startTime: '09:00', holdId: hold.body.holdId, step: 'thong-tin',
+      customer: { name: 'Lê Minh Anh', phone: '0939393939', email: 'anh@test.vn', note: 'Chụp ngoài trời' }
+    });
+
+    // Bước 4: thanh toán -> chưa đăng nhập bị chặn
+    const blocked = await b('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'Lê Minh Anh', customerPhone: '0939393939' });
+    assert.equal(blocked.status, 401);
+
+    // Đi đăng ký tài khoản -> bản nháp chuyển sang tài khoản, cookie bản nháp bị xóa
+    const reg = await b('POST', '/auth/register', { fullName: 'Lê Minh Anh', email: 'anh@test.vn', phone: '0939393939', password: 'Anh@2026' });
+    assert.equal(reg.status, 201);
+    assert.equal(reg.body.draftRestored, true);
+    assert.equal(reg.jar.kyuc_draft, undefined);
+
+    // Quay lại trang đặt lịch: mọi thứ còn nguyên
+    const back = await b('GET', '/booking-draft');
+    assert.equal(back.body.draft.step, 'thong-tin');
+    assert.equal(back.body.draft.data.conceptCode, 'BP01');
+    assert.equal(back.body.draft.data.customer.note, 'Chụp ngoài trời');
+    assert.equal(back.body.quote.totalAmount, 2650000);
+    assert.equal(back.body.hold.valid, true, 'slot vẫn đang được giữ');
+
+    // Bản nháp cũng thấy được khi đăng nhập trên thiết bị khác (theo tài khoản)
+    const other = await api('GET', '/booking-draft', null, reg.body.token);
+    assert.equal(other.body.draft.data.holdId, hold.body.holdId);
+
+    const created = await b('POST', '/bookings', { ...back.body.draft.data, customerName: 'Lê Minh Anh', customerPhone: '0939393939' });
+    assert.equal(created.status, 201);
+    assert.equal(created.body.data.userId, reg.body.user._id, 'đơn gắn vào tài khoản mới');
+    assert.equal((await b('GET', '/booking-draft')).body.draft, null, 'đặt xong thì xóa bản nháp');
+  } finally {
+    process.env.REQUIRE_LOGIN_TO_BOOK = 'false';
+  }
+});
+
+test('bản nháp: chỉ nhận field hợp lệ, báo slot hết hạn', async () => {
+  const b = browser();
+  assert.equal((await b('PUT', '/booking-draft', {})).status, 400);
+  assert.equal((await b('PUT', '/booking-draft', { holdId: 'abc' })).status, 400);
+  const saved = await b('PUT', '/booking-draft', { packageId: 102, hacker: 'x', holdId: new ObjectId().toString() });
+  assert.equal(saved.body.draft.data.hacker, undefined);
+  assert.equal(saved.body.hold.valid, false);
+
+  const fresh = await api('GET', '/booking-draft');
+  assert.equal(fresh.body.draft, null, 'trình duyệt khác không thấy bản nháp');
+  assert.equal((await b('DELETE', '/booking-draft')).status, 200);
+  assert.equal((await b('GET', '/booking-draft')).body.draft, null);
 });

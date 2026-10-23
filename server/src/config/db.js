@@ -24,6 +24,7 @@ async function connectDB() {
   collections.slotLockCollection = db.collection("slotLocks");
   collections.paymentCollection = db.collection("payments");
   collections.pointCollection = db.collection("pointTransactions");
+  collections.draftCollection = db.collection("bookingDrafts");
 
   await createIndexes();
   console.log(`✅ Đã kết nối thành công tới ${dbName}!`);
@@ -69,7 +70,11 @@ async function createIndexes() {
     ensureIndex(c.slotLockCollection, { ownerId: 1 }),
     // TTL: tự xóa slot giữ chỗ khi tới expiresAt (lock của booking không có expiresAt nên không bị xóa)
     ensureIndex(c.slotLockCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 }),
-    ensureIndex(c.holdSlotCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 })
+    ensureIndex(c.holdSlotCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    // Bản nháp đặt lịch: tìm theo cookie (khách vãng lai) hoặc theo tài khoản, tự xóa khi hết hạn
+    ensureIndex(c.draftCollection, { draftKey: 1 }, uniqueIfPresent("draftKey", "string")),
+    ensureIndex(c.draftCollection, { userId: 1 }),
+    ensureIndex(c.draftCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 })
   ]);
 }
 

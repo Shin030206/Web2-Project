@@ -10,6 +10,7 @@ const { calculateQuote, publicQuote } = require('../services/pricing.service');
 const { redeemVoucher, releaseVoucher, awardPoints } = require('../services/reward.service');
 const { cancelBooking } = require('../services/booking.service');
 const { buildPaymentInfo } = require('../services/payment.service');
+const { deleteDraft } = require('../services/draft.service');
 
 const S = C.BOOKING_STATUS;
 const P = C.PAYMENT_STATUS;
@@ -43,6 +44,10 @@ exports.getQuote = async (req, res) => {
 
 // Tạo đơn đặt lịch từ slot đang giữ
 exports.createBooking = async (req, res) => {
+  // Mặc định bắt buộc đăng nhập ở bước tạo đơn/thanh toán (REQUIRE_LOGIN_TO_BOOK=false để cho khách vãng lai đặt)
+  if (!req.user && process.env.REQUIRE_LOGIN_TO_BOOK !== "false") {
+    throw httpError(401, "Vui lòng đăng nhập hoặc đăng ký tài khoản để tiếp tục thanh toán!");
+  }
   requireFields(req.body, ["holdId", "customerName", "customerPhone"]);
   const { holdId, conceptCode, addons, voucherCode, customerName, customerEmail, note } = req.body;
   const customerPhone = normalizePhone(req.body.customerPhone);
@@ -105,6 +110,7 @@ exports.createBooking = async (req, res) => {
 
   await collections.bookingCollection.insertOne(newBooking);
   await collections.holdSlotCollection.deleteOne({ _id: hold._id });
+  await deleteDraft(req, res);
 
   res.status(201).send({
     message: "Đặt lịch chụp thành công! Vui lòng thanh toán cọc để giữ lịch.",

@@ -21,6 +21,13 @@ module.exports = {
 
   ROLES: { CUSTOMER: "customer", ADMIN: "admin" },
 
+  // Đăng nhập & bản nháp đặt lịch
+  AUTH_COOKIE: "kyuc_token",
+  DRAFT_COOKIE: "kyuc_draft",
+  REMEMBER_DAYS: 30,      // Tick "Lưu đăng nhập"
+  SESSION_HOURS: 24,      // Không tick: token sống 24h, cookie mất khi tắt trình duyệt
+  DRAFT_DAYS: 7,          // Bản nháp đặt lịch tự xóa sau 7 ngày không cập nhật
+
   BOOKING_STATUS: {
     PENDING: "Pending",       // Đã tạo đơn, chờ thanh toán cọc
     CONFIRMED: "Confirmed",   // Studio đã nhận cọc
