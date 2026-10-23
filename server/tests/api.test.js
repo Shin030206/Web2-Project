@@ -63,23 +63,45 @@ after(async () => {
 });
 
 test('đăng ký, đăng nhập, xem thông tin tài khoản', async () => {
-  const reg = await api('POST', '/auth/register', { fullName: 'Thanh Vy', email: 'vy@test.vn', phone: '0901234567', password: '123456' });
+  const reg = await api('POST', '/auth/register', { fullName: 'Thanh Vy', email: 'vy@test.vn', phone: '0901234567', password: 'Vy@12345' });
   assert.equal(reg.status, 201);
   assert.equal(reg.body.user.passwordHash, undefined);
 
-  const dup = await api('POST', '/auth/register', { fullName: 'X', email: 'vy@test.vn', phone: '0911111111', password: '123456' });
+  const dup = await api('POST', '/auth/register', { fullName: 'Người Khác', email: 'vy@test.vn', phone: '0911111111', password: 'Vy@12345' });
   assert.equal(dup.status, 409);
 
   const bad = await api('POST', '/auth/login', { account: 'vy@test.vn', password: 'wrong' });
   assert.equal(bad.status, 401);
 
-  const login = await api('POST', '/auth/login', { account: '0901234567', password: '123456' });
+  const login = await api('POST', '/auth/login', { account: '0901234567', password: 'Vy@12345' });
   assert.equal(login.status, 200);
   userToken = login.body.token;
 
   const me = await api('GET', '/auth/me', null, userToken);
   assert.equal(me.body.email, 'vy@test.vn');
   assert.equal(me.body.role, 'customer');
+});
+
+test('quy tắc họ tên hợp lệ và mật khẩu mạnh', async () => {
+  const base = { email: 'rule@test.vn', phone: '0909090909' };
+  const weak = ['Vy12345', 'vy@12345', 'VY@12345', 'Vy@abcde', 'VyAbc123', 'Vy@1234 5', 'Vỹ@12345', 'V@1a'];
+  for (const password of weak) {
+    const res = await api('POST', '/auth/register', { ...base, fullName: 'Thanh Vy', password });
+    assert.equal(res.status, 400, `mật khẩu "${password}" phải bị chặn`);
+  }
+  for (const fullName of ['A', 'Vy123', 'Vy@', 'Nguyễn_Văn A', 'x'.repeat(51)]) {
+    const res = await api('POST', '/auth/register', { ...base, fullName, password: 'Vy@12345' });
+    assert.equal(res.status, 400, `họ tên "${fullName}" phải bị chặn`);
+  }
+  const ok = await api('POST', '/auth/register', { ...base, fullName: '  võ   thị THANH vy ', password: 'Vy@12345' });
+  assert.equal(ok.status, 201);
+  assert.equal(ok.body.user.fullName, 'Võ Thị Thanh Vy', 'tên được chuẩn hóa');
+
+  const token = ok.body.token;
+  assert.equal((await api('PUT', '/auth/change-password', { oldPassword: 'Vy@12345', newPassword: '12345678' }, token)).status, 400);
+  assert.equal((await api('PUT', '/auth/change-password', { oldPassword: 'Vy@12345', newPassword: 'Vy@12345' }, token)).status, 400);
+  assert.equal((await api('PUT', '/auth/change-password', { oldPassword: 'Vy@12345', newPassword: 'Moi#2026' }, token)).status, 200);
+  assert.equal((await api('PUT', '/auth/me', { fullName: 'Vy 2' }, token)).status, 400);
 });
 
 test('phân quyền: khách không gọi được API admin', async () => {
@@ -159,7 +181,7 @@ test('luồng đặt lịch: giữ slot -> tạo đơn -> tra cứu -> thanh to�
   const hold = await api('POST', '/slots/hold', { packageId: 102, bookingDate: DATE, timeSlot: '10:30 - 12:00', customerPhone: '0901234567' }, userToken);
   assert.equal(hold.status, 201);
 
-  const wrongPhone = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'X', customerPhone: '0999999999' });
+  const wrongPhone = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'Khách X', customerPhone: '0999999999' });
   assert.equal(wrongPhone.status, 403);
 
   const created = await api('POST', '/bookings', {
@@ -180,7 +202,7 @@ test('luồng đặt lịch: giữ slot -> tạo đơn -> tra cứu -> thanh to�
   assert.equal(booking.timeSlot, '10:30 - 12:00');
   assert.equal(created.body.paymentInfo.amount, 765000);
 
-  const reuse = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'X', customerPhone: '0901234567' });
+  const reuse = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'Khách X', customerPhone: '0901234567' });
   assert.equal(reuse.status, 410, 'holdId chỉ dùng được 1 lần');
 
   const occupied = await api('GET', `/slots/occupied?date=${DATE}`);
@@ -264,7 +286,7 @@ test('hoàn thành buổi chụp được tích xu, đổi xu lấy voucher, h�
 test('đơn quá hạn cọc tự hủy và nhả slot', async () => {
   const date = futureDate(30);
   const hold = await api('POST', '/slots/hold', { packageId: 201, bookingDate: date, startTime: '09:00', customerPhone: '0988888888' });
-  const created = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'C', customerPhone: '0988888888' });
+  const created = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'Khách C', customerPhone: '0988888888' });
   await collections.bookingCollection.updateOne({ bookingCode: created.body.bookingCode }, { $set: { depositDeadline: new Date(Date.now() - 1000) } });
 
   await expireUnpaidBookings();
@@ -276,7 +298,7 @@ test('đơn quá hạn cọc tự hủy và nhả slot', async () => {
 test('slot giữ chỗ hết hạn thì không tạo đơn được', async () => {
   const hold = await api('POST', '/slots/hold', { packageId: 201, bookingDate: DATE, startTime: '17:00', customerPhone: '0912121212' });
   await collections.holdSlotCollection.updateOne({ customerPhone: '0912121212' }, { $set: { expiresAt: new Date(Date.now() - 1000) } });
-  const created = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'D', customerPhone: '0912121212' });
+  const created = await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'Khách D', customerPhone: '0912121212' });
   assert.equal(created.status, 410);
 });
 

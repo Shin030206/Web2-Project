@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const { collections, ObjectId } = require('../config/db');
 const C = require('../config/constants');
 const {
-  httpError, toObjectId, requireFields, isValidEmail, isValidPhone, normalizePhone, hoursUntil, toShootDate, parsePaging
+  httpError, toObjectId, requireFields, isValidEmail, isValidPhone, normalizePhone, normalizeFullName, hoursUntil, toShootDate, parsePaging
 } = require('../utils/helpers');
 const { isAdmin } = require('../middlewares/auth');
 const slotService = require('../services/slot.service');
@@ -47,6 +47,7 @@ exports.createBooking = async (req, res) => {
   const { holdId, conceptCode, addons, voucherCode, customerName, customerEmail, note } = req.body;
   const customerPhone = normalizePhone(req.body.customerPhone);
   if (!isValidPhone(customerPhone)) throw httpError(400, "Số điện thoại không hợp lệ!");
+  const name = normalizeFullName(customerName);
   if (customerEmail && !isValidEmail(customerEmail)) throw httpError(400, "Email không hợp lệ!");
 
   const hold = await collections.holdSlotCollection.findOne({ _id: toObjectId(holdId, "holdId"), expiresAt: { $gt: new Date() } });
@@ -80,7 +81,7 @@ exports.createBooking = async (req, res) => {
     bookingCode,
     userId,
     customer: {
-      name: String(customerName).trim(),
+      name,
       phone: customerPhone,
       email: customerEmail ? customerEmail.trim().toLowerCase() : "",
       note: note || ""

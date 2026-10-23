@@ -3,7 +3,8 @@ const { collections } = require('../config/db');
 const { signToken } = require('../middlewares/auth');
 const { ROLES } = require('../config/constants');
 const {
-  httpError, toObjectId, requireFields, isValidEmail, isValidPhone, normalizePhone, parsePaging, escapeRegex
+  httpError, toObjectId, requireFields, isValidEmail, isValidPhone, normalizePhone, normalizeFullName, validatePassword,
+  parsePaging, escapeRegex
 } = require('../utils/helpers');
 
 // Không bao giờ trả passwordHash về client
@@ -20,9 +21,10 @@ function validateProfile({ email, phone }) {
 // Đăng ký tài khoản khách hàng
 exports.register = async (req, res) => {
   requireFields(req.body, ["fullName", "email", "phone", "password"]);
-  const { fullName, password } = req.body;
+  const { password } = req.body;
+  const fullName = normalizeFullName(req.body.fullName);
   validateProfile(req.body);
-  if (String(password).length < 6) throw httpError(400, "Mật khẩu phải có ít nhất 6 ký tự!");
+  validatePassword(password);
 
   const email = req.body.email.trim().toLowerCase();
   const phone = normalizePhone(req.body.phone);
@@ -30,7 +32,7 @@ exports.register = async (req, res) => {
   if (exists) throw httpError(409, "Email hoặc số điện thoại đã được đăng ký!");
 
   const user = {
-    fullName: fullName.trim(),
+    fullName,
     email,
     phone,
     passwordHash: await bcrypt.hash(String(password), 10),
@@ -69,7 +71,7 @@ exports.getMe = async (req, res) => {
 exports.updateMe = async (req, res) => {
   validateProfile(req.body);
   const update = { updatedAt: new Date() };
-  if (req.body.fullName) update.fullName = String(req.body.fullName).trim();
+  if (req.body.fullName !== undefined) update.fullName = normalizeFullName(req.body.fullName);
   if (req.body.phone) update.phone = normalizePhone(req.body.phone);
   if (req.body.email) update.email = req.body.email.trim().toLowerCase();
   if (req.body.avatar_url) update.avatar_url = String(req.body.avatar_url);
@@ -85,7 +87,8 @@ exports.updateMe = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   requireFields(req.body, ["oldPassword", "newPassword"]);
-  if (String(req.body.newPassword).length < 6) throw httpError(400, "Mật khẩu mới phải có ít nhất 6 ký tự!");
+  validatePassword(req.body.newPassword);
+  if (req.body.newPassword === req.body.oldPassword) throw httpError(400, "Mật khẩu mới phải khác mật khẩu cũ!");
 
   const _id = toObjectId(req.user.userId);
   const user = await collections.userCollection.findOne({ _id });

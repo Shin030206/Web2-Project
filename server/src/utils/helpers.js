@@ -41,6 +41,27 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// Họ tên: chỉ chữ cái (có dấu tiếng Việt) và khoảng trắng, 2–50 ký tự. Trả về tên đã chuẩn hóa "Võ Thị Thanh Vy"
+function normalizeFullName(name) {
+  const cleaned = String(name || "").trim().replace(/\s+/g, " ");
+  if (cleaned.length < 2 || cleaned.length > 50) throw httpError(400, "Họ tên phải từ 2 đến 50 ký tự!");
+  if (!/^\p{L}+( \p{L}+)*$/u.test(cleaned)) throw httpError(400, "Họ tên chỉ được chứa chữ cái và khoảng trắng, không có số hay ký tự đặc biệt!");
+  return cleaned.split(" ").map(w => w.charAt(0).toLocaleUpperCase("vi") + w.slice(1).toLocaleLowerCase("vi")).join(" ");
+}
+
+// Mật khẩu mạnh: 8–32 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt; không dấu tiếng Việt, không khoảng trắng
+function validatePassword(password) {
+  const value = String(password || "");
+  const missing = [];
+  if (value.length < 8 || value.length > 32) missing.push("dài 8–32 ký tự");
+  if (!/[A-Z]/.test(value)) missing.push("ít nhất 1 chữ hoa");
+  if (!/[a-z]/.test(value)) missing.push("ít nhất 1 chữ thường");
+  if (!/[0-9]/.test(value)) missing.push("ít nhất 1 chữ số");
+  if (!/[^A-Za-z0-9]/.test(value)) missing.push("ít nhất 1 ký tự đặc biệt (vd @ # $ ! %)");
+  if (!/^[\x21-\x7E]*$/.test(value)) missing.push("không chứa chữ có dấu hoặc khoảng trắng");
+  if (missing.length) throw httpError(400, `Mật khẩu chưa hợp lệ, cần: ${missing.join(", ")}!`);
+}
+
 function normalizePhone(phone) {
   return String(phone).replace(/\s/g, "").replace(/^\+84/, "0");
 }
@@ -98,6 +119,8 @@ module.exports = {
   isValidPhone,
   isValidEmail,
   normalizePhone,
+  normalizeFullName,
+  validatePassword,
   isValidDate,
   timeToMinutes,
   minutesToTime,

@@ -15,15 +15,15 @@
     },
     {
       "key": "adminPassword",
-      "value": "admin123"
+      "value": "Admin@123"
     },
     {
       "key": "userEmail",
-      "value": "vy.test@gmail.com"
+      "value": "vy.kyuc@gmail.com"
     },
     {
       "key": "userPhone",
-      "value": "0901234567"
+      "value": "0901234568"
     },
     {
       "key": "userToken",
@@ -84,7 +84,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Võ Thị Thanh Vy\",\n  \"email\": \"{{userEmail}}\",\n  \"phone\": \"{{userPhone}}\",\n  \"password\": \"123456\"\n}"
+              "raw": "{\n  \"fullName\": \"Võ Thị Thanh Vy\",\n  \"email\": \"{{userEmail}}\",\n  \"phone\": \"{{userPhone}}\",\n  \"password\": \"Vy@12345\"\n}"
             },
             "description": "Chạy lần 2 sẽ báo 409 vì email đã tồn tại, bình thường. Đổi biến userEmail/userPhone nếu muốn đăng ký mới."
           },
@@ -123,7 +123,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"account\": \"{{userEmail}}\",\n  \"password\": \"123456\"\n}"
+              "raw": "{\n  \"account\": \"{{userEmail}}\",\n  \"password\": \"Vy@12345\"\n}"
             }
           },
           "event": [

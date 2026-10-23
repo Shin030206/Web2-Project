@@ -66,7 +66,7 @@ server/
 ### Tài khoản – `/api/auth`
 | Method | URL | Quyền | Body / ghi chú |
 |---|---|---|---|
-| POST | `/register` | 🔓 | `fullName, email, phone, password` → `{ token, user }` |
+| POST | `/register` | 🔓 | `fullName, email, phone, password` → `{ token, user }`. Họ tên: chỉ chữ cái + khoảng trắng, 2–50 ký tự (tự viết hoa chữ đầu). Mật khẩu: 8–32 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt, không dấu, không khoảng trắng |
 | POST | `/login` | 🔓 | `account` (email hoặc SĐT), `password` → `{ token, user }` |
 | GET | `/me` | 👤 | thông tin tài khoản |
 | PUT | `/me` | 👤 | `fullName, phone, email, avatar_url` |

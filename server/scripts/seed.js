@@ -37,7 +37,7 @@ async function seedCollection({ file, collection, idField, defaults = {} }) {
 
 async function seedAdmin() {
   const email = (process.env.ADMIN_EMAIL || 'admin@kyucstudio.vn').toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || 'admin123';
+  const password = process.env.ADMIN_PASSWORD || 'Admin@123';
   const result = await collections.userCollection.updateOne(
     { email },
     {
