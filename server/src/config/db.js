@@ -35,28 +35,41 @@ function uniqueIfPresent(field, type) {
   return { unique: true, partialFilterExpression: { [field]: { $type: type } } };
 }
 
+// Nếu DB đã có index cùng tên nhưng khác tùy chọn (tạo từ code cũ) thì xóa đi rồi tạo lại
+async function ensureIndex(collection, keys, options = {}) {
+  try {
+    await collection.createIndex(keys, options);
+  } catch (err) {
+    if (err.code !== 85 && err.code !== 86) throw err; // IndexOptionsConflict / IndexKeySpecsConflict
+    const name = Object.entries(keys).map(([k, v]) => `${k}_${v}`).join("_");
+    console.warn(`⚠️  Tạo lại index ${collection.collectionName}.${name} theo cấu hình mới`);
+    await collection.dropIndex(name);
+    await collection.createIndex(keys, options);
+  }
+}
+
 async function createIndexes() {
   const c = collections;
   await Promise.all([
-    c.userCollection.createIndex({ email: 1 }, uniqueIfPresent("email", "string")),
-    c.userCollection.createIndex({ phone: 1 }, uniqueIfPresent("phone", "string")),
-    c.packageCollection.createIndex({ package_id: 1 }, uniqueIfPresent("package_id", "number")),
-    c.conceptCollection.createIndex({ concept_code: 1 }, uniqueIfPresent("concept_code", "string")),
-    c.albumCollection.createIndex({ collection_id: 1 }, uniqueIfPresent("collection_id", "string")),
-    c.addonCollection.createIndex({ addon_id: 1 }, uniqueIfPresent("addon_id", "number")),
-    c.voucherCollection.createIndex({ voucher_code: 1 }, uniqueIfPresent("voucher_code", "string")),
-    c.bookingCollection.createIndex({ bookingCode: 1 }, uniqueIfPresent("bookingCode", "string")),
-    c.bookingCollection.createIndex({ bookingDate: 1, startTime: 1 }),
-    c.bookingCollection.createIndex({ "customer.phone": 1 }),
-    c.bookingCollection.createIndex({ userId: 1 }),
-    c.paymentCollection.createIndex({ bookingId: 1 }),
-    c.pointCollection.createIndex({ userId: 1, createdAt: -1 }),
+    ensureIndex(c.userCollection, { email: 1 }, uniqueIfPresent("email", "string")),
+    ensureIndex(c.userCollection, { phone: 1 }, uniqueIfPresent("phone", "string")),
+    ensureIndex(c.packageCollection, { package_id: 1 }, uniqueIfPresent("package_id", "number")),
+    ensureIndex(c.conceptCollection, { concept_code: 1 }, uniqueIfPresent("concept_code", "string")),
+    ensureIndex(c.albumCollection, { collection_id: 1 }, uniqueIfPresent("collection_id", "string")),
+    ensureIndex(c.addonCollection, { addon_id: 1 }, uniqueIfPresent("addon_id", "number")),
+    ensureIndex(c.voucherCollection, { voucher_code: 1 }, uniqueIfPresent("voucher_code", "string")),
+    ensureIndex(c.bookingCollection, { bookingCode: 1 }, uniqueIfPresent("bookingCode", "string")),
+    ensureIndex(c.bookingCollection, { bookingDate: 1, startTime: 1 }),
+    ensureIndex(c.bookingCollection, { "customer.phone": 1 }),
+    ensureIndex(c.bookingCollection, { userId: 1 }),
+    ensureIndex(c.paymentCollection, { bookingId: 1 }),
+    ensureIndex(c.pointCollection, { userId: 1, createdAt: -1 }),
     // Mỗi ô 30 phút trong ngày chỉ được 1 người chiếm -> chống đặt trùng khi 2 request tới cùng lúc
-    c.slotLockCollection.createIndex({ bookingDate: 1, unit: 1 }, { unique: true }),
-    c.slotLockCollection.createIndex({ ownerId: 1 }),
+    ensureIndex(c.slotLockCollection, { bookingDate: 1, unit: 1 }, { unique: true }),
+    ensureIndex(c.slotLockCollection, { ownerId: 1 }),
     // TTL: tự xóa slot giữ chỗ khi tới expiresAt (lock của booking không có expiresAt nên không bị xóa)
-    c.slotLockCollection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-    c.holdSlotCollection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+    ensureIndex(c.slotLockCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    ensureIndex(c.holdSlotCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 })
   ]);
 }
 
