@@ -1,0 +1,13 @@
+[
+  {
+    "payment_id": "PAY001",
+    "booking_id": "BKG001",
+    "amount": null,
+    "method": "bank_transfer",
+    "status": "pending",
+    "transaction_reference": null,
+    "paid_at": null,
+    "is_deposit": true,
+    "deposit_rate": 0.3
+  }
+]
