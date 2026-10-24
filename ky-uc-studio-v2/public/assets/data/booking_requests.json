@@ -1,0 +1,14 @@
+[
+  {
+    "booking_id": "BKG001",
+    "customer_id": "CUS001",
+    "concept_id": "CD01",
+    "package_id": "PKG01",
+    "desired_date": "2026-11-15",
+    "notes": "",
+    "status": "pending_contact",
+    "admin_note": "",
+    "created_at": "2026-10-24T10:00:00",
+    "updated_at": "2026-10-24T10:00:00"
+  }
+]
