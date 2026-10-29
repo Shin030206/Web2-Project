@@ -239,6 +239,11 @@ test('luồng đặt lịch: giữ slot -> tạo đơn -> tra cứu -> thanh to�
   const my = await api('GET', '/bookings/my', null, userToken);
   assert.equal(my.body.length, 1);
 
+  const qr = await api('GET', `/payments/qr/${booking._id}?phone=0901234567`);
+  assert.equal(qr.status, 200);
+  assert.equal(qr.body.amount, 765000);
+  assert.equal((await api('GET', `/payments/qr/${booking._id}?phone=0999999999`)).status, 403);
+
   const pay = await api('POST', '/payments', { bookingId: booking._id, phone: '0901234567', method: 'bank_transfer', amount: 1 });
   assert.equal(pay.status, 201);
   assert.equal(pay.body.data.amount, 765000, 'số tiền do server tính');

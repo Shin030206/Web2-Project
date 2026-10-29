@@ -3,7 +3,7 @@ const { collections } = require('../config/db');
 const C = require('../config/constants');
 const { httpError, toObjectId, requireFields, normalizePhone, parsePaging } = require('../utils/helpers');
 const { isAdmin } = require('../middlewares/auth');
-const { applySuccessfulPayment } = require('../services/payment.service');
+const { applySuccessfulPayment, buildPaymentInfo } = require('../services/payment.service');
 const vnpay = require('../services/vnpay.service');
 
 const S = C.BOOKING_STATUS;
@@ -75,6 +75,16 @@ exports.createPayment = async (req, res) => {
   };
   const result = await collections.paymentCollection.insertOne(payment);
   res.status(201).send({ message: "Đã ghi nhận thanh toán, studio sẽ xác nhận trong thời gian sớm nhất!", data: { ...payment, _id: result.insertedId } });
+};
+
+// Mã QR chuyển khoản (VietQR) cho đơn đang chờ cọc (giữ lại API GET /payments/qr/:bookingId từ nhánh main)
+exports.getPaymentQR = async (req, res) => {
+  const booking = await findBookingForPayer(req, req.params.bookingId);
+  if (booking.bookingStatus === S.CANCELLED) throw httpError(400, "Đơn này đã bị hủy!");
+  const type = booking.paymentStatus === P.DEPOSIT_PAID ? "remaining" : "deposit";
+  if (booking.paymentStatus !== P.UNPAID && type === "deposit") throw httpError(400, "Đơn này đã thanh toán đủ!");
+  const info = buildPaymentInfo(booking, amountFor(booking, type));
+  res.send({ bookingId: booking._id, bookingCode: booking.bookingCode, type, depositAmount: booking.pricing.depositAmount, ...info, qrImageUrl: info.qrUrl });
 };
 
 // Admin: danh sách giao dịch
