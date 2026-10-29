@@ -285,6 +285,72 @@
               }
             }
           ]
+        },
+        {
+          "name": "Quên mật khẩu – gửi mã OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}"
+            },
+            "description": "Chưa cấu hình SMTP thì mã OTP được in ra console của server (terminal npm run dev)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Quên mật khẩu – đặt mật khẩu mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"Vy@12345\"\n}"
+            },
+            "description": "Thay otp bằng mã nhận trong email/console. Không chạy trong Run collection vì cần mã thật (sẽ báo 400)."
+          },
+          "event": []
         }
       ]
     },
@@ -1219,6 +1285,45 @@
     {
       "name": "5. Thanh toán",
       "item": [
+        {
+          "name": "Tạo link thanh toán VNPay",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/vnpay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "vnpay"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"type\": \"deposit\",\n  \"bankCode\": \"NCB\"\n}"
+            },
+            "description": "Cần VNP_TMN_CODE + VNP_HASH_SECRET trong .env. Copy paymentUrl mở trên trình duyệt, chọn NCB, thẻ 9704198526191432198 / NGUYEN VAN A / 07/15 / OTP 123456."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) console.log(\"Mở link này để thanh toán:\", pm.response.json().paymentUrl);",
+                  "pm.test(\"201, hoặc 503 nếu chưa cấu hình VNPay\", () => pm.expect([201, 503]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ]
+        },
         {
           "name": "Khách báo đã chuyển cọc",
           "request": {

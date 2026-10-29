@@ -25,6 +25,7 @@ async function connectDB() {
   collections.paymentCollection = db.collection("payments");
   collections.pointCollection = db.collection("pointTransactions");
   collections.draftCollection = db.collection("bookingDrafts");
+  collections.passwordResetCollection = db.collection("passwordResets");
 
   await createIndexes();
   console.log(`✅ Đã kết nối thành công tới ${dbName}!`);
@@ -64,6 +65,7 @@ async function createIndexes() {
     ensureIndex(c.bookingCollection, { "customer.phone": 1 }),
     ensureIndex(c.bookingCollection, { userId: 1 }),
     ensureIndex(c.paymentCollection, { bookingId: 1 }),
+    ensureIndex(c.paymentCollection, { txnRef: 1 }, uniqueIfPresent("txnRef", "string")),
     ensureIndex(c.pointCollection, { userId: 1, createdAt: -1 }),
     // Mỗi ô 30 phút trong ngày chỉ được 1 người chiếm -> chống đặt trùng khi 2 request tới cùng lúc
     ensureIndex(c.slotLockCollection, { bookingDate: 1, unit: 1 }, { unique: true }),
@@ -74,7 +76,9 @@ async function createIndexes() {
     // Bản nháp đặt lịch: tìm theo cookie (khách vãng lai) hoặc theo tài khoản, tự xóa khi hết hạn
     ensureIndex(c.draftCollection, { draftKey: 1 }, uniqueIfPresent("draftKey", "string")),
     ensureIndex(c.draftCollection, { userId: 1 }),
-    ensureIndex(c.draftCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 })
+    ensureIndex(c.draftCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    ensureIndex(c.passwordResetCollection, { email: 1 }),
+    ensureIndex(c.passwordResetCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 })
   ]);
 }
 

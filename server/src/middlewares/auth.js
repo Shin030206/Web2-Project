@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { collections, ObjectId } = require('../config/db');
 const { httpError } = require('../utils/helpers');
 const { ROLES, AUTH_COOKIE, REMEMBER_DAYS, SESSION_HOURS } = require('../config/constants');
 
@@ -11,7 +12,7 @@ if (!process.env.JWT_SECRET) {
 // Có "Lưu đăng nhập" thì token sống 30 ngày, không thì 1 ngày
 function signToken(user, remember = false) {
   return jwt.sign(
-    { userId: String(user._id), role: user.role },
+    { userId: String(user._id), role: user.role, rem: Boolean(remember) },
     JWT_SECRET,
     { expiresIn: remember ? `${REMEMBER_DAYS}d` : `${SESSION_HOURS}h` }
   );
@@ -58,25 +59,45 @@ function readToken(req) {
   }
 }
 
+// Token hợp lệ chưa đủ: tài khoản phải còn tồn tại, không bị khóa, và token phải được cấp sau lần đổi mật khẩu gần nhất
+async function loadActiveUser(payload) {
+  if (!payload || !ObjectId.isValid(payload.userId)) return { error: "Vui lòng đăng nhập!" };
+  const user = await collections.userCollection.findOne(
+    { _id: new ObjectId(payload.userId) },
+    { projection: { role: 1, isLocked: 1, passwordChangedAt: 1 } }
+  );
+  if (!user) return { error: "Tài khoản không tồn tại!" };
+  if (user.isLocked) return { error: "Tài khoản đã bị khóa, vui lòng liên hệ studio!", status: 403 };
+  if (user.passwordChangedAt && payload.iat < Math.floor(user.passwordChangedAt.getTime() / 1000)) {
+    return { error: "Mật khẩu đã được thay đổi, vui lòng đăng nhập lại!" };
+  }
+  return { user: { userId: payload.userId, role: user.role, rem: payload.rem } };
+}
+
 // Bắt buộc đăng nhập
-exports.requireAuth = (req, res, next) => {
+exports.requireAuth = async (req, res, next) => {
   const payload = readToken(req);
   if (!payload) throw httpError(401, "Vui lòng đăng nhập!");
-  req.user = payload;
+  const { user, error, status } = await loadActiveUser(payload);
+  if (!user) throw httpError(status || 401, error);
+  req.user = user;
   next();
 };
 
 // Không bắt buộc: khách vãng lai vẫn dùng được, nếu có token thì gắn vào tài khoản
-exports.optionalAuth = (req, res, next) => {
-  req.user = readToken(req);
+exports.optionalAuth = async (req, res, next) => {
+  const payload = readToken(req);
+  req.user = payload ? (await loadActiveUser(payload)).user || null : null;
   next();
 };
 
-exports.requireAdmin = (req, res, next) => {
+exports.requireAdmin = async (req, res, next) => {
   const payload = readToken(req);
   if (!payload) throw httpError(401, "Vui lòng đăng nhập!");
-  if (payload.role !== ROLES.ADMIN) throw httpError(403, "Bạn không có quyền thực hiện thao tác này!");
-  req.user = payload;
+  const { user, error, status } = await loadActiveUser(payload);
+  if (!user) throw httpError(status || 401, error);
+  if (user.role !== ROLES.ADMIN) throw httpError(403, "Bạn không có quyền thực hiện thao tác này!");
+  req.user = user;
   next();
 };
 

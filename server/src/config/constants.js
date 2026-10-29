@@ -44,6 +44,12 @@ module.exports = {
     LOST_DEPOSIT: "Lost_Deposit"
   },
 
-  PAYMENT_METHODS: ["bank_transfer", "momo", "cash"],
+  PAYMENT_METHODS: ["bank_transfer", "momo", "cash"],   // khách tự báo / admin ghi nhận tay
+  VNPAY_EXPIRE_MINUTES: 15,                             // link thanh toán VNPay hết hạn sau 15 phút
+
+  // Quên mật khẩu
+  OTP_EXPIRE_MINUTES: 10,
+  OTP_MAX_ATTEMPTS: 5,
+  OTP_RESEND_SECONDS: 60,
   PAYMENT_TYPES: ["deposit", "remaining"]
 };

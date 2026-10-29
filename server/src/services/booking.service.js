@@ -51,8 +51,13 @@ async function expireUnpaidBookings() {
   }).toArray();
 
   for (const booking of expired) {
-    const pendingPayment = await collections.paymentCollection.findOne({ bookingId: booking._id, status: "Pending" });
-    if (pendingPayment) continue; // Khách đã báo chuyển khoản, chờ admin xác nhận
+    // Khách đã báo chuyển khoản (chờ admin xác nhận) hoặc đang thanh toán dở trên VNPay -> chưa hủy
+    const pendingPayment = await collections.paymentCollection.findOne({
+      bookingId: booking._id,
+      status: "Pending",
+      $or: [{ method: { $ne: "vnpay" } }, { expiresAt: { $gt: new Date() } }]
+    });
+    if (pendingPayment) continue;
     await cancelBooking(booking, { reason: "Quá hạn thanh toán cọc" });
   }
   return expired.length;

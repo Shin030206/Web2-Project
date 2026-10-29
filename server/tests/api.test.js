@@ -3,13 +3,17 @@
 process.env.NODE_ENV = 'test';
 process.env.DB_NAME = process.env.TEST_DB_NAME || 'KyUcStudioDB_test';
 process.env.JWT_SECRET = 'test-secret';
-process.env.REQUIRE_LOGIN_TO_BOOK = 'false'; // phần lớn test đặt lịch bằng khách vãng lai; test cookie bật lại
+process.env.REQUIRE_LOGIN_TO_BOOK = 'false';
+process.env.VNP_TMN_CODE = 'TESTTMN1';
+process.env.VNP_HASH_SECRET = 'TESTSECRETKEY1234567890ABCDEFGHIJ'; // phần lớn test đặt lịch bằng khách vãng lai; test cookie bật lại
 
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const bcrypt = require('bcryptjs');
 const { connectDB, closeDB, collections, ObjectId } = require('../src/config/db');
 const { expireUnpaidBookings } = require('../src/services/booking.service');
+const { outbox } = require('../src/services/mail.service');
+const vnpayService = require('../src/services/vnpay.service');
 const app = require('../src/app');
 
 let server;
@@ -118,8 +122,9 @@ test('quy tắc họ tên hợp lệ và mật khẩu mạnh', async () => {
   const token = ok.body.token;
   assert.equal((await api('PUT', '/auth/change-password', { oldPassword: 'Vy@12345', newPassword: '12345678' }, token)).status, 400);
   assert.equal((await api('PUT', '/auth/change-password', { oldPassword: 'Vy@12345', newPassword: 'Vy@12345' }, token)).status, 400);
-  assert.equal((await api('PUT', '/auth/change-password', { oldPassword: 'Vy@12345', newPassword: 'Moi#2026' }, token)).status, 200);
-  assert.equal((await api('PUT', '/auth/me', { fullName: 'Vy 2' }, token)).status, 400);
+  const changed = await api('PUT', '/auth/change-password', { oldPassword: 'Vy@12345', newPassword: 'Moi#2026' }, token);
+  assert.equal(changed.status, 200);
+  assert.equal((await api('PUT', '/auth/me', { fullName: 'Vy 2' }, changed.body.token)).status, 400);
 });
 
 test('phân quyền: khách không gọi được API admin', async () => {
@@ -422,4 +427,217 @@ test('bản nháp: chỉ nhận field hợp lệ, báo slot hết hạn', async 
   assert.equal(fresh.body.draft, null, 'trình duyệt khác không thấy bản nháp');
   assert.equal((await b('DELETE', '/booking-draft')).status, 200);
   assert.equal((await b('GET', '/booking-draft')).body.draft, null);
+});
+
+// Giả lập VNPay chuyển khách về / gọi IPN: lấy tham số từ link thanh toán, thêm kết quả rồi ký bằng HashSecret
+function vnpayCallback(paymentUrl, overrides = {}) {
+  const params = Object.fromEntries(new URL(paymentUrl).searchParams);
+  delete params.vnp_SecureHash;
+  const result = {
+    vnp_Amount: params.vnp_Amount,
+    vnp_BankCode: 'NCB',
+    vnp_BankTranNo: 'VNP14212345',
+    vnp_CardType: 'ATM',
+    vnp_OrderInfo: params.vnp_OrderInfo,
+    vnp_PayDate: '20261105103000',
+    vnp_ResponseCode: '00',
+    vnp_TmnCode: params.vnp_TmnCode,
+    vnp_TransactionNo: '14212345',
+    vnp_TransactionStatus: '00',
+    vnp_TxnRef: params.vnp_TxnRef,
+    ...overrides
+  };
+  const hash = vnpayService.sign(result, process.env.VNP_HASH_SECRET);
+  return new URLSearchParams({ ...result, vnp_SecureHash: hash }).toString();
+}
+
+async function newUnpaidBooking(phone, startTime, days) {
+  const hold = await api('POST', '/slots/hold', { packageId: 102, bookingDate: futureDate(days), startTime, customerPhone: phone });
+  return (await api('POST', '/bookings', { holdId: hold.body.holdId, customerName: 'Khách Vnpay', customerPhone: phone })).body;
+}
+
+test('VNPay: tạo link thanh toán đúng định dạng, chữ ký kiểm tra được', async () => {
+  const bk = await newUnpaidBooking('0951515151', '08:00', 50);
+  assert.equal(bk.paymentInfo.vnpayAvailable, true);
+  assert.equal((await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0999999999' })).status, 403);
+
+  const created = await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0951515151', bankCode: 'NCB' });
+  assert.equal(created.status, 201);
+  const url = new URL(created.body.paymentUrl);
+  assert.equal(url.origin + url.pathname, 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html');
+  const p = Object.fromEntries(url.searchParams);
+  assert.equal(p.vnp_Version, '2.1.0');
+  assert.equal(p.vnp_Command, 'pay');
+  assert.equal(p.vnp_TmnCode, 'TESTTMN1');
+  assert.equal(p.vnp_Amount, String(bk.data.pricing.depositAmount * 100), 'số tiền x100');
+  assert.equal(p.vnp_CurrCode, 'VND');
+  assert.equal(p.vnp_BankCode, 'NCB');
+  assert.match(p.vnp_CreateDate, /^\d{14}$/);
+  assert.match(p.vnp_OrderInfo, /^[\x20-\x7E]+$/, 'nội dung không dấu');
+  assert.ok(Object.keys(p).filter(k => k !== 'vnp_SecureHash').every((k, i, arr) => i === 0 || arr[i - 1] < k), 'tham số đã sắp xếp');
+
+  // Kiểm chữ ký độc lập theo đúng công thức VNPay: HMAC-SHA512(HashSecret, chuỗi tham số đã sắp xếp)
+  const raw = created.body.paymentUrl.split('?')[1].split('&vnp_SecureHash=')[0];
+  const expect = require('crypto').createHmac('sha512', process.env.VNP_HASH_SECRET).update(raw).digest('hex');
+  assert.equal(p.vnp_SecureHash, expect);
+});
+
+test('VNPay: thanh toán thành công -> đơn Confirmed, gọi lại nhiều lần chỉ ghi nhận 1 lần', async () => {
+  const bk = await newUnpaidBooking('0952525252', '09:30', 50);
+  const created = await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0952525252' });
+  const query = vnpayCallback(created.body.paymentUrl);
+
+  // IPN từ máy chủ VNPay
+  const ipn = await api('GET', `/payments/vnpay/ipn?${query}`);
+  assert.deepEqual(ipn.body, { RspCode: '00', Message: 'Confirm Success' });
+  const ipnAgain = await api('GET', `/payments/vnpay/ipn?${query}`);
+  assert.equal(ipnAgain.body.RspCode, '02', 'gọi lại báo đã xác nhận');
+
+  // Khách quay về trang kết quả
+  const ret = await api('GET', `/payments/vnpay/return?${query}`);
+  assert.equal(ret.status, 200);
+  assert.equal(ret.body.success, true);
+  assert.equal(ret.body.transactionCode, '14212345');
+  assert.equal(ret.body.booking.bookingStatus, 'Confirmed');
+  assert.equal(ret.body.booking.paymentStatus, 'Deposit_Paid');
+  assert.equal(ret.body.booking.paidAmount, bk.data.pricing.depositAmount, 'không cộng tiền 2 lần');
+
+  const payments = await collections.paymentCollection.find({ bookingId: new ObjectId(bk.bookingId) }).toArray();
+  assert.equal(payments.length, 1);
+  assert.equal(payments[0].confirmedBy, 'vnpay');
+
+  // Đã cọc rồi thì không tạo link cọc nữa, nhưng trả phần còn lại được
+  assert.equal((await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0952525252' })).status, 400);
+  const rest = await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0952525252', type: 'remaining' });
+  assert.equal(rest.status, 201);
+  await api('GET', `/payments/vnpay/ipn?${vnpayCallback(rest.body.paymentUrl)}`);
+  const lookup = await api('GET', `/bookings/lookup?code=${bk.bookingCode}&phone=0952525252`);
+  assert.equal(lookup.body.paymentStatus, 'Fully_Paid');
+  assert.equal(lookup.body.paidAmount, bk.data.pricing.totalAmount);
+});
+
+test('VNPay: khách hủy / chữ ký giả / sửa số tiền đều không được ghi nhận', async () => {
+  const bk = await newUnpaidBooking('0953535353', '11:00', 50);
+  const created = await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0953535353' });
+
+  const fake = vnpayCallback(created.body.paymentUrl).replace(/vnp_SecureHash=[0-9a-f]+/, 'vnp_SecureHash=' + 'a'.repeat(128));
+  assert.equal((await api('GET', `/payments/vnpay/ipn?${fake}`)).body.RspCode, '97');
+  assert.equal((await api('GET', `/payments/vnpay/return?${fake}`)).status, 400);
+
+  const tampered = vnpayCallback(created.body.paymentUrl, { vnp_Amount: '100' });
+  assert.equal((await api('GET', `/payments/vnpay/ipn?${tampered}`)).body.RspCode, '04');
+
+  const unknown = vnpayCallback(created.body.paymentUrl, { vnp_TxnRef: 'KHONGTONTAI' });
+  assert.equal((await api('GET', `/payments/vnpay/ipn?${unknown}`)).body.RspCode, '01');
+
+  const cancelled = vnpayCallback(created.body.paymentUrl, { vnp_ResponseCode: '24', vnp_TransactionStatus: '02' });
+  const ret = await api('GET', `/payments/vnpay/return?${cancelled}`);
+  assert.equal(ret.body.success, false);
+  assert.equal(ret.body.message, 'Khách hàng hủy giao dịch');
+  assert.equal(ret.body.booking.paymentStatus, 'Unpaid');
+
+  // Thanh toán lại bằng link mới thì được
+  const retry = await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0953535353' });
+  assert.equal(retry.status, 201);
+  assert.notEqual(retry.body.txnRef, created.body.txnRef);
+  assert.equal((await api('GET', `/payments/vnpay/ipn?${vnpayCallback(retry.body.paymentUrl)}`)).body.RspCode, '00');
+});
+
+test('VNPay: bấm thanh toán 2 lần thì link cũ bị hủy, đang chờ VNPay thì đơn chưa bị tự hủy', async () => {
+  const bk = await newUnpaidBooking('0954545454', '13:00', 50);
+  const first = await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0954545454' });
+  const second = await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0954545454' });
+  assert.equal((await api('GET', `/payments/vnpay/ipn?${vnpayCallback(first.body.paymentUrl)}`)).body.RspCode, '02', 'link cũ không dùng được nữa');
+
+  await collections.bookingCollection.updateOne({ bookingCode: bk.bookingCode }, { $set: { depositDeadline: new Date(Date.now() - 1000) } });
+  await expireUnpaidBookings();
+  assert.equal((await api('GET', `/bookings/lookup?code=${bk.bookingCode}&phone=0954545454`)).body.bookingStatus, 'Pending', 'đang thanh toán dở thì chưa hủy');
+
+  await collections.paymentCollection.updateOne({ txnRef: second.body.txnRef }, { $set: { expiresAt: new Date(Date.now() - 1000) } });
+  await expireUnpaidBookings();
+  assert.equal((await api('GET', `/bookings/lookup?code=${bk.bookingCode}&phone=0954545454`)).body.bookingStatus, 'Cancelled', 'link VNPay hết hạn mà chưa trả thì hủy');
+
+  // Khách vẫn trả tiền sau khi đơn đã hủy -> ghi nhận tiền, đánh dấu cần hoàn tiền
+  await collections.paymentCollection.updateOne({ txnRef: second.body.txnRef }, { $set: { expiresAt: new Date(Date.now() + 60000) } });
+  await api('GET', `/payments/vnpay/ipn?${vnpayCallback(second.body.paymentUrl)}`);
+  const paid = await collections.paymentCollection.findOne({ txnRef: second.body.txnRef });
+  assert.equal(paid.status, 'Success');
+  assert.equal(paid.needsRefund, true);
+});
+
+test('VNPay dở dang rồi đổi sang chuyển khoản QR vẫn được', async () => {
+  const bk = await newUnpaidBooking('0955555556', '15:00', 50);
+  const link = await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0955555556' });
+  const manual = await api('POST', '/payments', { bookingId: bk.bookingId, phone: '0955555556', method: 'bank_transfer' });
+  assert.equal(manual.status, 201);
+  assert.equal((await api('GET', `/payments/vnpay/ipn?${vnpayCallback(link.body.paymentUrl)}`)).body.RspCode, '02', 'link VNPay đã bị hủy');
+  assert.equal((await api('POST', '/payments/vnpay', { bookingId: bk.bookingId, phone: '0955555556' })).status, 409, 'đang chờ admin duyệt chuyển khoản');
+});
+
+test('quên mật khẩu: gửi OTP qua email -> nhập mã -> đặt mật khẩu mới', async () => {
+  await api('POST', '/auth/register', { fullName: 'Quên Mật Khẩu', email: 'quen@test.vn', phone: '0961616161', password: 'Cu@12345' });
+  const oldLogin = await api('POST', '/auth/login', { account: 'quen@test.vn', password: 'Cu@12345' });
+  outbox.length = 0;
+
+  // Email chưa đăng ký: trả cùng câu, không gửi mail
+  const ghost = await api('POST', '/auth/forgot-password', { email: 'khongco@test.vn' });
+  const real = await api('POST', '/auth/forgot-password', { email: 'QUEN@test.vn' });
+  assert.equal(ghost.status, 200);
+  assert.equal(ghost.body.message, real.body.message, 'không lộ email nào đã đăng ký');
+  assert.equal(outbox.length, 1);
+  assert.equal(outbox[0].to, 'quen@test.vn');
+  const otp = outbox[0].subject.match(/^(\d{6})/)[1];
+  assert.ok(outbox[0].html.includes(otp));
+
+  // Bấm gửi lại ngay -> không gửi thêm (chống spam), mã cũ vẫn dùng được
+  await api('POST', '/auth/forgot-password', { email: 'quen@test.vn' });
+  assert.equal(outbox.length, 1);
+
+  const wrong = await api('POST', '/auth/verify-reset-otp', { email: 'quen@test.vn', otp: otp === '000000' ? '111111' : '000000' });
+  assert.equal(wrong.status, 400);
+  assert.match(wrong.body.error, /còn 4 lần/);
+  assert.equal((await api('POST', '/auth/verify-reset-otp', { email: 'quen@test.vn', otp })).body.valid, true);
+
+  assert.equal((await api('POST', '/auth/reset-password', { email: 'quen@test.vn', otp, newPassword: 'yeu' })).status, 400, 'mật khẩu mới vẫn phải mạnh');
+  const reset = await api('POST', '/auth/reset-password', { email: 'quen@test.vn', otp, newPassword: 'Moi@12345' });
+  assert.equal(reset.status, 200);
+  assert.match(outbox.at(-1).subject, /đã được thay đổi/);
+
+  assert.equal((await api('POST', '/auth/reset-password', { email: 'quen@test.vn', otp, newPassword: 'Moi@99999' })).status, 400, 'mã chỉ dùng 1 lần');
+  assert.equal((await api('POST', '/auth/login', { account: 'quen@test.vn', password: 'Cu@12345' })).status, 401);
+  assert.equal((await api('POST', '/auth/login', { account: 'quen@test.vn', password: 'Moi@12345' })).status, 200);
+
+  await new Promise(r => setTimeout(r, 1100)); // token cấp trước lần đổi mật khẩu (khác giây)
+  await collections.userCollection.updateOne({ email: 'quen@test.vn' }, { $set: { passwordChangedAt: new Date() } });
+  const me = await api('GET', '/auth/me', null, oldLogin.body.token);
+  assert.equal(me.status, 401, 'phiên đăng nhập cũ bị đăng xuất');
+  assert.match(me.body.error, /Mật khẩu đã được thay đổi/);
+});
+
+test('quên mật khẩu: nhập sai quá 5 lần phải xin mã mới, mã hết hạn', async () => {
+  await api('POST', '/auth/register', { fullName: 'Sai Nhiều', email: 'sai@test.vn', phone: '0962626262', password: 'Cu@12345' });
+  outbox.length = 0;
+  await api('POST', '/auth/forgot-password', { email: 'sai@test.vn' });
+  const otp = outbox[0].subject.slice(0, 6);
+  const bad = otp === '000000' ? '111111' : '000000';
+  for (let i = 0; i < 5; i++) await api('POST', '/auth/verify-reset-otp', { email: 'sai@test.vn', otp: bad });
+  const locked = await api('POST', '/auth/reset-password', { email: 'sai@test.vn', otp, newPassword: 'Moi@12345' });
+  assert.equal(locked.status, 400);
+  assert.match(locked.body.error, /quá 5 lần/);
+
+  await collections.passwordResetCollection.deleteMany({});
+  await api('POST', '/auth/forgot-password', { email: 'sai@test.vn' });
+  const otp2 = outbox.at(-1).subject.slice(0, 6);
+  await collections.passwordResetCollection.updateOne({ email: 'sai@test.vn' }, { $set: { expiresAt: new Date(Date.now() - 1000) } });
+  assert.equal((await api('POST', '/auth/reset-password', { email: 'sai@test.vn', otp: otp2, newPassword: 'Moi@12345' })).status, 400, 'mã hết hạn');
+});
+
+test('admin khóa tài khoản thì phiên đang đăng nhập bị chặn ngay', async () => {
+  await api('POST', '/auth/register', { fullName: 'Bị Khóa', email: 'khoa@test.vn', phone: '0963636363', password: 'Khoa@1234' });
+  const login = await api('POST', '/auth/login', { account: 'khoa@test.vn', password: 'Khoa@1234' });
+  assert.equal((await api('GET', '/auth/me', null, login.body.token)).status, 200);
+  await api('PATCH', `/admin/users/${login.body.user._id}`, { isLocked: true }, adminToken);
+  const me = await api('GET', '/auth/me', null, login.body.token);
+  assert.equal(me.status, 403);
+  assert.equal((await api('GET', '/packages', null, login.body.token)).status, 200, 'vẫn xem trang công khai được như khách');
 });

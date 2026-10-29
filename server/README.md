@@ -73,9 +73,12 @@ server/
 | POST | `/register` | 🔓 | `fullName, email, phone, password` → `{ token, user }`. Họ tên: chỉ chữ cái + khoảng trắng, 2–50 ký tự (tự viết hoa chữ đầu). Mật khẩu: 8–32 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt, không dấu, không khoảng trắng |
 | POST | `/login` | 🔓 | `account` (email hoặc SĐT), `password`, `rememberMe?` → `{ token, user, draftRestored }` |
 | POST | `/logout` | 🔓 | xóa cookie đăng nhập |
+| POST | `/forgot-password` | 🔓 | `{ email }` → gửi mã OTP 6 số qua email (hiệu lực 10 phút, 60 giây mới gửi lại được). Luôn trả cùng một câu để không lộ email nào đã đăng ký |
+| POST | `/verify-reset-otp` | 🔓 | `{ email, otp }` → kiểm tra mã trước khi cho nhập mật khẩu mới (sai 5 lần phải xin mã mới) |
+| POST | `/reset-password` | 🔓 | `{ email, otp, newPassword }` → đặt mật khẩu mới (vẫn theo quy tắc mật khẩu mạnh), đăng xuất mọi thiết bị, gửi mail thông báo |
 | GET | `/me` | 👤 | thông tin tài khoản |
 | PUT | `/me` | 👤 | `fullName, phone, email, avatar_url` |
-| PUT | `/change-password` | 👤 | `oldPassword, newPassword` |
+| PUT | `/change-password` | 👤 | `oldPassword, newPassword` → trả token mới; các thiết bị khác bị đăng xuất |
 | GET | `/me/points` | 👤 | `{ points, history[] }` |
 
 ### Danh mục – `/api/packages`, `/api/concepts`, `/api/collections`, `/api/addons`, `/api/vouchers`
@@ -136,6 +139,22 @@ Lưu tiến trình đặt lịch để khách không phải nhập lại. Khách
 | PUT | `/:id/confirm` | 🛡️ | xác nhận đã nhận tiền → đơn chuyển `Confirmed` / `Fully_Paid` |
 | PUT | `/:id/reject` | 🛡️ | `{ reason }` |
 
+### Thanh toán VNPay – `/api/payments/vnpay`
+| Method | URL | Quyền | Ghi chú |
+|---|---|---|---|
+| POST | `/vnpay` | 🔓/👤 | `{ bookingId, type?: deposit|remaining, bankCode?: "NCB", locale?: vn|en, phone? }` → `{ paymentUrl }`. Link hết hạn sau 15 phút, bấm lại sẽ tạo link mới |
+| GET | `/vnpay/return?vnp_...` | 🔓 | frontend gửi nguyên query string VNPay trả về → `{ success, message, amount, transactionCode, booking }` |
+| GET | `/vnpay/ipn?vnp_...` | VNPay | máy chủ VNPay gọi để báo kết quả, trả `{ RspCode, Message }` |
+
+Server kiểm tra chữ ký HMAC-SHA512, số tiền, mã giao dịch; mỗi giao dịch chỉ được ghi nhận 1 lần dù Return và IPN cùng gọi. Thanh toán thành công thì đơn tự chuyển `Confirmed` / `Deposit_Paid` (hoặc `Fully_Paid` với `type: remaining`), admin không cần duyệt tay.
+
+**Cách test VNPay sandbox:**
+1. Đăng ký tài khoản test tại https://sandbox.vnpayment.vn/devreg/ → VNPay gửi `vnp_TmnCode` và `vnp_HashSecret` qua email → điền vào `.env` (`VNP_TMN_CODE`, `VNP_HASH_SECRET`).
+2. Tạo đơn → `POST /api/payments/vnpay` → mở `paymentUrl` trên trình duyệt.
+3. Chọn ngân hàng **NCB**, nhập thẻ test: số thẻ `9704198526191432198`, tên `NGUYEN VAN A`, ngày phát hành `07/15`, OTP `123456`.
+4. VNPay chuyển về `VNP_RETURN_URL?vnp_...` → frontend gọi `GET /api/payments/vnpay/return` + nguyên query string đó để hiện kết quả.
+5. IPN chỉ chạy khi server có địa chỉ public (deploy hoặc dùng ngrok) và đã khai báo IPN URL `https://<domain>/api/payments/vnpay/ipn` trong trang quản trị merchant VNPay. Chạy local không có IPN vẫn được vì Return URL cũng ghi nhận kết quả.
+
 ### Admin – `/api/admin` 🛡️
 | Method | URL | Ghi chú |
 |---|---|---|
@@ -152,5 +171,5 @@ Lưu tiến trình đặt lịch để khách không phải nhập lại. Khách
 4. Tới bước thanh toán mà chưa đăng nhập (`GET /api/auth/me` trả 401) → chuyển sang trang đăng nhập/đăng ký, kèm đường dẫn quay về (vd `/dang-nhap?returnUrl=/dat-lich`).
 5. Đăng nhập/đăng ký xong → quay lại trang đặt lịch → `GET /api/booking-draft` để điền lại form đúng bước `step`. Nếu `hold.valid = false` thì cho khách chọn lại giờ.
 6. `POST /api/bookings` với `holdId` → nhận `bookingCode` + `paymentInfo` (QR). Bản nháp tự xóa.
-7. Khách chuyển khoản → `POST /api/payments` → admin `PUT /api/payments/:id/confirm`.
+7. Thanh toán cọc: bấm **VNPay** → `POST /api/payments/vnpay` → `window.location.href = paymentUrl` → trang kết quả gọi `GET /api/payments/vnpay/return${location.search}`. Hoặc chuyển khoản QR → `POST /api/payments` → admin `PUT /api/payments/:id/confirm`.
 8. Khách xem/đổi/hủy trong "Lịch của tôi" (`GET /api/bookings/my`).
