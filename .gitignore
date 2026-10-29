@@ -12,8 +12,10 @@
 /package-lock.json
 /yarn.lock
 
-# Environment files
-/.env
+# Environment files (chặn .env ở mọi thư mục, chỉ cho phép .env.example)
+**/.env
+**/.env.*
+!**/.env.example
 
 # Angular CLI and build artefacts
 /.angular-cli.json
