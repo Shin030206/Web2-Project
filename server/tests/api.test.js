@@ -493,8 +493,8 @@ test('VNPay: thanh toán thành công -> đơn Confirmed, gọi lại nhiều l�
   const ipnAgain = await api('GET', `/payments/vnpay/ipn?${query}`);
   assert.equal(ipnAgain.body.RspCode, '02', 'gọi lại báo đã xác nhận');
 
-  // Khách quay về trang kết quả
-  const ret = await api('GET', `/payments/vnpay/return?${query}`);
+  // Khách quay về trang kết quả (công cụ như Postman có thể gửi lặp chuỗi tham số ở cuối -> vẫn nhận đúng)
+  const ret = await api('GET', `/payments/vnpay/return?${query}&${encodeURIComponent(query)}`);
   assert.equal(ret.status, 200);
   assert.equal(ret.body.success, true);
   assert.equal(ret.body.transactionCode, '14212345');

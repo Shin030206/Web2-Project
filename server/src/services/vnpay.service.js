@@ -79,7 +79,11 @@ function buildPaymentUrl({ txnRef, amount, orderInfo, ipAddr, bankCode, locale, 
 
 // Kiểm tra chữ ký VNPay gửi về (Return URL / IPN) để chống giả mạo kết quả thanh toán
 function verifyReturn(query) {
-  const params = { ...query };
+  // Chỉ lấy tham số VNPay gửi (vnp_ + tên); tham số lạ do trình duyệt/công cụ thêm vào không được tính vào chữ ký
+  const params = {};
+  for (const [key, value] of Object.entries(query || {})) {
+    if (/^vnp_[A-Za-z]+$/.test(key) && typeof value === "string") params[key] = value;
+  }
   const secureHash = params.vnp_SecureHash;
   delete params.vnp_SecureHash;
   delete params.vnp_SecureHashType;

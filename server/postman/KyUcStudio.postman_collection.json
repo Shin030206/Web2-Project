@@ -72,10 +72,6 @@
     {
       "key": "vnpReturnUrl",
       "value": ""
-    },
-    {
-      "key": "vnpReturnQuery",
-      "value": ""
     }
   ],
   "item": [
@@ -1943,7 +1939,7 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": "{{baseUrl}}/payments/vnpay/return?{{vnpReturnQuery}}"
+            "url": "{{baseUrl}}/payments/vnpay/return"
           },
           "event": [
             {
@@ -1952,8 +1948,10 @@
                 "type": "text/javascript",
                 "exec": [
                   "// Dán NGUYÊN link VNPay chuyển về (http://localhost:4200/thanh-toan/ket-qua?vnp_...) vào biến vnpReturnUrl",
-                  "const full = pm.collectionVariables.get(\"vnpReturnUrl\") || \"\";",
-                  "pm.collectionVariables.set(\"vnpReturnQuery\", full.includes(\"?\") ? full.split(\"?\")[1] : \"\");"
+                  "// Script tự ghép thành http://localhost:3005/api/payments/vnpay/return?vnp_... (không cần sửa tab Params)",
+                  "const full = (pm.collectionVariables.get(\"vnpReturnUrl\") || \"\").trim();",
+                  "const query = full.includes(\"?\") ? full.slice(full.indexOf(\"?\") + 1) : \"\";",
+                  "pm.request.url.update(pm.collectionVariables.get(\"baseUrl\") + \"/payments/vnpay/return\" + (query ? \"?\" + query : \"\"));"
                 ]
               }
             },
@@ -1967,10 +1965,10 @@
                   "} else {",
                   "  const b = pm.response.json();",
                   "  console.log(b);",
-                  "  pm.test(\"Thanh toán thành công\", () => pm.expect(b.success).to.eql(true));",
+                  "  pm.test(\"Thanh toán thành công\", () => pm.expect(b.success, b.error || b.message).to.eql(true));",
                   "  pm.test(\"Đơn chuyển sang Confirmed / Deposit_Paid\", () => {",
-                  "    pm.expect(b.booking.bookingStatus).to.eql(\"Confirmed\");",
-                  "    pm.expect(b.booking.paymentStatus).to.eql(\"Deposit_Paid\");",
+                  "    pm.expect(b.booking && b.booking.bookingStatus).to.eql(\"Confirmed\");",
+                  "    pm.expect(b.booking && b.booking.paymentStatus).to.eql(\"Deposit_Paid\");",
                   "  });",
                   "}"
                 ]
