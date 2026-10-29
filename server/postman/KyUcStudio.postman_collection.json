@@ -72,6 +72,14 @@
     {
       "key": "vnpReturnUrl",
       "value": ""
+    },
+    {
+      "key": "otp",
+      "value": ""
+    },
+    {
+      "key": "newPassword",
+      "value": "Moi@12345"
     }
   ],
   "item": [
@@ -2008,6 +2016,140 @@
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "const b = pm.response.json();",
                   "console.log(\"Trạng thái đơn:\", b.bookingStatus, b.paymentStatus, \"| Giao dịch:\", b.payments.map(p => p.method + \" \" + p.status + \" \" + p.amount));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "9. Kịch bản quên mật khẩu qua SĐT (bấm Send từng bước)",
+      "description": "Bước 1 gửi mã OTP tới SĐT trong biến userPhone. SMS_PROVIDER=console thì mã hiện ở terminal npm run dev; twilio thì về điện thoại. Điền mã vào biến otp (tab Variables) → Ctrl+S → Send bước 2, 3, 4. Mật khẩu mới là biến newPassword.",
+      "item": [
+        {
+          "name": "Bước 1 – Gửi mã OTP qua SMS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/forgot-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{userPhone}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Đã gửi yêu cầu\", () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set(\"otp\", \"\");",
+                  "console.log(\"👉 \" + b.message + \" (\" + b.sentTo + \"). Lấy mã ở terminal npm run dev hoặc điện thoại, điền vào biến otp.\");"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 2 – Kiểm tra mã OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/verify-reset-otp",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{userPhone}}\",\n  \"otp\": \"{{otp}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"otp\")) {",
+                  "  pm.test.skip(\"Chưa nhập mã OTP vào biến otp\", () => {});",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Mã hợp lệ\", () => pm.expect(pm.response.json().valid, pm.response.json().error).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 3 – Đặt mật khẩu mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/reset-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{userPhone}}\",\n  \"otp\": \"{{otp}}\",\n  \"newPassword\": \"{{newPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"otp\")) {",
+                  "  pm.test.skip(\"Chưa nhập mã OTP vào biến otp\", () => {});",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Đặt lại thành công\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 4 – Đăng nhập bằng mật khẩu mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account\": \"{{userPhone}}\",\n  \"password\": \"{{newPassword}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"otp\")) {",
+                  "  pm.test.skip(\"Chưa nhập mã OTP vào biến otp\", () => {});",
+                  "  return;",
+                  "}",
+                  "pm.test(\"Đăng nhập được bằng mật khẩu mới\", () => pm.response.to.have.status(200));",
+                  "console.log(\"Lưu ý: mật khẩu tài khoản test giờ là \" + pm.collectionVariables.get(\"newPassword\") + \". Muốn chạy lại các thư mục khác thì đặt lại về Vy@12345.\");"
                 ]
               }
             }
