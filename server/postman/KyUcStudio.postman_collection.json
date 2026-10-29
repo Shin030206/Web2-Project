@@ -56,6 +56,26 @@
     {
       "key": "paymentId",
       "value": ""
+    },
+    {
+      "key": "vnpDate",
+      "value": ""
+    },
+    {
+      "key": "vnpTime",
+      "value": ""
+    },
+    {
+      "key": "vnpPaymentUrl",
+      "value": ""
+    },
+    {
+      "key": "vnpReturnUrl",
+      "value": ""
+    },
+    {
+      "key": "vnpReturnQuery",
+      "value": ""
     }
   ],
   "item": [
@@ -94,7 +114,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"201 tạo mới, hoặc 409 đã có từ lần chạy trước\", () => pm.expect([201, 409]).to.include(pm.response.code));",
                   "if (pm.response.code === 201) pm.collectionVariables.set(\"userToken\", pm.response.json().token);"
                 ]
               }
@@ -817,7 +837,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));"
+                  "pm.test(\"201 tạo mới, hoặc 409 đã có từ lần chạy trước\", () => pm.expect([201, 409]).to.include(pm.response.code));"
                 ]
               }
             }
@@ -1719,6 +1739,275 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Kịch bản thanh toán VNPay (bấm Send từng bước)",
+      "description": "Chạy lần lượt bước 1 → 4 bằng nút Send. Ở bước 4 mở link trong Console, thanh toán bằng thẻ test NCB 9704198526191432198 / NGUYEN VAN A / 07/15 / OTP 123456. Sau khi VNPay chuyển về (trang localhost:4200 báo lỗi là bình thường), copy NGUYÊN link trên thanh địa chỉ, dán vào biến vnpReturnUrl (tab Variables của collection) rồi Send bước 5.",
+      "item": [
+        {
+          "name": "Bước 1 – Đăng nhập khách hàng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account\": \"{{userEmail}}\",\n  \"password\": \"Vy@12345\"\n}"
+            },
+            "description": "Nếu báo sai tài khoản: chạy '1. Tài khoản → Đăng ký khách hàng' trước."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Đăng nhập thành công\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"userToken\", pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 2 – Giữ một khung giờ trống",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/slots/hold",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "slots",
+                "hold"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"packageId\": 102,\n  \"bookingDate\": \"{{vnpDate}}\",\n  \"startTime\": \"{{vnpTime}}\",\n  \"customerPhone\": \"{{userPhone}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Chọn ngẫu nhiên ngày (15–80 ngày tới) và giờ để không đụng lịch của các lần test trước",
+                  "const days = 15 + Math.floor(Math.random() * 65);",
+                  "const d = new Date(Date.now() + 7 * 3600e3 + days * 864e5).toISOString().slice(0, 10);",
+                  "const times = [\"08:00\", \"09:30\", \"11:00\", \"13:00\", \"14:30\", \"16:00\", \"17:30\"];",
+                  "pm.collectionVariables.set(\"vnpDate\", d);",
+                  "pm.collectionVariables.set(\"vnpTime\", times[Math.floor(Math.random() * times.length)]);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Giữ slot thành công (409 thì bấm Send lại để đổi giờ)\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"holdId\", pm.response.json().holdId);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 3 – Tạo đơn đặt lịch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"holdId\": \"{{holdId}}\",\n  \"conceptCode\": \"CD01\",\n  \"addons\": [\n    {\n      \"addon_id\": 1\n    }\n  ],\n  \"customerName\": \"Võ Thị Thanh Vy\",\n  \"customerPhone\": \"{{userPhone}}\",\n  \"customerEmail\": \"{{userEmail}}\",\n  \"note\": \"Test VNPay\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Tạo đơn thành công\", () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.collectionVariables.set(\"bookingId\", b.bookingId);",
+                  "pm.collectionVariables.set(\"bookingCode\", b.bookingCode);",
+                  "console.log(\"Mã đơn:\", b.bookingCode, \"| Tiền cọc:\", b.paymentInfo.amount, \"| VNPay đã cấu hình:\", b.paymentInfo.vnpayAvailable);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 4 – Tạo link thanh toán VNPay",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/vnpay",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "vnpay"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingId\": \"{{bookingId}}\",\n  \"type\": \"deposit\",\n  \"bankCode\": \"NCB\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 503) {",
+                  "  pm.test(\"Chưa cấu hình VNPay: thêm VNP_TMN_CODE, VNP_HASH_SECRET vào .env rồi chạy lại npm run dev\", () => pm.expect.fail());",
+                  "} else {",
+                  "  pm.test(\"Tạo link thành công\", () => pm.response.to.have.status(201));",
+                  "  const url = pm.response.json().paymentUrl;",
+                  "  pm.collectionVariables.set(\"vnpPaymentUrl\", url);",
+                  "  pm.collectionVariables.set(\"vnpReturnUrl\", \"\");",
+                  "  console.log(\"👉 MỞ LINK NÀY TRÊN TRÌNH DUYỆT ĐỂ THANH TOÁN:\\n\" + url);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 5 – Kiểm tra kết quả thanh toán",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/payments/vnpay/return?{{vnpReturnQuery}}"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Dán NGUYÊN link VNPay chuyển về (http://localhost:4200/thanh-toan/ket-qua?vnp_...) vào biến vnpReturnUrl",
+                  "const full = pm.collectionVariables.get(\"vnpReturnUrl\") || \"\";",
+                  "pm.collectionVariables.set(\"vnpReturnQuery\", full.includes(\"?\") ? full.split(\"?\")[1] : \"\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"vnpReturnUrl\")) {",
+                  "  pm.test.skip(\"Chưa dán link VNPay trả về vào biến vnpReturnUrl\", () => {});",
+                  "} else {",
+                  "  const b = pm.response.json();",
+                  "  console.log(b);",
+                  "  pm.test(\"Thanh toán thành công\", () => pm.expect(b.success).to.eql(true));",
+                  "  pm.test(\"Đơn chuyển sang Confirmed / Deposit_Paid\", () => {",
+                  "    pm.expect(b.booking.bookingStatus).to.eql(\"Confirmed\");",
+                  "    pm.expect(b.booking.paymentStatus).to.eql(\"Deposit_Paid\");",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Bước 6 – Xem lại đơn và giao dịch",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{userToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bookings/{{bookingId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bookings",
+                "{{bookingId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "console.log(\"Trạng thái đơn:\", b.bookingStatus, b.paymentStatus, \"| Giao dịch:\", b.payments.map(p => p.method + \" \" + p.status + \" \" + p.amount));"
                 ]
               }
             }

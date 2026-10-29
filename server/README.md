@@ -148,7 +148,7 @@ Lưu tiến trình đặt lịch để khách không phải nhập lại. Khách
 
 Server kiểm tra chữ ký HMAC-SHA512, số tiền, mã giao dịch; mỗi giao dịch chỉ được ghi nhận 1 lần dù Return và IPN cùng gọi. Thanh toán thành công thì đơn tự chuyển `Confirmed` / `Deposit_Paid` (hoặc `Fully_Paid` với `type: remaining`), admin không cần duyệt tay.
 
-**Cách test VNPay sandbox:**
+**Cách test VNPay sandbox:** (trong Postman có sẵn thư mục *8. Kịch bản thanh toán VNPay*, bấm Send lần lượt từng bước)
 1. Đăng ký tài khoản test tại https://sandbox.vnpayment.vn/devreg/ → VNPay gửi `vnp_TmnCode` và `vnp_HashSecret` qua email → điền vào `.env` (`VNP_TMN_CODE`, `VNP_HASH_SECRET`).
 2. Tạo đơn → `POST /api/payments/vnpay` → mở `paymentUrl` trên trình duyệt.
 3. Chọn ngân hàng **NCB**, nhập thẻ test: số thẻ `9704198526191432198`, tên `NGUYEN VAN A`, ngày phát hành `07/15`, OTP `123456`.
