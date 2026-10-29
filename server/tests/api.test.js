@@ -2,7 +2,7 @@
 // Chạy: npm test   (hoặc MONGO_URI=... npm test). DB test sẽ bị xóa sau khi chạy xong.
 process.env.NODE_ENV = 'test';
 process.env.DB_NAME = process.env.TEST_DB_NAME || 'KyUcStudioDB_test';
-process.env.JWT_SECRET = 'test-secret';
+process.env.JWT_SECRET = 'test-secret-only-for-automated-tests';
 process.env.REQUIRE_LOGIN_TO_BOOK = 'false';
 process.env.VNP_TMN_CODE = 'TESTTMN1';
 process.env.VNP_HASH_SECRET = 'TESTSECRETKEY1234567890ABCDEFGHIJ'; // phần lớn test đặt lịch bằng khách vãng lai; test cookie bật lại
@@ -70,13 +70,13 @@ before(async () => {
   ]);
   await collections.userCollection.insertOne({
     fullName: 'Admin', email: 'admin@test.vn', phone: '0900000000', role: 'admin', points: 0,
-    passwordHash: await bcrypt.hash('admin123', 10), createdAt: new Date()
+    passwordHash: await bcrypt.hash('Test@Admin1', 10), createdAt: new Date()
   });
 
   server = app.listen(0);
   baseUrl = `http://127.0.0.1:${server.address().port}/api`;
 
-  adminToken = (await api('POST', '/auth/login', { account: 'admin@test.vn', password: 'admin123' })).body.token;
+  adminToken = (await api('POST', '/auth/login', { account: 'admin@test.vn', password: 'Test@Admin1' })).body.token;
 });
 
 after(async () => {

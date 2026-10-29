@@ -7,7 +7,7 @@ Node.js + Express 5 + MongoDB (driver `mongodb`, chạy trên MongoDB Atlas).
 ```bash
 cd server
 npm install
-cp .env.example .env     # điền MONGO_URI của Atlas, JWT_SECRET, thông tin ngân hàng
+cp .env.example .env     # điền MONGO_URI của Atlas, JWT_SECRET (chuỗi ngẫu nhiên), ADMIN_PASSWORD, thông tin ngân hàng
 npm run seed             # đưa dữ liệu mẫu (JSON của frontend) lên DB + tạo tài khoản admin
 npm run dev              # chạy với nodemon (npm start để chạy production)
 ```
@@ -16,6 +16,12 @@ npm run dev              # chạy với nodemon (npm start để chạy producti
 - Test bằng Postman: Import file `server/postman/KyUcStudio.postman_collection.json` → bấm **Run collection** để chạy hết theo thứ tự (token, holdId, bookingId tự lưu vào biến).
 - `npm test` chạy test end-to-end trên DB riêng `KyUcStudioDB_test` (tự xóa khi xong). Mặc định dùng `mongodb://127.0.0.1:27017`, muốn dùng Atlas thì đặt `MONGO_URI`.
 - Frontend Angular: copy `server/proxy.conf.json` vào `ky-uc-studio-v2/` và thêm `"proxyConfig": "proxy.conf.json"` vào `serve.options` trong `angular.json`, rồi gọi API bằng đường dẫn tương đối `/api/...`.
+
+## Bảo mật khi đưa lên GitHub / deploy
+- **Không bao giờ commit file `.env`** (đã có trong `.gitignore`). `.env.example` chỉ chứa tên biến, không chứa giá trị thật.
+- `JWT_SECRET` bắt buộc là chuỗi ngẫu nhiên riêng. Thiếu hoặc yếu thì khi `NODE_ENV=production` server **không khởi động**; khi dev thì dùng secret tạm.
+- Không có mật khẩu admin mặc định: đặt `ADMIN_PASSWORD` trong `.env`, hoặc để trống thì `npm run seed` tạo mật khẩu ngẫu nhiên và in ra 1 lần.
+- Khi deploy, khai báo các biến môi trường trên trang quản lý của nơi deploy (Render/Railway…), không đưa vào code.
 
 ## Cấu trúc
 

@@ -15,7 +15,8 @@
     },
     {
       "key": "adminPassword",
-      "value": "Admin@123"
+      "value": "",
+      "description": "Điền mật khẩu admin của m (không lưu lên GitHub)"
     },
     {
       "key": "userEmail",

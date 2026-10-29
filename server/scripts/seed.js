@@ -4,7 +4,9 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const { validatePassword } = require('../src/utils/helpers');
 const { connectDB, closeDB, collections } = require('../src/config/db');
 
 const DATA_DIR = path.join(__dirname, '../../ky-uc-studio-v2/public/assets/data');
@@ -37,7 +39,13 @@ async function seedCollection({ file, collection, idField, defaults = {} }) {
 
 async function seedAdmin() {
   const email = (process.env.ADMIN_EMAIL || 'admin@kyucstudio.vn').toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || 'Admin@123';
+  // Không có mật khẩu mặc định (repo public ai cũng đọc được): lấy từ .env, không có thì tạo ngẫu nhiên và in ra 1 lần
+  let password = process.env.ADMIN_PASSWORD;
+  if (password) {
+    validatePassword(password);
+  } else {
+    password = 'Ky@9' + crypto.randomBytes(9).toString('base64url'); // tiền tố đảm bảo đủ hoa, thường, số, ký tự đặc biệt
+  }
   const result = await collections.userCollection.updateOne(
     { email },
     {
@@ -54,7 +62,9 @@ async function seedAdmin() {
     },
     { upsert: true }
   );
-  console.log(result.upsertedCount ? `  Đã tạo admin: ${email}` : `  Admin ${email} đã tồn tại`);
+  if (!result.upsertedCount) return console.log(`  Admin ${email} đã tồn tại (không đổi mật khẩu)`);
+  console.log(`  Đã tạo admin: ${email}`);
+  if (!process.env.ADMIN_PASSWORD) console.log(`  ⚠️  Mật khẩu admin (chỉ hiện 1 lần, hãy lưu lại): ${password}`);
 }
 
 (async () => {

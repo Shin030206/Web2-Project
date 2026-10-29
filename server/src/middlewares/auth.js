@@ -1,13 +1,23 @@
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { collections, ObjectId } = require('../config/db');
 const { httpError } = require('../utils/helpers');
 const { ROLES, AUTH_COOKIE, REMEMBER_DAYS, SESSION_HOURS } = require('../config/constants');
 
-const JWT_SECRET = process.env.JWT_SECRET || "ky-uc-studio-dev-secret";
-
-if (!process.env.JWT_SECRET) {
-  console.warn("⚠️  Chưa đặt JWT_SECRET trong .env, đang dùng secret mặc định (chỉ dùng khi dev)!");
+// JWT_SECRET phải là chuỗi ngẫu nhiên riêng, không được để trống hay dùng giá trị mẫu:
+// ai biết secret là tự tạo được token admin giả mà không cần mật khẩu.
+const WEAK_SECRETS = ["", "change-me", "secret", "ky-uc-studio-dev-secret"];
+function loadJwtSecret() {
+  const secret = process.env.JWT_SECRET || "";
+  if (secret.length >= 16 && !WEAK_SECRETS.includes(secret)) return secret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("JWT_SECRET chưa đặt hoặc quá yếu! Tạo bằng: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"");
+  }
+  // Khi dev: dùng secret ngẫu nhiên tạm (khởi động lại server là phải đăng nhập lại)
+  console.warn("⚠️  JWT_SECRET chưa đặt hoặc quá yếu, đang dùng secret ngẫu nhiên tạm. Hãy đặt JWT_SECRET trong .env!");
+  return crypto.randomBytes(32).toString("hex");
 }
+const JWT_SECRET = loadJwtSecret();
 
 // Có "Lưu đăng nhập" thì token sống 30 ngày, không thì 1 ngày
 function signToken(user, remember = false) {
