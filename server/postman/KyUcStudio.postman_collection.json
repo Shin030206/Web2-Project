@@ -1965,6 +1965,7 @@
                   "} else {",
                   "  const b = pm.response.json();",
                   "  console.log(b);",
+                  "  if (b.booking && b.booking._id) pm.collectionVariables.set(\"bookingId\", b.booking._id); // để bước 6 dùng",
                   "  pm.test(\"Thanh toán thành công\", () => pm.expect(b.success, b.error || b.message).to.eql(true));",
                   "  pm.test(\"Đơn chuyển sang Confirmed / Deposit_Paid\", () => {",
                   "    pm.expect(b.booking && b.booking.bookingStatus).to.eql(\"Confirmed\");",
@@ -2003,6 +2004,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "if (!pm.collectionVariables.get(\"bookingId\")) console.warn(\"Chưa có bookingId: chạy bước 3 hoặc bước 5 trước\");",
                   "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
                   "const b = pm.response.json();",
                   "console.log(\"Trạng thái đơn:\", b.bookingStatus, b.paymentStatus, \"| Giao dịch:\", b.payments.map(p => p.method + \" \" + p.status + \" \" + p.amount));"
