@@ -13,6 +13,7 @@ const bcrypt = require('bcryptjs');
 const { connectDB, closeDB, collections, ObjectId } = require('../src/config/db');
 const { expireUnpaidBookings } = require('../src/services/booking.service');
 const { outbox } = require('../src/services/mail.service');
+const { outbox: smsOutbox } = require('../src/services/sms.service');
 const vnpayService = require('../src/services/vnpay.service');
 const app = require('../src/app');
 
@@ -628,7 +629,7 @@ test('quên mật khẩu: nhập sai quá 5 lần phải xin mã mới, mã hế
   await collections.passwordResetCollection.deleteMany({});
   await api('POST', '/auth/forgot-password', { email: 'sai@test.vn' });
   const otp2 = outbox.at(-1).subject.slice(0, 6);
-  await collections.passwordResetCollection.updateOne({ email: 'sai@test.vn' }, { $set: { expiresAt: new Date(Date.now() - 1000) } });
+  await collections.passwordResetCollection.updateOne({ target: 'sai@test.vn' }, { $set: { expiresAt: new Date(Date.now() - 1000) } });
   assert.equal((await api('POST', '/auth/reset-password', { email: 'sai@test.vn', otp: otp2, newPassword: 'Moi@12345' })).status, 400, 'mã hết hạn');
 });
 
@@ -640,4 +641,81 @@ test('admin khóa tài khoản thì phiên đang đăng nhập bị chặn ngay'
   const me = await api('GET', '/auth/me', null, login.body.token);
   assert.equal(me.status, 403);
   assert.equal((await api('GET', '/packages', null, login.body.token)).status, 200, 'vẫn xem trang công khai được như khách');
+});
+
+test('quên mật khẩu qua SĐT: nhận OTP bằng SMS -> đặt mật khẩu mới', async () => {
+  await api('POST', '/auth/register', { fullName: 'Quên Qua Sms', email: 'sms@test.vn', phone: '0971717171', password: 'Cu@12345' });
+  smsOutbox.length = 0;
+  outbox.length = 0;
+
+  const ghost = await api('POST', '/auth/forgot-password', { phone: '0970000000' });
+  const real = await api('POST', '/auth/forgot-password', { phone: '+84 971 717 171' });
+  assert.equal(ghost.status, 200);
+  assert.equal(ghost.body.message, real.body.message, 'không lộ SĐT nào đã đăng ký');
+  assert.equal(real.body.channel, 'sms');
+  assert.equal(real.body.sentTo, '097****171');
+  assert.equal(smsOutbox.length, 1, 'chỉ gửi cho SĐT có tài khoản');
+  assert.equal(outbox.length, 0, 'không gửi email');
+  assert.equal(smsOutbox[0].to, '+84971717171');
+  assert.match(smsOutbox[0].body, /^[\x20-\x7E]+$/, 'SMS không dấu');
+  const otp = smsOutbox[0].body.match(/(\d{6})/)[1];
+
+  assert.equal((await api('POST', '/auth/verify-reset-otp', { phone: '0971717171', otp })).body.valid, true);
+  assert.equal((await api('POST', '/auth/reset-password', { phone: '0971717172', otp, newPassword: 'Moi@12345' })).status, 400, 'sai SĐT');
+  const reset = await api('POST', '/auth/reset-password', { account: '0971717171', otp, newPassword: 'Moi@12345' });
+  assert.equal(reset.status, 200);
+  assert.equal(outbox.at(-1).to, 'sms@test.vn', 'báo đổi mật khẩu qua email');
+  assert.equal((await api('POST', '/auth/login', { account: '0971717171', password: 'Moi@12345' })).status, 200);
+});
+
+test('quên mật khẩu: tối đa 5 mã mỗi ngày, thiếu SĐT/email báo lỗi', async () => {
+  await api('POST', '/auth/register', { fullName: 'Spam Otp', email: 'spam@test.vn', phone: '0972727272', password: 'Cu@12345' });
+  assert.equal((await api('POST', '/auth/forgot-password', {})).status, 400);
+  assert.equal((await api('POST', '/auth/forgot-password', { phone: '123' })).status, 400);
+
+  for (let i = 0; i < 5; i++) {
+    await collections.passwordResetCollection.deleteMany({ target: '0972727272' }); // bỏ qua chờ 60 giây
+    assert.equal((await api('POST', '/auth/forgot-password', { phone: '0972727272' })).status, 200);
+  }
+  await collections.passwordResetCollection.deleteMany({ target: '0972727272' });
+  const sixth = await api('POST', '/auth/forgot-password', { phone: '0972727272' });
+  assert.equal(sixth.status, 429);
+});
+
+test('gửi SMS thật qua Twilio: đúng API, đúng định dạng; Twilio lỗi thì báo 503', async () => {
+  const http = require('node:http');
+  const received = [];
+  let fail = false;
+  const fake = http.createServer((req, res) => {
+    let body = '';
+    req.on('data', c => (body += c));
+    req.on('end', () => {
+      received.push({ url: req.url, auth: req.headers.authorization, body: Object.fromEntries(new URLSearchParams(body)) });
+      res.writeHead(fail ? 400 : 201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(fail ? { message: 'The number is unverified' } : { sid: 'SM123' }));
+    });
+  }).listen(0);
+  Object.assign(process.env, {
+    SMS_PROVIDER: 'twilio', TWILIO_ACCOUNT_SID: 'AC123', TWILIO_AUTH_TOKEN: 'tok', TWILIO_FROM_NUMBER: '+15005550006',
+    TWILIO_API_URL: `http://127.0.0.1:${fake.address().port}`
+  });
+  try {
+    await api('POST', '/auth/register', { fullName: 'Twilio Test', email: 'tw@test.vn', phone: '0973737373', password: 'Cu@12345' });
+    assert.equal((await api('POST', '/auth/forgot-password', { phone: '0973737373' })).status, 200);
+    assert.equal(received.length, 1);
+    assert.equal(received[0].url, '/2010-04-01/Accounts/AC123/Messages.json');
+    assert.equal(received[0].auth, 'Basic ' + Buffer.from('AC123:tok').toString('base64'));
+    assert.equal(received[0].body.To, '+84973737373');
+    assert.equal(received[0].body.From, '+15005550006');
+    assert.match(received[0].body.Body, /Ma dat lai mat khau cua ban la \d{6}/);
+
+    fail = true;
+    await collections.passwordResetCollection.deleteMany({ target: '0973737373' });
+    const err = await api('POST', '/auth/forgot-password', { phone: '0973737373' });
+    assert.equal(err.status, 503);
+    assert.equal(await collections.passwordResetCollection.countDocuments({ target: '0973737373' }), 0, 'gửi lỗi thì không giữ mã');
+  } finally {
+    delete process.env.SMS_PROVIDER;
+    fake.close();
+  }
 });

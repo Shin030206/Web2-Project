@@ -324,9 +324,9 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{userEmail}}\"\n}"
+              "raw": "{\n  \"phone\": \"{{userPhone}}\"\n}"
             },
-            "description": "Chưa cấu hình SMTP thì mã OTP được in ra console của server (terminal npm run dev)."
+            "description": "Gửi mã OTP qua SMS tới SĐT. Mặc định SMS_PROVIDER=console: mã in ra terminal npm run dev. Đổi thành {\"email\": ...} để nhận qua email."
           },
           "event": [
             {
@@ -362,7 +362,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"Vy@12345\"\n}"
+              "raw": "{\n  \"phone\": \"{{userPhone}}\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"Vy@12345\"\n}"
             },
             "description": "Thay otp bằng mã nhận trong email/console. Không chạy trong Run collection vì cần mã thật (sẽ báo 400)."
           },

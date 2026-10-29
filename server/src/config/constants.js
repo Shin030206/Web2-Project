@@ -51,5 +51,6 @@ module.exports = {
   OTP_EXPIRE_MINUTES: 10,
   OTP_MAX_ATTEMPTS: 5,
   OTP_RESEND_SECONDS: 60,
+  OTP_MAX_PER_DAY: 5,          // SMS tốn tiền -> mỗi SĐT/email tối đa 5 mã mỗi ngày
   PAYMENT_TYPES: ["deposit", "remaining"]
 };

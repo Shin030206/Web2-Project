@@ -73,9 +73,9 @@ server/
 | POST | `/register` | 🔓 | `fullName, email, phone, password` → `{ token, user }`. Họ tên: chỉ chữ cái + khoảng trắng, 2–50 ký tự (tự viết hoa chữ đầu). Mật khẩu: 8–32 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt, không dấu, không khoảng trắng |
 | POST | `/login` | 🔓 | `account` (email hoặc SĐT), `password`, `rememberMe?` → `{ token, user, draftRestored }` |
 | POST | `/logout` | 🔓 | xóa cookie đăng nhập |
-| POST | `/forgot-password` | 🔓 | `{ email }` → gửi mã OTP 6 số qua email (hiệu lực 10 phút, 60 giây mới gửi lại được). Luôn trả cùng một câu để không lộ email nào đã đăng ký |
-| POST | `/verify-reset-otp` | 🔓 | `{ email, otp }` → kiểm tra mã trước khi cho nhập mật khẩu mới (sai 5 lần phải xin mã mới) |
-| POST | `/reset-password` | 🔓 | `{ email, otp, newPassword }` → đặt mật khẩu mới (vẫn theo quy tắc mật khẩu mạnh), đăng xuất mọi thiết bị, gửi mail thông báo |
+| POST | `/forgot-password` | 🔓 | `{ phone }` → gửi mã OTP 6 số qua **SMS** (hoặc `{ email }` → qua email; `{ account }` nhận cả hai). Mã hiệu lực 10 phút, 60 giây mới gửi lại, tối đa 5 mã/ngày. Luôn trả cùng một câu để không lộ SĐT/email nào đã đăng ký → `{ message, channel, sentTo: "097****171" }` |
+| POST | `/verify-reset-otp` | 🔓 | `{ phone, otp }` → kiểm tra mã trước khi cho nhập mật khẩu mới (sai 5 lần phải xin mã mới) |
+| POST | `/reset-password` | 🔓 | `{ phone, otp, newPassword }` → đặt mật khẩu mới (vẫn theo quy tắc mật khẩu mạnh), đăng xuất mọi thiết bị, gửi email thông báo |
 | GET | `/me` | 👤 | thông tin tài khoản |
 | PUT | `/me` | 👤 | `fullName, phone, email, avatar_url` |
 | PUT | `/change-password` | 👤 | `oldPassword, newPassword` → trả token mới; các thiết bị khác bị đăng xuất |
@@ -121,6 +121,8 @@ Bộ lọc:
 | PATCH | `/:id/status` | 🛡️ | `{ status: "Confirmed" | "Completed" | "No_Show" | "Cancelled", note? }` |
 
 `paymentInfo` gồm số tiền cọc, nội dung chuyển khoản và `qrUrl` (ảnh VietQR, frontend chỉ cần `<img [src]="qrUrl">`).
+
+**Gửi SMS:** mặc định `SMS_PROVIDER=console` in mã OTP ra terminal `npm run dev` (không tốn tiền, đủ để dev/demo). Muốn gửi SMS thật: đăng ký Twilio dùng thử, xác minh số điện thoại của mình trong Twilio, rồi đặt `SMS_PROVIDER=twilio` + `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` trong `.env`.
 
 ### Bản nháp đặt lịch – `/api/booking-draft`
 Lưu tiến trình đặt lịch để khách không phải nhập lại. Khách vãng lai được nhận diện bằng cookie `kyuc_draft` (giữ 7 ngày); khi đăng nhập/đăng ký, bản nháp tự chuyển sang tài khoản (`draftRestored: true`).

@@ -26,6 +26,7 @@ async function connectDB() {
   collections.pointCollection = db.collection("pointTransactions");
   collections.draftCollection = db.collection("bookingDrafts");
   collections.passwordResetCollection = db.collection("passwordResets");
+  collections.otpLogCollection = db.collection("otpLogs");
 
   await createIndexes();
   console.log(`✅ Đã kết nối thành công tới ${dbName}!`);
@@ -77,7 +78,9 @@ async function createIndexes() {
     ensureIndex(c.draftCollection, { draftKey: 1 }, uniqueIfPresent("draftKey", "string")),
     ensureIndex(c.draftCollection, { userId: 1 }),
     ensureIndex(c.draftCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 }),
-    ensureIndex(c.passwordResetCollection, { email: 1 }),
+    ensureIndex(c.passwordResetCollection, { target: 1 }),
+    ensureIndex(c.otpLogCollection, { target: 1 }),
+    ensureIndex(c.otpLogCollection, { createdAt: 1 }, { expireAfterSeconds: 24 * 3600 }),
     ensureIndex(c.passwordResetCollection, { expiresAt: 1 }, { expireAfterSeconds: 0 })
   ]);
 }
