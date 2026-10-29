@@ -1,74 +1,57 @@
-// 1. LẤY TẤT CẢ GÓI CHỤP (Kèm lọc khoảng giá min/max)
-const { collections, ObjectId } = require('../config/db');
+const { collections } = require('../config/db');
+const { makeCrud } = require('../utils/crud');
+const { httpError, escapeRegex } = require('../utils/helpers');
+const { BOOKING_STATUS } = require('../config/constants');
 
-// Lấy danh sách gói chụp (kèm lọc min/max price)
-exports.getAllPackages = async (req, res) => {
-  try {
-    const { minPrice, maxPrice, category } = req.query;
-    let query = {};
-
+const packageCrud = makeCrud({
+  collection: "packageCollection",
+  idField: "package_id",
+  numericId: true,
+  label: "gói chụp",
+  schema: {
+    package_id: { type: "number", required: true },
+    category: { type: "string", required: true },
+    level: { type: "string" },
+    package_name: { type: "string", required: true },
+    slug: { type: "string" },
+    price: { type: "number", required: true },
+    duration_minutes: { type: "number", required: true },
+    description: { type: "string" },
+    includes: { type: "array", default: [] },
+    image_url: { type: "string" },
+    status: { type: "string", enum: ["ACTIVE", "INACTIVE"], default: "ACTIVE" }
+  },
+  activeFilter: { status: "ACTIVE" },
+  // Lọc theo khoảng giá min/max, category, level, từ khóa
+  buildFilter: ({ minPrice, maxPrice, category, level, q }) => {
+    const filter = {};
     if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
-    if (category) {
-      query.category = category;
-    }
-
-    const result = await collections.packageCollection.find(query).toArray();
-    res.send(result);
-  } catch (err) {
-    res.status(500).send({ error: err.message });
+    if (category) filter.category = category;
+    if (level) filter.level = level;
+    if (q) filter.package_name = { $regex: escapeRegex(q), $options: "i" };
+    return filter;
+  },
+  // Không cho xóa gói đang có lịch chụp sắp tới (nên chuyển status = INACTIVE)
+  beforeDelete: async (pkg) => {
+    const activeBooking = await collections.bookingCollection.findOne({
+      "pricing.package.package_id": pkg.package_id,
+      bookingStatus: { $in: [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED] }
+    });
+    if (activeBooking) throw httpError(409, "Gói này đang có lịch chụp chưa hoàn thành, hãy chuyển sang INACTIVE thay vì xóa!");
   }
-};
+});
 
-// Chi tiết gói chụp (hỗ trợ ID và Slug)
+exports.getAllPackages = packageCrud.list;
 exports.getPackageByIdentifier = async (req, res) => {
-  try {
-    const id = req.params["identifier"];
-    let query = id.match(/^[0-9a-fA-F]{24}$/) ? { _id: new ObjectId(id) } : { slug: id };
-
-    const result = await collections.packageCollection.find(query).toArray();
-    res.send(result[0] || null);
-  } catch (err) {
-    res.status(500).send({ error: err.message });
-  }
+  // Hỗ trợ cả slug ngoài _id và package_id
+  const pkg = await collections.packageCollection.findOne({ slug: req.params.id });
+  if (pkg) return res.send(pkg);
+  return packageCrud.getOne(req, res);
 };
-
-// Thêm gói mới
-exports.createPackage = async (req, res) => {
-  try {
-    await collections.packageCollection.insertOne(req.body);
-    res.send(req.body);
-  } catch (err) {
-    res.status(500).send({ error: err.message });
-  }
-};
-
-// Cập nhật gói
-exports.updatePackage = async (req, res) => {
-  try {
-    const o_id = new ObjectId(req.body._id);
-    let updateData = { ...req.body };
-    delete updateData._id;
-
-    await collections.packageCollection.updateOne({ _id: o_id }, { $set: updateData });
-    const result = await collections.packageCollection.find({ _id: o_id }).toArray();
-    res.send(result[0]);
-  } catch (err) {
-    res.status(500).send({ error: err.message });
-  }
-};
-
-// Xóa gói
-exports.deletePackage = async (req, res) => {
-  try {
-    const o_id = new ObjectId(req.params["id"]);
-    const result = await collections.packageCollection.find({ _id: o_id }).toArray();
-    await collections.packageCollection.deleteOne({ _id: o_id });
-    res.send(result[0]);
-  } catch (err) {
-    res.status(500).send({ error: err.message });
-  }
-};
+exports.createPackage = packageCrud.create;
+exports.updatePackage = packageCrud.update;
+exports.deletePackage = packageCrud.remove;

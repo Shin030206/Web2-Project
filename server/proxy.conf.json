@@ -1,22 +1,13 @@
 {
-    "/packages": {
-        "target": "http://localhost:3005",
-        "secure": false,
-        "changeOrigin": true
-    },
-    "/slots": {
-        "target": "http://localhost:3005",
-        "secure": false,
-        "changeOrigin": true
-    },
-    "/bookings": {
-        "target": "http://localhost:3005",
-        "secure": false,
-        "changeOrigin": true
-    },
-    "/payments": {
-        "target": "http://localhost:3005",
-        "secure": false,
-        "changeOrigin": true
-    }
+  "/api": {
+    "target": "http://localhost:3005",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/uploads": {
+    "target": "http://localhost:3005",
+    "secure": false,
+    "changeOrigin": true
+  }
 }
