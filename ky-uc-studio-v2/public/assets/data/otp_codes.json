@@ -1,0 +1,11 @@
+[
+  {
+    "otp_id": "OTP001",
+    "phone": "0900000000",
+    "otp_hash": "<hash của mã OTP>",
+    "expires_at": "2026-10-24T09:05:00",
+    "status": "used",
+    "attempt_count": 1,
+    "max_attempts": 5
+  }
+]

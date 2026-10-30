@@ -1,0 +1,11 @@
+[
+  {
+    "image_id": "IMG001",
+    "image_url": "/images/gallery/img001.jpg",
+    "caption": "",
+    "collection_id": "COL01",
+    "concept_id": "CD01",
+    "display_order": 1,
+    "is_public": true
+  }
+]
