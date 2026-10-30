@@ -1,0 +1,140 @@
+.site-header {
+  background-color: var(--color-bg-cream);
+  height: 82px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border-light);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.logo-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-menu a {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-espresso);
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.nav-menu a:hover,
+.nav-menu a.active {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.hotline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+  font-weight: 500 !important;
+  color: var(--color-espresso) !important;
+}
+
+.phone-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--color-espresso);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-actions .btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 22px;
+  border-radius: 9999px;
+  border: 1px solid #C5AC8D;
+  background-color: transparent;
+  color: #3C2A21;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.header-actions .btn-outline:hover {
+  background-color: rgba(166, 138, 91, 0.08);
+  border-color: #A68A5B;
+}
+
+.header-actions .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  color: #3C2A21;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.header-actions .btn-ghost:hover {
+  color: #A68A5B;
+}
+
+.header-actions .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 24px;
+  border-radius: 9999px;
+  background-color: #9E7D4E;
+  color: #ffffff;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-decoration: none;
+  border: none;
+  box-shadow: 0 2px 6px rgba(158, 125, 78, 0.25);
+  transition: all 0.2s ease;
+}
+
+.header-actions .btn-primary:hover {
+  background-color: #8C6D3F;
+  box-shadow: 0 4px 10px rgba(158, 125, 78, 0.35);
+}
+
+@media (max-width: 1100px) {
+  .nav-menu {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .nav-menu {
+    display: none;
+  }
+}
+

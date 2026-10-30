@@ -1,0 +1,230 @@
+<!-- BOOKING & DEPOSIT PAGE - FIGMA NODE 336:12299 -->
+<div class="booking-page">
+  <div class="container booking-container">
+    <!-- 1. Top Banner (Figma 336:12299 -> Frame 2650) -->
+    <div class="booking-hero-card">
+      <div class="hero-card-left">
+        <span class="hero-brand">KÝ ỨC</span>
+        <h1 class="hero-heading">THANH TOÁN TIỀN CỌC</h1>
+        <p class="hero-desc">
+          Chọn thứ bạn cần chụp, rồi chọn nơi và giờ. Thanh toán giữ lịch trong 30 phút.
+        </p>
+      </div>
+      <div class="hero-card-right">
+        <div class="notice-outline-box">
+          <p class="notice-line">Ký Ức Studio (Linh Xuân, Thủ Đức, TP.HCM)</p>
+          <p class="notice-line">Giữ chỗ thanh toán: <strong>{{ formatTime }}</strong></p>
+          <p class="notice-line">Cọc trước 30% — Hoàn cọc trước 48h</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Two Main Columns (Figma Frame 2651 + Frame 2652) -->
+    <div class="booking-content-grid">
+      <!-- Left Column: Thông tin đơn đặt -->
+      <div class="booking-card order-info-card">
+        <h2 class="card-section-title">Thông tin đơn đặt</h2>
+        
+        <div class="concept-preview-box">
+          <img [src]="selectedConceptImage" alt="CD Vườn Hoa" class="concept-preview-img">
+        </div>
+
+        <div class="concept-order-meta">
+          <span class="concept-tag-label">CONCEPT</span>
+          <h3 class="concept-order-name">{{ selectedConceptName }}</h3>
+          <p class="order-code-text">Mã đơn: {{ orderCode }}</p>
+        </div>
+
+        <div class="card-line-divider"></div>
+
+        <div class="order-details-table">
+          <div class="detail-row">
+            <span class="detail-label">Ngày chụp</span>
+            <span class="detail-val">{{ selectedDateFormatted }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Khung giờ</span>
+            <span class="detail-val">{{ selectedSlot }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Trạng thái</span>
+            <span class="detail-status-badge">Đã xác nhận</span>
+          </div>
+          <div class="detail-row price-highlight-row">
+            <span class="detail-label">Tiền cọc (30%)</span>
+            <span class="detail-price-val">{{ depositAmountFormatted }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Phương thức thanh toán -->
+      <div class="booking-card payment-method-card">
+        <h2 class="card-section-title">Phương thức thanh toán</h2>
+
+        <div class="payment-options-list">
+          <!-- Option 1: Chuyển khoản ngân hàng (QR Code) -->
+          <div 
+            class="payment-option-box" 
+            [class.active]="selectedPaymentMethod === 'bank'"
+            (click)="setPaymentMethod('bank')">
+            <div class="option-icon-col">
+              <svg class="pay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                <line x1="2" y1="10" x2="22" y2="10"></line>
+              </svg>
+            </div>
+            <div class="option-text-col">
+              <h4 class="option-title">Chuyển khoản ngân hàng</h4>
+              <p class="option-desc">Quét mã QR hoặc chuyển khoản</p>
+            </div>
+            <div class="option-check-col">
+              <div class="check-circle" [class.checked]="selectedPaymentMethod === 'bank'">
+                <span *ngIf="selectedPaymentMethod === 'bank'">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bank QR Display if active -->
+          @if (selectedPaymentMethod === 'bank') {
+            <div class="vietqr-inline-box text-center">
+              <img [src]="vietQrUrl" alt="VietQR Thanh Toán Cọc" class="qr-img">
+              <p class="qr-hint">Mở ứng dụng Ngân hàng để quét mã QR thanh toán cọc <strong>{{ depositAmountFormatted }}</strong></p>
+              <div class="qr-bank-details">
+                <p><strong>Ngân hàng:</strong> MB Bank (Quân Đội)</p>
+                <p><strong>STK:</strong> 0396581067</p>
+                <p><strong>Chủ TK:</strong> NGUYEN NGOC KHANH</p>
+                <p><strong>Nội dung CK:</strong> <code>{{ orderCode }}</code></p>
+              </div>
+            </div>
+          }
+
+          <!-- Option 2: Ví MoMo -->
+          <div 
+            class="payment-option-box" 
+            [class.active]="selectedPaymentMethod === 'momo'"
+            (click)="setPaymentMethod('momo')">
+            <div class="option-icon-col">
+              <svg class="pay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="3" width="18" height="18" rx="4"></rect>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </div>
+            <div class="option-text-col">
+              <h4 class="option-title">Ví MoMo</h4>
+              <p class="option-desc">Thanh toán qua ứng dụng MoMo</p>
+            </div>
+            <div class="option-check-col">
+              <div class="check-circle" [class.checked]="selectedPaymentMethod === 'momo'">
+                <span *ngIf="selectedPaymentMethod === 'momo'">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Option 3: VNPay -->
+          <div 
+            class="payment-option-box" 
+            [class.active]="selectedPaymentMethod === 'vnpay'"
+            (click)="setPaymentMethod('vnpay')">
+            <div class="option-icon-col">
+              <svg class="pay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M9 12l2 2 4-4"></path>
+              </svg>
+            </div>
+            <div class="option-text-col">
+              <h4 class="option-title">VNPay</h4>
+              <p class="option-desc">Cổng thanh toán thẻ ATM / Visa / Master</p>
+            </div>
+            <div class="option-check-col">
+              <div class="check-circle" [class.checked]="selectedPaymentMethod === 'vnpay'">
+                <span *ngIf="selectedPaymentMethod === 'vnpay'">✓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-line-divider"></div>
+
+        <div class="payment-action-wrap">
+          <button type="button" class="btn-confirm-payment" (click)="confirmPayment()">
+            <span>TIẾP TỤC</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Bottom Consultation Form (Frame 46) -->
+  <section class="booking-consult-section">
+    <div class="container consult-container">
+      <div class="consult-header text-center">
+        <span class="consult-tagline">KHI BẠN SẴN SÀNG</span>
+        <h2 class="consult-title">CÂU CHUYỆN CỦA BẠN<br>BẮT ĐẦU Ở ĐÂY</h2>
+      </div>
+
+      <div class="consult-card">
+        <form (ngSubmit)="submitConsult()" class="consult-form">
+          <div class="form-group">
+            <label class="form-label">Họ và tên</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="VD: Nguyễn Thị Hoa"
+              [(ngModel)]="consultForm.fullName" 
+              name="fullName"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input 
+              type="tel" 
+              class="form-control" 
+              placeholder="VD: 0987654321"
+              [(ngModel)]="consultForm.phone" 
+              name="phone"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Concept yêu thích</label>
+            <select class="form-control select-control" [(ngModel)]="consultForm.favoriteConcept" name="favoriteConcept">
+              <option value="">- Chọn dịch vụ -</option>
+              <option value="CD Vườn Hoa">CD Vườn Hoa</option>
+              <option value="CD Ngày Mưa">CD Ngày Mưa</option>
+              <option value="Áo Dài Trắng Trơn">Áo Dài Trắng Trơn</option>
+              <option value="Cặp Đôi Thanh Xuân">Cặp Đôi Thanh Xuân</option>
+              <option value="Gia Đình Sum Vầy">Gia Đình Sum Vầy</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ý tưởng concept cụ thể (nếu có)</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="VD: Áo dài, Mẹ và con,..."
+              [(ngModel)]="consultForm.conceptIdea1" 
+              name="conceptIdea1">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ý tưởng concept cụ thể (nếu có)</label>
+            <textarea 
+              rows="3" 
+              class="form-control textarea-control" 
+              placeholder="VD: Chụp hình sinh nhật, chụp ảnh Tết,..."
+              [(ngModel)]="consultForm.conceptIdea2" 
+              name="conceptIdea2"></textarea>
+          </div>
+
+          <div class="form-action">
+            <button type="submit" class="btn-submit-consult">
+              <span>Đặt lịch →</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>

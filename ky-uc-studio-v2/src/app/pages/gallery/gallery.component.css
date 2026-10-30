@@ -1,0 +1,213 @@
+/* GALLERY PAGE - FIGMA NODE 147:2486 */
+
+.gallery-page {
+  background-color: #FAF8F5;
+  color: #2E1E17;
+  padding-bottom: 80px;
+}
+
+/* 1. HERO */
+.gallery-hero {
+  padding: 60px 0 50px;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.hero-tag {
+  display: inline-block;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: #7D6B5E;
+  margin-bottom: 12px;
+}
+
+.hero-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 46px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #2E1E17;
+  margin-bottom: 24px;
+}
+
+.hero-story {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #4A3A31;
+  margin-bottom: 24px;
+}
+
+.hero-quote {
+  font-size: 14.5px;
+  font-style: italic;
+  color: #7D6B5E;
+  border-left: 2px solid #C5AC8D;
+  padding-left: 14px;
+  margin: 0;
+}
+
+.hero-visual-col {
+  display: flex;
+  justify-content: center;
+}
+
+.polaroid-frame {
+  background: #ffffff;
+  padding: 14px 14px 36px 14px;
+  box-shadow: 0 10px 30px rgba(46, 30, 23, 0.12);
+  border-radius: 6px;
+  transform: rotate(2deg);
+  max-width: 380px;
+  width: 100%;
+}
+
+.polaroid-img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* 2. COLLECTIONS LIST */
+.collections-section {
+  padding: 30px 0;
+}
+
+.collections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.collection-card {
+  background-color: #FAF6EF;
+  border: 1px solid #E8DFD3;
+  border-radius: 24px;
+  padding: 36px 42px;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 40px;
+  align-items: center;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 4px 18px rgba(46, 30, 23, 0.04);
+}
+
+.collection-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(46, 30, 23, 0.08);
+}
+
+.card-visual-col {
+  position: relative;
+}
+
+.card-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 270px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+}
+
+.col-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.number-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: #E6D8C5;
+  color: #3C2A21;
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 20px;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-top-right-radius: 16px;
+}
+
+.card-content-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.col-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: #2E1E17;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.col-sub {
+  font-size: 13.5px;
+  color: #7D6B5E;
+  margin-bottom: 12px;
+}
+
+.col-slogan {
+  font-size: 15px;
+  font-weight: 600;
+  color: #3C2A21;
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+.col-desc {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: #55443B;
+  margin-bottom: 22px;
+}
+
+.btn-explore {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 24px;
+  border-radius: 9999px;
+  border: 1px solid #C5AC8D;
+  background: transparent;
+  color: #3C2A21;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-explore:hover {
+  background-color: #9E7D4E;
+  color: #ffffff;
+  border-color: #9E7D4E;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .collection-card {
+    grid-template-columns: 1fr;
+    padding: 28px 24px;
+    gap: 24px;
+  }
+  .card-img-wrap {
+    height: 200px;
+  }
+}

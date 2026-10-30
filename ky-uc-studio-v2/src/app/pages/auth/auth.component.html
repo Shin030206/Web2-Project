@@ -1,0 +1,341 @@
+<div class="auth-page">
+  <div class="container auth-container">
+    <!-- Frame 2652: Main Auth Dual-Card -->
+    <div class="auth-card">
+      
+      <!-- LEFT PANEL: Frame 2653 (Branding & Quote) -->
+      <div class="auth-brand-col">
+        <div class="brand-col-content">
+          <div class="brand-logo-wrap">
+            <h1 class="brand-title">KÝ ỨC STUDIO</h1>
+            <div class="brand-line"></div>
+          </div>
+          
+          <div class="brand-quote-box">
+            <p class="brand-quote">
+              “Gương mặt nào rồi cũng sẽ đổi.<br>
+              Chỉ tấm ảnh là ở lại đúng tuổi ấy.<br>
+              Nên hôm nay, đáng để đẹp hết sức.”
+            </p>
+          </div>
+
+          <div class="brand-footer-hint">
+            <span>— Nghệ thuật lưu giữ thanh xuân & ký ức</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: Frame 2654 (Interactive Form) -->
+      <div class="auth-form-col">
+        <!-- Top Pill-Tabs Switch (Frame ĐĂNG NHẬP/ĐĂNG KÝ) -->
+        <div class="auth-switch-tab">
+          <button 
+            type="button" 
+            class="switch-btn" 
+            [class.active]="mode === 'login'" 
+            (click)="setMode('login')">
+            ĐĂNG NHẬP
+          </button>
+          <button 
+            type="button" 
+            class="switch-btn" 
+            [class.active]="mode === 'register'" 
+            (click)="setMode('register')">
+            ĐĂNG KÝ
+          </button>
+        </div>
+
+        <!-- Notification Alerts -->
+        @if (loginSuccess) {
+          <div class="alert-success">{{ loginSuccess }}</div>
+        }
+        @if (loginError) {
+          <div class="alert-error">{{ loginError }}</div>
+        }
+        @if (regError) {
+          <div class="alert-error">{{ regError }}</div>
+        }
+
+        <!-- 1. LOGIN MODE -->
+        @if (mode === 'login') {
+          <div class="form-wrapper">
+            <div class="form-header">
+              <h2 class="form-title">Đăng nhập</h2>
+              <p class="form-subtitle">Nhập thông tin của bạn để tiếp tục đặt lịch và quản lý tài khoản.</p>
+            </div>
+
+            <form (ngSubmit)="submitLogin()" class="form-body">
+              <!-- Field: Phone / Email -->
+              <div class="form-field">
+                <label class="field-label">Số điện thoại *</label>
+                <div class="input-wrap">
+                  <input 
+                    type="text" 
+                    class="field-input" 
+                    placeholder="Nhập số điện thoại của bạn"
+                    [(ngModel)]="loginPhoneOrEmail" 
+                    name="loginPhoneOrEmail"
+                    required>
+                </div>
+              </div>
+
+              <!-- Field: Password -->
+              <div class="form-field">
+                <label class="field-label">Mật khẩu *</label>
+                <div class="input-wrap">
+                  <input 
+                    [type]="showLoginPassword ? 'text' : 'password'" 
+                    class="field-input" 
+                    placeholder="Nhập mật khẩu"
+                    [(ngModel)]="loginPassword" 
+                    name="loginPassword"
+                    required>
+                  <button 
+                    type="button" 
+                    class="toggle-eye" 
+                    (click)="showLoginPassword = !showLoginPassword"
+                    aria-label="Hiện/ẩn mật khẩu">
+                    <svg *ngIf="!showLoginPassword" class="eye-icon" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                    </svg>
+                    <svg *ngIf="showLoginPassword" class="eye-icon" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" />
+                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Options: Remember & Forgot -->
+              <div class="form-row-options">
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe">
+                  <span>Ghi nhớ đăng nhập</span>
+                </label>
+                <a routerLink="/forgot-password" class="link-forgot">Quên mật khẩu ?</a>
+              </div>
+
+              <!-- Submit Button (Frame 2660) -->
+              <button 
+                type="submit" 
+                class="btn-submit" 
+                [disabled]="loginLoading">
+                {{ loginLoading ? 'Đang xử lý...' : 'Đăng nhập' }}
+              </button>
+
+              <!-- Footer Switch Link -->
+              <div class="form-switch-prompt">
+                <span>Chưa có tài khoản?</span>
+                <button type="button" class="link-action" (click)="setMode('register')">Đăng ký ngay</button>
+              </div>
+
+              <!-- Terms Disclaimer -->
+              <p class="terms-disclaimer">
+                Bằng cách đăng nhập, bạn đồng ý với Điều khoản và Điều kiện và đã đọc Chính sách Quyền riêng tư của Ký Ức.
+              </p>
+            </form>
+          </div>
+        }
+
+        <!-- 2. REGISTER MODE -->
+        @if (mode === 'register') {
+          <div class="form-wrapper">
+            <div class="form-header">
+              <h2 class="form-title">Đăng ký</h2>
+              <p class="form-subtitle">Tạo tài khoản để theo dõi lịch chụp và lưu giữ bộ ảnh độc quyền của bạn.</p>
+            </div>
+
+            <form (ngSubmit)="submitRegister()" class="form-body">
+              <!-- Field: Full Name -->
+              <div class="form-field">
+                <label class="field-label">Họ và tên *</label>
+                <div class="input-wrap">
+                  <input 
+                    type="text" 
+                    class="field-input" 
+                    placeholder="VD: Nguyễn Thị Ánh Tuyết"
+                    [(ngModel)]="regFullName" 
+                    name="regFullName"
+                    required>
+                </div>
+              </div>
+
+              <!-- Field: Phone -->
+              <div class="form-field">
+                <label class="field-label">Số điện thoại *</label>
+                <div class="input-wrap">
+                  <input 
+                    type="tel" 
+                    class="field-input" 
+                    placeholder="VD: 0396581067"
+                    [(ngModel)]="regPhone" 
+                    name="regPhone"
+                    required>
+                </div>
+              </div>
+
+              <!-- Field: Email -->
+              <div class="form-field">
+                <label class="field-label">Địa chỉ Email (Nhận ảnh)</label>
+                <div class="input-wrap">
+                  <input 
+                    type="email" 
+                    class="field-input" 
+                    placeholder="VD: anhtuyet@gmail.com"
+                    [(ngModel)]="regEmail" 
+                    name="regEmail">
+                </div>
+              </div>
+
+              <!-- Field: Password -->
+              <div class="form-field">
+                <label class="field-label">Mật khẩu *</label>
+                <div class="input-wrap">
+                  <input 
+                    [type]="showRegPassword ? 'text' : 'password'" 
+                    class="field-input" 
+                    placeholder="Tối thiểu 6 ký tự"
+                    [(ngModel)]="regPassword" 
+                    name="regPassword"
+                    required>
+                  <button 
+                    type="button" 
+                    class="toggle-eye" 
+                    (click)="showRegPassword = !showRegPassword"
+                    aria-label="Hiện/ẩn mật khẩu">
+                    <svg *ngIf="!showRegPassword" class="eye-icon" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                      <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                    </svg>
+                    <svg *ngIf="showRegPassword" class="eye-icon" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" />
+                      <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Field: Confirm Password -->
+              <div class="form-field">
+                <label class="field-label">Xác nhận mật khẩu *</label>
+                <div class="input-wrap">
+                  <input 
+                    type="password" 
+                    class="field-input" 
+                    placeholder="Nhập lại mật khẩu"
+                    [(ngModel)]="regConfirmPassword" 
+                    name="regConfirmPassword"
+                    required>
+                </div>
+              </div>
+
+              <!-- Field: Agree Terms -->
+              <div class="form-row-terms">
+                <label class="checkbox-label">
+                  <input type="checkbox" [(ngModel)]="regAgreeTerms" name="regAgreeTerms">
+                  <span>Tôi đồng ý với <a href="#" class="link-terms">Điều khoản dịch vụ</a> và <a href="#" class="link-terms">Chính sách bảo mật</a> của Ký Ức Studio.</span>
+                </label>
+              </div>
+
+              <!-- Submit Button (Triggers OTP Modal) -->
+              <button 
+                type="submit" 
+                class="btn-submit" 
+                [disabled]="regLoading">
+                {{ regLoading ? 'Đang tạo tài khoản...' : 'Đăng ký tài khoản' }}
+              </button>
+
+              <!-- Footer Switch Link -->
+              <div class="form-switch-prompt">
+                <span>Đã có tài khoản?</span>
+                <button type="button" class="link-action" (click)="setMode('login')">Đăng nhập ngay</button>
+              </div>
+            </form>
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       POPUP MODAL OTP (Figma Reference: Node 383:13636)
+       ========================================================================= -->
+  @if (showOtpModal) {
+    <div class="otp-modal-backdrop" (click)="closeOtpModal()">
+      <div class="otp-modal-box" (click)="$event.stopPropagation()">
+        <!-- Close Button -->
+        <button class="otp-close-btn" (click)="closeOtpModal()" aria-label="Đóng">&times;</button>
+
+        <!-- Header -->
+        <h3 class="otp-title">Xác thực số điện thoại</h3>
+        <p class="otp-desc-1">Một mã xác thực đã được gửi qua SMS đến số điện thoại</p>
+        
+        <!-- Masked Phone (Figma 03•• ••• 067) -->
+        <div class="otp-phone-display">
+          <span>{{ maskedPhoneDisplay }}</span>
+        </div>
+
+        <p class="otp-desc-2">Vui lòng nhập mã OTP gồm 6 chữ số để tiếp tục đăng ký.</p>
+
+        <!-- Alert in OTP -->
+        @if (otpError) {
+          <div class="otp-alert-error">{{ otpError }}</div>
+        }
+        @if (otpSuccess) {
+          <div class="otp-alert-success">Xác thực thành công! Đang chuyển hướng...</div>
+        }
+
+        <!-- 6-Digit OTP Inputs (Frame 2517 -> 6x Frame 2666) -->
+        <div class="otp-inputs-row" (paste)="onOtpPaste($event)">
+          @for (digit of otpDigits; track $index) {
+            <input 
+              #otpInput
+              type="text" 
+              maxlength="1" 
+              inputmode="numeric"
+              pattern="[0-9]*"
+              class="otp-box-input"
+              [class.has-value]="otpDigits[$index] !== ''"
+              [value]="otpDigits[$index]"
+              (input)="onOtpInput($index, $event)"
+              (keydown)="onOtpKeyDown($index, $event)">
+          }
+        </div>
+
+        <!-- Timer: "Mã có hiệu lực trong 04:59" -->
+        <div class="otp-timer-row">
+          <span>Mã có hiệu lực trong: </span>
+          <strong class="timer-digits">{{ formatOtpTimer }}</strong>
+        </div>
+
+        <!-- Resend Prompt -->
+        <div class="otp-resend-row">
+          <span class="resend-text">Chưa nhận được mã?</span>
+          <button 
+            type="button" 
+            class="resend-btn" 
+            [disabled]="otpSecondsRemaining > 240"
+            (click)="resendOtp()">
+            Gửi lại OTP
+          </button>
+        </div>
+
+        <!-- Hourly Limit Hint -->
+        <p class="otp-limit-hint">Giới hạn 5 lần gửi mã mỗi giờ.</p>
+
+        <!-- Action Button -->
+        <div class="otp-action-row">
+          <button 
+            type="button" 
+            class="btn-otp-verify" 
+            (click)="verifyOtp()">
+            Xác nhận OTP
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

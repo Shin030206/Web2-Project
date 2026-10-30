@@ -1,0 +1,143 @@
+<div class="concept-page">
+  <!-- 1. HERO SECTION (Figma 154:4414 -> Frame 43) -->
+  <section class="concept-hero">
+    <div class="container text-center">
+      <span class="hero-eyebrow">Concept Collection 2026</span>
+      <h1 class="concept-hero-title">
+        129+ CONCEPT<br>
+        <span class="golden-italic">CHO CÂU CHUYỆN CỦA BẠN</span>
+      </h1>
+      <p class="concept-hero-desc">
+        Mỗi concept là một phong cách, một câu chuyện. Duyệt theo nhóm chụp — chọn concept phù hợp, rồi đặt lịch.
+      </p>
+
+      <!-- 2. LỰA CHỌN CONCEPT PILLS (Figma 162:4642) -->
+      <div class="collections-pill-bar">
+        @for (pill of collectionPills; track pill.id) {
+          <button 
+            type="button" 
+            class="pill-btn" 
+            [class.active]="activeCollectionId === pill.id" 
+            (click)="setCollectionPill(pill.id)">
+            {{ pill.name }}
+          </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. CONCEPTS GRID SECTION (Thẻ Concept 165:1963) -->
+  <section class="concepts-grid-section container">
+    @if (loading) {
+      <div class="loading-state text-center">
+        <p>Đang tải danh sách concept từ CSDL...</p>
+      </div>
+    } @else {
+      @if (filteredConcepts.length === 0) {
+        <div class="empty-state text-center">
+          <p>Không tìm thấy concept nào phù hợp với bộ lọc hiện tại.</p>
+          <button class="btn-outline" (click)="setCollectionPill('all')">Xem tất cả concept</button>
+        </div>
+      } @else {
+        <div class="concepts-grid">
+          @for (concept of filteredConcepts; track concept.concept_code) {
+            <!-- Figma Component 165:1963: Thẻ Concept -->
+            <div class="concept-card" (click)="viewDetail(concept)">
+              <div class="card-image-wrap">
+                <img 
+                  [src]="concept.thumbnail_url" 
+                  [alt]="concept.concept_name" 
+                  class="card-img"
+                  loading="lazy">
+              </div>
+
+              <div class="card-content">
+                <h3 class="card-title">{{ concept.concept_name }}</h3>
+                <p class="card-desc">{{ concept.description }}</p>
+                
+                <div class="card-footer-row">
+                  <span class="card-cat-name">{{ concept.category }}</span>
+                  <span class="card-price-from">Giá từ {{ (concept.starting_price || 3800000) | number }}đ</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  </section>
+
+  <!-- 4. QUICK BOOKING SECTION (Figma 154:4414 -> Frame 46) -->
+  <section class="quick-booking-section">
+    <div class="container quick-booking-box">
+      <div class="quick-booking-header text-center">
+        <span class="qb-tagline">KHI BẠN SẴN SÀNG</span>
+        <h2 class="qb-title">CÂU CHUYỆN CỦA BẠN<br>BẮT ĐẦU Ở ĐÂY</h2>
+      </div>
+
+      <div class="consult-card">
+        <form (ngSubmit)="submitQuickBooking()" class="quick-booking-form">
+          <div class="form-group">
+            <label class="form-label">Họ và tên</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="VD: Nguyễn Thị Hoa"
+              [(ngModel)]="quickForm.fullName" 
+              name="fullName"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input 
+              type="tel" 
+              class="form-control" 
+              placeholder="VD: 0987654321"
+              [(ngModel)]="quickForm.phone" 
+              name="phone"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Concept yêu thích</label>
+            <select class="form-control select-control" [(ngModel)]="quickForm.favoriteConcept" name="favoriteConcept">
+              <option value="">- Chọn dịch vụ -</option>
+              <option value="CD Vườn Hoa">CD Vườn Hoa</option>
+              <option value="CD Ngày Mưa">CD Ngày Mưa</option>
+              <option value="Áo Dài Trắng Trơn">Áo Dài Trắng Trơn</option>
+              <option value="Cặp Đôi Thanh Xuân">Cặp Đôi Thanh Xuân</option>
+              <option value="Gia Đình Sum Vầy">Gia Đình Sum Vầy</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ý tưởng concept cụ thể (nếu có)</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="VD: Áo dài, Mẹ và con,..."
+              [(ngModel)]="quickForm.conceptIdea1" 
+              name="conceptIdea1">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ý tưởng concept cụ thể (nếu có)</label>
+            <textarea 
+              rows="3" 
+              class="form-control textarea-control" 
+              placeholder="VD: Chụp hình sinh nhật, chụp ảnh Tết,..."
+              [(ngModel)]="quickForm.conceptIdea2" 
+              name="conceptIdea2"></textarea>
+          </div>
+
+          <div class="form-action">
+            <button type="submit" class="btn-submit-booking">
+              <span>Đặt lịch →</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>

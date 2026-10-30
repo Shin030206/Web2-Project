@@ -1,0 +1,87 @@
+{
+  "project": "Ky Uc Studio - Web Kinh Doanh Nang Cao",
+  "version": "1.0.0",
+  "figmaSource": "https://www.figma.com/design/p94ehchDcEC9Hjepgg9xLO/Web-n%C3%A2ng-cao?node-id=1-78",
+  "features": [
+    {
+      "id": "F01_DESIGN_SYSTEM",
+      "name": "Design Tokens & Shared Layout (Header + Footer)",
+      "figmaNode": "64:27, 85:1964",
+      "status": "completed",
+      "description": "Thiết lập CSS Variables (màu #A68A5B, #5C4840, #FAF9F6), font Playfair Display & Inter, Header Navbar có hotline + nút Đăng nhập/Đăng ký/Tài khoản/Đặt lịch, Footer hoàn chỉnh theo Figma.",
+      "testCriteria": "Navbar & Footer hiển thị đúng tỷ lệ, nút bấm bo góc 16px, logo và hotline hiển thị chuẩn."
+    },
+    {
+      "id": "F02_HOME_PAGE",
+      "name": "Trang chủ 03.01 Home",
+      "figmaNode": "64:26",
+      "status": "completed",
+      "description": "Gồm Hero Section ('Mỗi Bức Ảnh Là Một Câu Chuyện'), Giới thiệu ('Nơi câu chuyện của bạn bắt đầu' + ảnh viền đồng 10px), Gói dịch vụ, Bộ sưu tập preview, CTA Đặt lịch.",
+      "testCriteria": "Khớp 100% bố cục dọc từ Hero xuống Footer theo screenshot Figma."
+    },
+    {
+      "id": "F03_SERVICES_MONGODB",
+      "name": "Angular Services & MongoDB API Integration",
+      "figmaNode": "N/A (Backend / Architecture)",
+      "status": "completed",
+      "description": "Tích hợp Angular HttpClient với Express + MongoDB backend (server port 3005) lấy dữ liệu thật về gói chụp, concepts, collections, addons và đơn hàng theo bài học Web2_Slides_VN. Đã nạp 9 packages, 56 concepts, 5 collections, 5 addons vào KyUcStudioDB.",
+      "testCriteria": "Dữ liệu gói chụp, concepts và ảnh thực tế được load động từ KyUcStudioDB trên MongoDB qua RxJS Observable."
+    },
+    {
+      "id": "F04_PRICING_PAGE",
+      "name": "Trang Bảng giá 03.02 Pricing",
+      "figmaNode": "115:1818",
+      "status": "completed",
+      "description": "Bảng giá chi tiết các gói: Chân dung (Tiêu chuẩn 1.5tr, Nâng cao 2.5tr, VIP 3.8tr), Cặp đôi (2.8tr - 5.5tr), Gia đình (4.5tr - 6.8tr) và bảng dịch vụ gia tăng.",
+      "testCriteria": "Tab chuyển đổi các loại gói chụp và bảng giá so sánh hiển thị sắc nét theo Figma, liên kết đặt lịch kèm tham số tier/concept."
+    },
+    {
+      "id": "F05_GALLERY_PAGE",
+      "name": "Trang Bộ sưu tập 03.07 Gallery",
+      "figmaNode": "147:2486",
+      "status": "completed",
+      "description": "Thư viện ảnh nghệ thuật phân loại theo chủ đề/concept, hỗ trợ Lightbox modal phóng to xem chi tiết bộ ảnh và link đặt lịch.",
+      "testCriteria": "Grid ảnh responsive, bộ lọc danh mục mượt mà, modal phóng to chi tiết ảnh chuẩn Figma."
+    },
+    {
+      "id": "F06_CONCEPT_DETAILS",
+      "name": "Trang Concept & Chi tiết Concept",
+      "figmaNode": "154:4414, 162:4642, 165:1963, 217:3089",
+      "status": "completed",
+      "description": "Danh mục Concept (154:4414) kèm pills collection, tabs category, thẻ Concept (165:1963) hiển thị ảnh thật từ MongoDB, và Trang Chi tiết Concept (217:3089 'CD NGÀY MƯA') với bài viết nghệ thuật, thẻ giá, form đặt hẹn nhanh Frame 46.",
+      "testCriteria": "Route /concept và /concept/:code hoạt động mượt mà, hiển thị đúng ảnh và giá từ MongoDB."
+    },
+    {
+      "id": "F07_BOOKING_FLOW",
+      "name": "Quy trình Đặt lịch & Thanh toán 5 bước",
+      "figmaNode": "336:12299, 120:960, 339:12353, 339:12386",
+      "status": "completed",
+      "description": "Quy trình đặt lịch 5 bước: 1. Chọn gói -> 2. Chọn ngày & khung giờ (slot) -> 3. Chọn dịch vụ thêm -> 4. Thông tin khách hàng -> 5. Xác nhận & thanh toán giữ slot với VietQR cọc 30% và countdown timer 30 phút.",
+      "testCriteria": "Thanh tiến trình 5 bước mượt mà, timer đếm ngược 30:00 giữ chỗ, form validate dữ liệu, màn hình thành công sinh mã đơn tự động."
+    },
+    {
+      "id": "F08_AUTH_MODAL",
+      "name": "Đăng nhập, Đăng ký & Modal OTP",
+      "figmaNode": "369:12792, 370:13212, 383:13636",
+      "status": "completed",
+      "description": "Form Đăng nhập, Đăng ký thẻ đôi (Card 1090x866 bo góc 25px, cột trái nền #572E2F kèm quote trích dẫn, cột phải form pill switch) và Popup Modal xác thực OTP 6 ô đếm ngược 05:00 đúng chuẩn Figma 383:13636.",
+      "testCriteria": "Popup OTP có 6 ô nhập tự động focus nhảy tiếp/xóa lùi/dán chuỗi, timer 05:00 đếm ngược, masked phone 03•• ••• 067 và xác thực hoàn tất."
+    },
+    {
+      "id": "F09_ABOUT_US",
+      "name": "Trang Giới thiệu & Đội ngũ 03.04 About",
+      "figmaNode": "198:3066",
+      "status": "completed",
+      "description": "Trang Giới thiệu câu chuyện thương hiệu Ký Ức Studio (Stats 200+ 5-sao, 4.8/5, 96% hài lòng; cảm hứng văn hóa Việt; Đội ngũ 5 thành viên; 4 giá trị cốt lõi Tận Tâm - Sáng Tạo - Chất Lượng - Ấm Áp).",
+      "testCriteria": "Route /ve-chung-toi điều hướng chuẩn xác, layout responsive đẹp mắt bám sát Figma 198:3066."
+    },
+    {
+      "id": "F10_ACCOUNT_MANAGEMENT",
+      "name": "Trang Quản lý Tài khoản & Lịch sử Đặt lịch",
+      "figmaNode": "419:12412, 429:12629, 433:12937, 437:13484",
+      "status": "completed",
+      "description": "Quản lý tài khoản cá nhân: Tổng quan 4 thẻ tóm tắt (Thông tin cá nhân, Lịch chụp gần nhất, Thống kê, Ưu đãi thành viên), Lịch sử đặt lịch với bộ lọc 5 trạng thái (Tất cả, Chờ chụp, Hoàn thành, Hủy, Trả ảnh) kèm modal xem chi tiết đơn, và Chỉnh sửa hồ sơ cá nhân.",
+      "testCriteria": "Route /account, /account/bookings, /account/profile phản hồi mượt mà, lưu trữ dữ liệu thông tin và đồng bộ trạng thái đơn hàng."
+    }
+  ]
+}

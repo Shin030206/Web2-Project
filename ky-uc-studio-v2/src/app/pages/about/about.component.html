@@ -1,0 +1,144 @@
+<div class="about-page">
+  <!-- 1. HERO SECTION (Figma 198:3066) -->
+  <section class="about-hero">
+    <div class="container text-center">
+      <span class="hero-tagline">— VỀ CHÚNG TÔI —</span>
+      <h1 class="about-hero-title">
+        CÂU CHUYỆN <span class="gold-text">KÝ ỨC</span>
+      </h1>
+      <p class="about-hero-desc">
+        Ký Ức Studio ra đời năm 2026 với sứ mệnh giản dị: biến mỗi bức ảnh thành một câu chuyện ý nghĩa. Dù chỉ mới gần 1 năm hoạt động, chúng tôi đã thực hiện hơn 300 bộ ảnh, nhận được sự tin yêu từ đông đảo khách hàng.
+      </p>
+
+      <!-- Stats Bar (Figma 198:3066) -->
+      <div class="stats-box">
+        <div class="stat-item">
+          <span class="stat-value">200+</span>
+          <span class="stat-label">Đánh giá 5 sao</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">4.8/5</span>
+          <span class="stat-label">Đánh giá</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-value">96%</span>
+          <span class="stat-label">Hài lòng</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. STORY SECTION (Figma 198:3066) -->
+  <section class="story-section">
+    <div class="container story-grid">
+      <!-- Left: Large Red Background Artistic Couple Photo -->
+      <div class="story-visual">
+        <div class="story-image-wrap">
+          <img src="assets/images/about-story-red.png" alt="Câu chuyện Ký Ức Studio" class="story-img">
+        </div>
+      </div>
+
+      <!-- Right: Narrative Content -->
+      <div class="story-content">
+        <span class="story-tagline">— CÂU CHUYỆN —</span>
+        <h2 class="story-heading">
+          Ký Ức Studio ra đời<br>
+          từ cảm hứng văn hóa Việt
+        </h2>
+
+        <div class="story-paragraphs">
+          <p>
+            Trong thời đại số hóa bùng nổ, chúng ta rất dễ dàng lưu trữ hàng ngàn bức ảnh trong chiếc điện thoại di động, nhưng phần lớn những khoảnh khắc đó thường trôi qua rất nhanh và thiếu đi chiều sâu cảm xúc.
+          </p>
+          <p>
+            Ký Ức Studio được nảy mầm từ xu hướng trẻ trung, hiện đại, mang văn hóa Việt Nam. Chúng tôi tạo ra một không gian nghệ thuật nơi tinh thần trẻ trung, phá cách hòa quyện hoàn hảo cùng niềm tự hào về văn hóa hiện đại Việt Nam.
+          </p>
+          <p>
+            Tại đây, khách hàng không bị gò bó trong những bối cảnh cổ điển nhàm chán. Ký Ức Studio mang đến những set chụp sử dụng kỹ thuật ánh sáng điện ảnh, màu sắc nổi bật, kết hợp cùng các chất liệu văn hóa Việt được cách điệu một cách tinh tế.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. TEAM SECTION (Figma 198:3066: 5 Circular Photos with Names) -->
+  <section class="team-section">
+    <div class="container text-center">
+      <h2 class="team-heading">ĐỘI NGŨ CỦA CHÚNG TÔI</h2>
+
+      <div class="team-avatars-row">
+        @for (member of teamMembers; track member.name) {
+          <div class="team-member-col">
+            <div class="avatar-circle">
+              <img [src]="member.avatar" [alt]="member.name" class="avatar-img">
+            </div>
+            <h3 class="member-display-name">{{ member.name }}</h3>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. CORE VALUES SECTION: 4 CARDS (Figma 198:3066) -->
+  <section class="values-section container">
+    <div class="values-grid">
+      <!-- 1. Tận Tâm -->
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+          </svg>
+        </div>
+        <h3 class="value-title">Tận Tâm</h3>
+        <p class="value-desc">Mỗi khách hàng là một câu chuyện riêng cần được kể bằng tất cả sự tận tụy</p>
+      </div>
+
+      <!-- 2. Sáng Tạo -->
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </div>
+        <h3 class="value-title">Sáng Tạo</h3>
+        <p class="value-desc">Không ngừng đổi mới concept, bắt kịp xu hướng để mang đến trải nghiệm độc đáo</p>
+      </div>
+
+      <!-- 3. CHẤT LƯỢNG -->
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <polyline points="9 12 11 14 15 10"></polyline>
+          </svg>
+        </div>
+        <h3 class="value-title">CHẤT LƯỢNG</h3>
+        <p class="value-desc">Từ makeup, trang phục đến hậu kỳ - mọi khâu đều đạt tiêu chuẩn cao nhất</p>
+      </div>
+
+      <!-- 4. ẤM ÁP -->
+      <div class="value-card">
+        <div class="value-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <h3 class="value-title">ẤM ÁP</h3>
+        <p class="value-desc">Không gian thân thiện giúp bạn tự tin tỏa sáng trước ống kính</p>
+      </div>
+    </div>
+  </section>
+</div>
