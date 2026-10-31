@@ -211,3 +211,35 @@
     height: 200px;
   }
 }
+
+@media (max-width: 500px) {
+  .hero-title {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+  .hero-story p {
+    font-size: 13.5px;
+  }
+  .collection-card {
+    padding: 18px 14px;
+    border-radius: 18px;
+  }
+  .col-title {
+    font-size: 20px;
+  }
+  .col-sub {
+    font-size: 13px;
+  }
+  .col-slogan {
+    font-size: 13.5px;
+  }
+  .col-desc {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .btn-explore {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}

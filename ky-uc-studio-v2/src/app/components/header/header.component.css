@@ -1,9 +1,9 @@
 .site-header {
-  background-color: var(--color-bg-cream);
+  background-color: var(--color-bg-cream, #FAF9F6);
   height: 82px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light, #EFEAE2);
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -37,15 +37,16 @@
 .nav-menu a {
   font-size: 15px;
   font-weight: 400;
-  color: var(--color-espresso);
+  color: var(--color-espresso, #2E1E17);
   position: relative;
+  text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .nav-menu a:hover,
 .nav-menu a.active {
-  color: var(--color-primary);
-  font-weight: 500;
+  color: #9E7D4E;
+  font-weight: 600;
 }
 
 .hotline-link {
@@ -54,13 +55,13 @@
   gap: 6px;
   margin-left: 12px;
   font-weight: 500 !important;
-  color: var(--color-espresso) !important;
+  color: var(--color-espresso, #2E1E17) !important;
 }
 
 .phone-icon {
   width: 15px;
   height: 15px;
-  color: var(--color-espresso);
+  color: var(--color-espresso, #2E1E17);
 }
 
 .header-actions {
@@ -105,6 +106,51 @@
   color: #A68A5B;
 }
 
+.btn-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 18px;
+  border-radius: 9999px;
+  background-color: rgba(158, 125, 78, 0.12);
+  color: #2E1E17;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.btn-account:hover {
+  background-color: rgba(158, 125, 78, 0.22);
+}
+
+.user-icon {
+  width: 16px;
+  height: 16px;
+  color: #9E7D4E;
+}
+
+.btn-logout-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #8C7E77;
+  transition: color 0.2s ease;
+}
+
+.btn-logout-link:hover {
+  color: #C0392B;
+}
+
+.logout-icon {
+  width: 18px;
+  height: 18px;
+}
+
 .header-actions .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -119,6 +165,7 @@
   border: none;
   box-shadow: 0 2px 6px rgba(158, 125, 78, 0.25);
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .header-actions .btn-primary:hover {
@@ -126,6 +173,29 @@
   box-shadow: 0 4px 10px rgba(158, 125, 78, 0.35);
 }
 
+/* Hamburger Button */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 38px;
+  height: 38px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px 6px;
+  z-index: 1001;
+}
+
+.hamburger-btn .bar {
+  width: 100%;
+  height: 2.2px;
+  background-color: #2E1E17;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Responsive Breakpoints */
 @media (max-width: 1100px) {
   .nav-menu {
     gap: 18px;
@@ -136,5 +206,228 @@
   .nav-menu {
     display: none;
   }
+  
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .header-actions .btn-outline,
+  .header-actions .btn-ghost {
+    display: none;
+  }
 }
 
+@media (max-width: 480px) {
+  .site-header {
+    height: 68px;
+  }
+
+  .logo-img {
+    height: 32px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .header-actions .btn-primary {
+    padding: 7px 16px;
+    font-size: 13.5px;
+  }
+
+  .btn-account span {
+    display: none;
+  }
+
+  .btn-account {
+    padding: 7px 10px;
+  }
+}
+
+/* ================= MOBILE DRAWER ================= */
+.mobile-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(26, 18, 14, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.25s ease;
+}
+
+.mobile-drawer-content {
+  width: min(320px, 85vw);
+  height: 100%;
+  background-color: #FAF8F5;
+  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 24px 22px;
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.mobile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #EAE3D8;
+}
+
+.mobile-drawer-logo {
+  height: 34px;
+  width: auto;
+}
+
+.mobile-drawer-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  line-height: 1;
+  color: #55443D;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  gap: 14px;
+  border-bottom: 1px solid #EAE3D8;
+}
+
+.mobile-nav-link {
+  font-size: 16px;
+  font-weight: 500;
+  color: #2E1E17;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-link.active,
+.mobile-nav-link:hover {
+  background-color: rgba(158, 125, 78, 0.12);
+  color: #9E7D4E;
+  font-weight: 600;
+}
+
+.mobile-hotline-wrap {
+  padding: 16px 12px;
+  border-bottom: 1px solid #EAE3D8;
+}
+
+.mobile-hotline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #9E7D4E;
+  text-decoration: none;
+}
+
+.mobile-drawer-footer {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mobile-user-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EAE3D8;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-greeting {
+  font-size: 12px;
+  color: #7A6F68;
+  display: block;
+}
+
+.user-name {
+  font-size: 15px;
+  color: #2E1E17;
+}
+
+.user-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-drawer-account {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9E7D4E;
+  text-decoration: none;
+}
+
+.btn-drawer-logout {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #C0392B;
+  cursor: pointer;
+  padding: 0;
+}
+
+.mobile-auth-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-drawer-login,
+.btn-drawer-register {
+  text-align: center;
+  padding: 10px 14px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-drawer-login {
+  border: 1px solid #C5AC8D;
+  color: #2E1E17;
+  background-color: transparent;
+}
+
+.btn-drawer-register {
+  background-color: #2E1E17;
+  color: #ffffff;
+}
+
+.btn-drawer-book {
+  text-align: center;
+  background-color: #9E7D4E;
+  color: #ffffff;
+  padding: 13px 20px;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(158, 125, 78, 0.35);
+}

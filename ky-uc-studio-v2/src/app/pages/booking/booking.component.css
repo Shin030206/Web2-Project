@@ -418,3 +418,341 @@
     padding: 28px 20px;
   }
 }
+
+/* REAL BOOKING LIFECYCLE EXTENSIONS */
+.booking-alert-error {
+  background-color: #FDF2F2;
+  border: 1px solid #F8B4B4;
+  color: #9B1C1C;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 14.5px;
+  margin-top: 20px;
+  font-weight: 500;
+}
+
+.timer-alert {
+  color: #FFD2D2 !important;
+  font-weight: 700;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+.selection-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 600px) {
+  .selection-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3C2A21;
+}
+
+.form-select-control,
+.form-input-control,
+.form-date-input {
+  width: 100%;
+  background-color: #FAF8F5;
+  border: 1px solid #D8C7B5;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #2E1E17;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-textarea-control {
+  width: 100%;
+  background-color: #FAF8F5;
+  border: 1px solid #D8C7B5;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #2E1E17;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form-select-control:focus,
+.form-input-control:focus,
+.form-date-input:focus,
+.form-textarea-control:focus {
+  border-color: #9E7D4E;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(158, 125, 78, 0.15);
+}
+
+.concept-desc-sm {
+  font-size: 13px;
+  color: #6B5B53;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.slot-picker-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.slots-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slots-loading-text,
+.slots-empty-text {
+  font-size: 13.5px;
+  color: #7A6F68;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.slots-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.slot-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border: 1.5px solid #D8C7B5;
+  border-radius: 12px;
+  background-color: #FAF8F5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slot-chip .slot-time {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2E1E17;
+}
+
+.slot-chip .slot-status {
+  font-size: 11px;
+  color: #27AE60;
+  margin-top: 2px;
+}
+
+.slot-chip:hover:not(.disabled) {
+  border-color: #9E7D4E;
+  background-color: rgba(158, 125, 78, 0.08);
+}
+
+.slot-chip.active {
+  border-color: #9E7D4E;
+  background-color: #9E7D4E;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(158, 125, 78, 0.3);
+}
+
+.slot-chip.active .slot-time,
+.slot-chip.active .slot-status {
+  color: #ffffff;
+}
+
+.slot-chip.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background-color: #EDE8E1;
+  border-color: #D3CCC2;
+}
+
+.slot-chip.disabled .slot-status {
+  color: #8C827A;
+}
+
+.customer-info-section {
+  margin: 18px 0;
+}
+
+.subsection-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2E1E17;
+  margin-bottom: 12px;
+}
+
+.customer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.customer-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .customer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.voucher-input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.voucher-code-input {
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.btn-apply-voucher {
+  background-color: #2E1E17;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.btn-apply-voucher:hover {
+  background-color: #4A3328;
+}
+
+.voucher-error-hint {
+  display: block;
+  font-size: 12.5px;
+  color: #C0392B;
+  margin-bottom: 10px;
+}
+
+.discount-row {
+  color: #27AE60;
+  font-weight: 500;
+}
+
+.total-row {
+  font-weight: 600;
+}
+
+.payment-hint-sub {
+  font-size: 14px;
+  color: #6B5B53;
+  margin-bottom: 18px;
+}
+
+.auth-gate-notice {
+  background-color: #FFF9E6;
+  border: 1px solid #F5DCA8;
+  color: #8A6517;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin: 18px 0;
+}
+
+.created-booking-success-box {
+  padding: 20px 0;
+}
+
+.success-badge {
+  display: inline-block;
+  background-color: #E8F8F0;
+  color: #1E824C;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  margin-bottom: 14px;
+}
+
+.order-code-heading {
+  font-size: 20px;
+  color: #2E1E17;
+  margin: 0 0 10px;
+}
+
+.order-code-heading span {
+  color: #9E7D4E;
+  font-weight: 700;
+}
+
+.deposit-notice-text {
+  font-size: 14.5px;
+  color: #55443D;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.btn-transfer-done {
+  margin-top: 18px;
+  background-color: #1E824C;
+}
+
+.btn-transfer-done:hover {
+  background-color: #16693C;
+}
+
+.transfer-confirmed-msg {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #F0FBF5;
+  border: 1px solid #C4EED8;
+  border-radius: 16px;
+}
+
+.confirm-p {
+  color: #16693C;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.btn-goto-account {
+  display: inline-block;
+  background-color: #9E7D4E;
+  color: #ffffff;
+  padding: 11px 26px;
+  border-radius: 9999px;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(158, 125, 78, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+.btn-goto-account:hover {
+  background-color: #8C6D3F;
+}

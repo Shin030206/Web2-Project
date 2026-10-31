@@ -285,3 +285,26 @@
     padding: 28px 20px;
   }
 }
+
+@media (max-width: 480px) {
+  .concept-hero-title {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+  .concept-hero-desc {
+    font-size: 13.5px;
+  }
+  .collections-pill-bar {
+    gap: 6px;
+  }
+  .pill-btn {
+    padding: 6px 14px;
+    font-size: 12.5px;
+  }
+  .card-image-wrap {
+    height: 220px;
+  }
+  .card-content {
+    padding: 16px;
+  }
+}

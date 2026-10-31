@@ -9,6 +9,7 @@ import { AboutComponent } from './pages/about/about.component';
 import { ConceptComponent } from './pages/concept/concept.component';
 import { ConceptDetailComponent } from './pages/concept-detail/concept-detail.component';
 import { AccountComponent } from './pages/account/account.component';
+import { PaymentResultComponent } from './pages/payment-result/payment-result.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -23,6 +24,7 @@ const routes: Routes = [
   { path: 've-chung-toi', component: AboutComponent },
   { path: 'login', component: AuthComponent },
   { path: 'register', component: AuthComponent },
+  { path: 'thanh-toan/ket-qua', component: PaymentResultComponent },
   { path: '**', redirectTo: '' }
 ];
 

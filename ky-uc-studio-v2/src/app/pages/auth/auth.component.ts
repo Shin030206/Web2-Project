@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-auth',
@@ -8,8 +9,9 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrl: './auth.component.css'
 })
 export class AuthComponent implements OnInit, OnDestroy {
-  // Mode: 'login' | 'register'
-  mode: 'login' | 'register' = 'login';
+  // Mode: 'login' | 'register' | 'forgot'
+  mode: 'login' | 'register' | 'forgot' = 'login';
+  returnUrl: string = '/';
 
   // Login form fields
   loginPhoneOrEmail: string = '';
@@ -28,14 +30,22 @@ export class AuthComponent implements OnInit, OnDestroy {
   regAgreeTerms: boolean = false;
   regError: string = '';
   regLoading: boolean = false;
+  regSuccess: string = '';
 
-  // OTP Modal state (Figma 383:13636)
+  // Forgot Password fields
+  forgotAccount: string = '';
+  forgotNewPassword: string = '';
+  forgotConfirmPassword: string = '';
+  forgotStep: 'request' | 'verify' = 'request';
+  forgotLoading: boolean = false;
+  forgotError: string = '';
+  forgotSuccess: string = '';
+
+  // OTP Modal state (Figma 383:13636 & Password Reset)
   showOtpModal: boolean = false;
   otpDigits: string[] = ['', '', '', '', '', ''];
-  otpSecondsRemaining: number = 299; // 5 minutes
+  otpSecondsRemaining: number = 300; // 5 minutes
   otpTimerInterval: any = null;
-  otpResendCount: number = 0;
-  otpMaxResends: number = 5;
   otpError: string = '';
   otpSuccess: boolean = false;
   maskedPhoneDisplay: string = '03•• ••• 067';
@@ -43,30 +53,39 @@ export class AuthComponent implements OnInit, OnDestroy {
   // Toggle password visibility
   showLoginPassword: boolean = false;
   showRegPassword: boolean = false;
+  showForgotNewPassword: boolean = false;
 
   @ViewChildren('otpInput') otpInputs!: QueryList<ElementRef>;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    // Check route or query params
-    this.route.url.subscribe(segments => {
-      const path = segments[0]?.path;
-      if (path === 'register') {
+    // Check returnUrl
+    this.route.queryParams.subscribe(params => {
+      if (params['returnUrl']) {
+        this.returnUrl = params['returnUrl'];
+      }
+      if (params['mode'] === 'register') {
         this.mode = 'register';
-      } else {
+      } else if (params['mode'] === 'forgot') {
+        this.mode = 'forgot';
+      } else if (params['mode'] === 'login') {
         this.mode = 'login';
       }
     });
 
-    this.route.queryParams.subscribe(params => {
-      if (params['mode'] === 'register') {
+    this.route.url.subscribe(segments => {
+      const path = segments[0]?.path;
+      if (path === 'register') {
         this.mode = 'register';
-      } else if (params['mode'] === 'login') {
+      } else if (path === 'login') {
         this.mode = 'login';
+      } else if (path === 'forgot-password') {
+        this.mode = 'forgot';
       }
     });
   }
@@ -75,19 +94,40 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.clearOtpTimer();
   }
 
-  setMode(targetMode: 'login' | 'register'): void {
+  setMode(targetMode: 'login' | 'register' | 'forgot'): void {
     this.mode = targetMode;
     this.loginError = '';
     this.regError = '';
     this.loginSuccess = '';
+    this.regSuccess = '';
+    this.forgotError = '';
+    this.forgotSuccess = '';
   }
 
-  // Handle Login Submit
+  // Validate strong password matching server rules exactly
+  validatePasswordStrength(password: string): string | null {
+    const value = String(password || '');
+    const missing: string[] = [];
+    if (value.length < 8 || value.length > 32) missing.push('dài 8–32 ký tự');
+    if (!/[A-Z]/.test(value)) missing.push('ít nhất 1 chữ hoa');
+    if (!/[a-z]/.test(value)) missing.push('ít nhất 1 chữ thường');
+    if (!/[0-9]/.test(value)) missing.push('ít nhất 1 chữ số');
+    if (!/[^A-Za-z0-9]/.test(value)) missing.push('ít nhất 1 ký tự đặc biệt (@, #, $, !, %, ...)');
+    if (!/^[\x21-\x7E]*$/.test(value)) missing.push('không chứa chữ có dấu hoặc khoảng trắng');
+    
+    if (missing.length > 0) {
+      return `Mật khẩu cần: ${missing.join(', ')}.`;
+    }
+    return null;
+  }
+
+  // 1. Submit Login to Server
   submitLogin(): void {
     this.loginError = '';
     this.loginSuccess = '';
 
-    if (!this.loginPhoneOrEmail.trim()) {
+    const account = this.loginPhoneOrEmail.trim();
+    if (!account) {
       this.loginError = 'Vui lòng nhập số điện thoại hoặc email.';
       return;
     }
@@ -98,37 +138,55 @@ export class AuthComponent implements OnInit, OnDestroy {
     }
 
     this.loginLoading = true;
-    setTimeout(() => {
-      this.loginLoading = false;
-      this.loginSuccess = 'Đăng nhập thành công! Đang chuyển hướng...';
-      setTimeout(() => {
-        this.router.navigate(['/']);
-      }, 1200);
-    }, 800);
+    this.authService.login({
+      account: account,
+      password: this.loginPassword,
+      rememberMe: this.rememberMe
+    }).subscribe({
+      next: (res) => {
+        this.loginLoading = false;
+        this.loginSuccess = res.message || 'Đăng nhập thành công! Đang chuyển hướng...';
+        setTimeout(() => {
+          this.router.navigateByUrl(this.returnUrl);
+        }, 800);
+      },
+      error: (err) => {
+        this.loginLoading = false;
+        this.loginError = err.error?.error || err.error?.message || err.message || 'Sai số điện thoại hoặc mật khẩu!';
+      }
+    });
   }
 
-  // Handle Register Submit -> Trigger OTP Modal
+  // 2. Submit Register to Server
   submitRegister(): void {
     this.regError = '';
+    this.regSuccess = '';
 
-    if (!this.regFullName.trim()) {
+    const fullName = this.regFullName.trim();
+    if (!fullName) {
       this.regError = 'Vui lòng nhập họ và tên của bạn.';
       return;
     }
 
-    const cleanPhone = this.regPhone.trim();
+    const cleanPhone = this.regPhone.trim().replace(/\s/g, '');
     if (!cleanPhone || !/^[0-9]{9,11}$/.test(cleanPhone)) {
       this.regError = 'Vui lòng nhập số điện thoại hợp lệ (9 - 11 chữ số).';
       return;
     }
 
-    if (this.regEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.regEmail.trim())) {
+    const email = this.regEmail.trim();
+    if (!email) {
+      this.regError = 'Vui lòng nhập địa chỉ email để nhận thông tin bộ ảnh và tài khoản.';
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       this.regError = 'Định dạng email chưa chính xác.';
       return;
     }
 
-    if (!this.regPassword || this.regPassword.length < 6) {
-      this.regError = 'Mật khẩu phải chứa ít nhất 6 ký tự.';
+    const passError = this.validatePasswordStrength(this.regPassword);
+    if (passError) {
+      this.regError = passError;
       return;
     }
 
@@ -142,33 +200,111 @@ export class AuthComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Mask phone for OTP modal: e.g. 0396581067 -> 03•• ••• 067
-    this.maskedPhoneDisplay = this.formatMaskedPhone(cleanPhone);
-
-    // Open OTP modal
-    this.showOtpModal = true;
-    this.resetOtpForm();
-    this.startOtpTimer();
-
-    // Auto focus first OTP input after render
-    setTimeout(() => {
-      if (this.otpInputs && this.otpInputs.first) {
-        this.otpInputs.first.nativeElement.focus();
+    this.regLoading = true;
+    this.authService.register({
+      fullName: fullName,
+      email: email,
+      phone: cleanPhone,
+      password: this.regPassword
+    }).subscribe({
+      next: (res) => {
+        this.regLoading = false;
+        this.regSuccess = res.message || 'Đăng ký tài khoản thành công! Đang chuyển hướng...';
+        setTimeout(() => {
+          this.router.navigateByUrl(this.returnUrl);
+        }, 1000);
+      },
+      error: (err) => {
+        this.regLoading = false;
+        this.regError = err.error?.error || err.error?.message || err.message || 'Đăng ký thất bại, vui lòng kiểm tra lại thông tin!';
       }
-    }, 150);
+    });
   }
 
-  formatMaskedPhone(phone: string): string {
-    if (phone.length >= 10) {
-      return phone.substring(0, 2) + '•• ••• ' + phone.substring(phone.length - 3);
+  // 3. Forgot Password Flow
+  submitForgotPasswordRequest(): void {
+    this.forgotError = '';
+    this.forgotSuccess = '';
+
+    const target = this.forgotAccount.trim();
+    if (!target) {
+      this.forgotError = 'Vui lòng nhập số điện thoại hoặc email đã đăng ký.';
+      return;
     }
-    return phone;
+
+    this.forgotLoading = true;
+    this.authService.forgotPassword({ account: target }).subscribe({
+      next: (res) => {
+        this.forgotLoading = false;
+        this.maskedPhoneDisplay = res.sentTo || target;
+        this.forgotStep = 'verify';
+        this.showOtpModal = true;
+        this.resetOtpForm();
+        this.startOtpTimer();
+      },
+      error: (err) => {
+        this.forgotLoading = false;
+        this.forgotError = err.error?.error || err.error?.message || err.message || 'Không thể gửi mã xác nhận lúc này!';
+      }
+    });
   }
 
-  // OTP Timer Management
+  submitResetPassword(): void {
+    this.forgotError = '';
+    const otp = this.otpDigits.join('');
+    if (otp.length !== 6) {
+      this.otpError = 'Vui lòng nhập đầy đủ 6 chữ số OTP.';
+      return;
+    }
+
+    const passError = this.validatePasswordStrength(this.forgotNewPassword);
+    if (passError) {
+      this.otpError = passError;
+      return;
+    }
+
+    if (this.forgotNewPassword !== this.forgotConfirmPassword) {
+      this.otpError = 'Mật khẩu xác nhận không khớp.';
+      return;
+    }
+
+    this.forgotLoading = true;
+    this.authService.resetPassword({
+      account: this.forgotAccount.trim(),
+      otp: otp,
+      newPassword: this.forgotNewPassword
+    }).subscribe({
+      next: (res) => {
+        this.forgotLoading = false;
+        this.otpSuccess = true;
+        setTimeout(() => {
+          this.closeOtpModal();
+          this.setMode('login');
+          this.loginSuccess = 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.';
+        }, 1200);
+      },
+      error: (err) => {
+        this.forgotLoading = false;
+        this.otpError = err.error?.error || err.error?.message || err.message || 'Mã OTP không đúng hoặc đã hết hạn!';
+      }
+    });
+  }
+
+  // OTP Modal Controls
+  closeOtpModal(): void {
+    this.showOtpModal = false;
+    this.clearOtpTimer();
+  }
+
+  resetOtpForm(): void {
+    this.otpDigits = ['', '', '', '', '', ''];
+    this.otpError = '';
+    this.otpSuccess = false;
+  }
+
   startOtpTimer(): void {
     this.clearOtpTimer();
-    this.otpSecondsRemaining = 299; // 04:59
+    this.otpSecondsRemaining = 300;
     this.otpTimerInterval = setInterval(() => {
       if (this.otpSecondsRemaining > 0) {
         this.otpSecondsRemaining--;
@@ -193,109 +329,45 @@ export class AuthComponent implements OnInit, OnDestroy {
     return `${mStr}:${sStr}`;
   }
 
-  resetOtpForm(): void {
-    this.otpDigits = ['', '', '', '', '', ''];
-    this.otpError = '';
-    this.otpSuccess = false;
-  }
-
-  closeOtpModal(): void {
-    this.showOtpModal = false;
-    this.clearOtpTimer();
-    this.resetOtpForm();
-  }
-
-  // Handle OTP 6-digit input interactions
   onOtpInput(index: number, event: any): void {
-    const inputVal = event.target.value;
-    
-    // Only accept numeric
-    if (!/^[0-9]$/.test(inputVal)) {
-      this.otpDigits[index] = '';
-      return;
-    }
-
-    this.otpDigits[index] = inputVal;
-
-    // Move to next input box if available
-    if (index < 5) {
-      const inputsArray = this.otpInputs.toArray();
-      if (inputsArray[index + 1]) {
-        inputsArray[index + 1].nativeElement.focus();
+    const value = event.target.value;
+    if (value && value.length > 0) {
+      this.otpDigits[index] = value.slice(-1);
+      // Auto advance
+      if (index < 5 && this.otpInputs) {
+        const nextInput = this.otpInputs.toArray()[index + 1];
+        if (nextInput) nextInput.nativeElement.focus();
       }
     } else {
-      // All 6 digits filled, auto-verify if desired
-      if (this.otpDigits.every(d => d !== '')) {
-        this.verifyOtp();
-      }
+      this.otpDigits[index] = '';
     }
   }
 
   onOtpKeyDown(index: number, event: KeyboardEvent): void {
-    if (event.key === 'Backspace') {
-      if (!this.otpDigits[index] && index > 0) {
-        const inputsArray = this.otpInputs.toArray();
-        if (inputsArray[index - 1]) {
-          inputsArray[index - 1].nativeElement.focus();
-          this.otpDigits[index - 1] = '';
-        }
-      } else {
-        this.otpDigits[index] = '';
+    if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0 && this.otpInputs) {
+      const prevInput = this.otpInputs.toArray()[index - 1];
+      if (prevInput) {
+        prevInput.nativeElement.focus();
       }
     }
   }
 
   onOtpPaste(event: ClipboardEvent): void {
     event.preventDefault();
-    const clipboardData = event.clipboardData?.getData('text') || '';
-    const digitsOnly = clipboardData.replace(/\D/g, '').substring(0, 6);
-
-    if (digitsOnly.length > 0) {
-      for (let i = 0; i < 6; i++) {
-        this.otpDigits[i] = digitsOnly[i] || '';
-      }
-
-      // Focus last filled or 6th input
-      const targetIndex = Math.min(digitsOnly.length, 5);
-      const inputsArray = this.otpInputs.toArray();
-      if (inputsArray[targetIndex]) {
-        inputsArray[targetIndex].nativeElement.focus();
-      }
-
-      if (digitsOnly.length === 6) {
-        this.verifyOtp();
-      }
-    }
+    const pasteData = event.clipboardData?.getData('text') || '';
+    const digits = pasteData.replace(/\D/g, '').slice(0, 6).split('');
+    digits.forEach((d, i) => {
+      if (i < 6) this.otpDigits[i] = d;
+    });
   }
 
   resendOtp(): void {
-    if (this.otpResendCount >= this.otpMaxResends) {
-      this.otpError = 'Bạn đã đạt giới hạn 5 lần gửi mã mỗi giờ. Vui lòng thử lại sau.';
-      return;
+    if (this.forgotAccount.trim()) {
+      this.submitForgotPasswordRequest();
     }
-
-    this.otpResendCount++;
-    this.otpError = '';
-    this.startOtpTimer();
   }
 
   verifyOtp(): void {
-    this.otpError = '';
-    const code = this.otpDigits.join('');
-
-    if (code.length < 6) {
-      this.otpError = 'Vui lòng nhập đầy đủ 6 chữ số mã OTP.';
-      return;
-    }
-
-    // Verify OTP simulation
-    this.otpSuccess = true;
-    setTimeout(() => {
-      this.closeOtpModal();
-      this.mode = 'login';
-      this.loginSuccess = 'Xác thực tài khoản thành công! Vui lòng đăng nhập để bắt đầu.';
-      this.loginPhoneOrEmail = this.regPhone;
-    }, 1500);
+    this.submitResetPassword();
   }
 }
-

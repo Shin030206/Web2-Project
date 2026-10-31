@@ -362,3 +362,30 @@
     padding: 30px 24px;
   }
 }
+
+@media (max-width: 600px) {
+  .pricing-main-title {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+  .pricing-quote {
+    font-size: 13.5px;
+    line-height: 1.5;
+    padding: 0 4px;
+  }
+  .category-nav-pills {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .cat-pill {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  .tier-card {
+    padding: 24px 18px;
+  }
+  .consult-card {
+    padding: 24px 16px;
+  }
+}

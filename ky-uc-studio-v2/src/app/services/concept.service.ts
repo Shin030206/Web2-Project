@@ -11,9 +11,9 @@ export class ConceptService {
 
   // Lấy tất cả concepts từ MongoDB, fallback sang file assets/data/concepts.json
   getConcepts(): Observable<Concept[]> {
-    return this.http.get<Concept[]>('/concepts').pipe(
+    return this.http.get<Concept[]>('/api/concepts').pipe(
       catchError(() => {
-        console.warn('Backend /concepts chưa kết nối, sử dụng assets/data/concepts.json');
+        console.warn('Backend /api/concepts chưa kết nối, sử dụng assets/data/concepts.json');
         return this.http.get<Concept[]>('assets/data/concepts.json');
       })
     );
@@ -21,16 +21,16 @@ export class ConceptService {
 
   // Lấy concept theo mã code hoặc id
   getConceptByCode(code: string): Observable<Concept | null> {
-    return this.http.get<Concept>(`/concepts/${code}`).pipe(
+    return this.http.get<Concept>(`/api/concepts/${code}`).pipe(
       catchError(() => of(null))
     );
   }
 
   // Lấy bộ sưu tập (collections) từ MongoDB, fallback sang assets/data/collections.json
   getCollections(): Observable<CollectionItem[]> {
-    return this.http.get<CollectionItem[]>('/collections').pipe(
+    return this.http.get<CollectionItem[]>('/api/collections').pipe(
       catchError(() => {
-        console.warn('Backend /collections chưa kết nối, sử dụng assets/data/collections.json');
+        console.warn('Backend /api/collections chưa kết nối, sử dụng assets/data/collections.json');
         return this.http.get<CollectionItem[]>('assets/data/collections.json');
       })
     );

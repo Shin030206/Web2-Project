@@ -281,16 +281,40 @@
   height: 16px;
 }
 
-.link-forgot {
+.link-forgot,
+.link-forgot-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.85rem;
   color: #8A5F35;
   font-weight: 500;
   text-decoration: none;
+  cursor: pointer;
   transition: color 0.2s ease;
 }
 
-.link-forgot:hover {
+.link-forgot:hover,
+.link-forgot-btn:hover {
   color: #572E2F;
   text-decoration: underline;
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: #8A7B72;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.modal-pass-fields {
+  margin: 18px 0;
+  text-align: left;
+}
+.modal-pass-fields .form-field {
+  margin-bottom: 14px;
 }
 
 .form-row-terms {

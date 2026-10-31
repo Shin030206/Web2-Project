@@ -10,14 +10,14 @@ export class PackageService {
   constructor(private http: HttpClient) {}
 
   getPackages(): Observable<Package[]> {
-    return this.http.get<Package[]>('/packages').pipe(
+    return this.http.get<Package[]>('/api/packages').pipe(
       retry(3),
       catchError(this.handleError)
     );
   }
 
   getPackage(id: string): Observable<Package> {
-    return this.http.get<Package>(`/packages/${id}`).pipe(
+    return this.http.get<Package>(`/api/packages/${id}`).pipe(
       retry(3),
       catchError(this.handleError)
     );

@@ -1,7 +1,7 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -16,6 +16,8 @@ import { AboutComponent } from './pages/about/about.component';
 import { ConceptComponent } from './pages/concept/concept.component';
 import { ConceptDetailComponent } from './pages/concept-detail/concept-detail.component';
 import { AccountComponent } from './pages/account/account.component';
+import { PaymentResultComponent } from './pages/payment-result/payment-result.component';
+import { authInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
   declarations: [
@@ -30,7 +32,8 @@ import { AccountComponent } from './pages/account/account.component';
     AboutComponent,
     ConceptComponent,
     ConceptDetailComponent,
-    AccountComponent
+    AccountComponent,
+    PaymentResultComponent
   ],
   imports: [
     BrowserModule,
@@ -39,7 +42,7 @@ import { AccountComponent } from './pages/account/account.component';
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient()
+    provideHttpClient(withInterceptors([authInterceptor]))
   ],
   bootstrap: [App]
 })

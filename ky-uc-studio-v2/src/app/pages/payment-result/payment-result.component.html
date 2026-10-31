@@ -1,0 +1,86 @@
+<div class="payment-result-page">
+  <div class="container result-container">
+    <div class="result-card">
+      
+      <!-- Loading State -->
+      @if (loading) {
+        <div class="state-loading text-center">
+          <div class="spinner"></div>
+          <h2 class="result-title">Đang kiểm tra kết quả giao dịch...</h2>
+          <p class="result-sub">Vui lòng không đóng trình duyệt trong giây lát.</p>
+        </div>
+      }
+
+      <!-- Success State -->
+      @if (!loading && success) {
+        <div class="state-success text-center">
+          <div class="icon-circle icon-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+
+          <h2 class="result-title text-success">Thanh toán cọc thành công!</h2>
+          <p class="result-sub">{{ message }}</p>
+
+          <div class="result-details-box">
+            @if (booking?.bookingCode) {
+              <div class="detail-row">
+                <span class="d-label">Mã đơn đặt:</span>
+                <span class="d-val highlight">{{ booking.bookingCode }}</span>
+              </div>
+            }
+            <div class="detail-row">
+              <span class="d-label">Số tiền đã cọc:</span>
+              <span class="d-val text-gold">{{ amount | number }}đ</span>
+            </div>
+            @if (transactionCode) {
+              <div class="detail-row">
+                <span class="d-label">Mã giao dịch VNPay:</span>
+                <span class="d-val">{{ transactionCode }}</span>
+              </div>
+            }
+            @if (bankCode) {
+              <div class="detail-row">
+                <span class="d-label">Ngân hàng thanh toán:</span>
+                <span class="d-val">{{ bankCode }}</span>
+              </div>
+            }
+            @if (booking?.bookingDate) {
+              <div class="detail-row">
+                <span class="d-label">Ngày chụp dự kiến:</span>
+                <span class="d-val">{{ booking.bookingDate }} ({{ booking.timeSlot || 'Theo lịch' }})</span>
+              </div>
+            }
+          </div>
+
+          <div class="actions-row">
+            <a routerLink="/account/bookings" class="btn-primary">Xem đơn đặt lịch của tôi</a>
+            <a routerLink="/" class="btn-outline">Về trang chủ</a>
+          </div>
+        </div>
+      }
+
+      <!-- Failed State -->
+      @if (!loading && !success) {
+        <div class="state-failed text-center">
+          <div class="icon-circle icon-failed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </div>
+
+          <h2 class="result-title text-danger">Giao dịch chưa hoàn tất</h2>
+          <p class="result-sub">{{ errorMessage || message }}</p>
+
+          <div class="actions-row">
+            <a routerLink="/dat-lich" class="btn-primary">Thử thanh toán lại</a>
+            <a routerLink="/" class="btn-outline">Về trang chủ</a>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

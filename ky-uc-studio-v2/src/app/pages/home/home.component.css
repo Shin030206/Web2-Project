@@ -689,3 +689,53 @@
     padding: 30px 24px;
   }
 }
+
+@media (max-width: 640px) {
+  .hero-slider-section {
+    min-height: 480px;
+    height: 72vh;
+  }
+  .hero-title {
+    font-size: 28px !important;
+    line-height: 1.25;
+  }
+  .hero-desc {
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+  .hero-actions {
+    gap: 12px;
+  }
+  .slider-arrow {
+    display: none;
+  }
+  .slider-dots {
+    bottom: 16px;
+  }
+  .gallery-pills-bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .gallery-pills-bar button {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+  .dark-pkg-card {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 24px !important;
+  }
+  .btn-primary.hero-btn {
+    padding: 10px 22px;
+    font-size: 13.5px;
+  }
+  .btn-hero-link {
+    font-size: 13.5px;
+  }
+}

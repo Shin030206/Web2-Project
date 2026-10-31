@@ -52,8 +52,17 @@
         @if (loginError) {
           <div class="alert-error">{{ loginError }}</div>
         }
+        @if (regSuccess) {
+          <div class="alert-success">{{ regSuccess }}</div>
+        }
         @if (regError) {
           <div class="alert-error">{{ regError }}</div>
+        }
+        @if (forgotSuccess) {
+          <div class="alert-success">{{ forgotSuccess }}</div>
+        }
+        @if (forgotError) {
+          <div class="alert-error">{{ forgotError }}</div>
         }
 
         <!-- 1. LOGIN MODE -->
@@ -67,12 +76,12 @@
             <form (ngSubmit)="submitLogin()" class="form-body">
               <!-- Field: Phone / Email -->
               <div class="form-field">
-                <label class="field-label">Số điện thoại *</label>
+                <label class="field-label">Số điện thoại hoặc Email *</label>
                 <div class="input-wrap">
                   <input 
                     type="text" 
                     class="field-input" 
-                    placeholder="Nhập số điện thoại của bạn"
+                    placeholder="Nhập số điện thoại hoặc email của bạn"
                     [(ngModel)]="loginPhoneOrEmail" 
                     name="loginPhoneOrEmail"
                     required>
@@ -113,7 +122,7 @@
                   <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe">
                   <span>Ghi nhớ đăng nhập</span>
                 </label>
-                <a routerLink="/forgot-password" class="link-forgot">Quên mật khẩu ?</a>
+                <button type="button" class="link-forgot-btn" (click)="setMode('forgot')">Quên mật khẩu ?</button>
               </div>
 
               <!-- Submit Button (Frame 2660) -->
@@ -121,7 +130,7 @@
                 type="submit" 
                 class="btn-submit" 
                 [disabled]="loginLoading">
-                {{ loginLoading ? 'Đang xử lý...' : 'Đăng nhập' }}
+                {{ loginLoading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
               </button>
 
               <!-- Footer Switch Link -->
@@ -177,14 +186,15 @@
 
               <!-- Field: Email -->
               <div class="form-field">
-                <label class="field-label">Địa chỉ Email (Nhận ảnh)</label>
+                <label class="field-label">Địa chỉ Email (Nhận ảnh & hợp đồng) *</label>
                 <div class="input-wrap">
                   <input 
                     type="email" 
                     class="field-input" 
                     placeholder="VD: anhtuyet@gmail.com"
                     [(ngModel)]="regEmail" 
-                    name="regEmail">
+                    name="regEmail"
+                    required>
                 </div>
               </div>
 
@@ -195,7 +205,7 @@
                   <input 
                     [type]="showRegPassword ? 'text' : 'password'" 
                     class="field-input" 
-                    placeholder="Tối thiểu 6 ký tự"
+                    placeholder="8–32 ký tự (chữ hoa, chữ thường, số, ký tự đặc biệt)"
                     [(ngModel)]="regPassword" 
                     name="regPassword"
                     required>
@@ -214,6 +224,7 @@
                     </svg>
                   </button>
                 </div>
+                <span class="field-hint">Mật khẩu từ 8–32 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt.</span>
               </div>
 
               <!-- Field: Confirm Password -->
@@ -238,7 +249,7 @@
                 </label>
               </div>
 
-              <!-- Submit Button (Triggers OTP Modal) -->
+              <!-- Submit Button -->
               <button 
                 type="submit" 
                 class="btn-submit" 
@@ -254,13 +265,49 @@
             </form>
           </div>
         }
+
+        <!-- 3. FORGOT PASSWORD MODE -->
+        @if (mode === 'forgot') {
+          <div class="form-wrapper">
+            <div class="form-header">
+              <h2 class="form-title">Quên mật khẩu</h2>
+              <p class="form-subtitle">Nhập số điện thoại hoặc email đã đăng ký. Hệ thống sẽ gửi mã OTP xác thực.</p>
+            </div>
+
+            <form (ngSubmit)="submitForgotPasswordRequest()" class="form-body">
+              <div class="form-field">
+                <label class="field-label">Số điện thoại hoặc Email *</label>
+                <div class="input-wrap">
+                  <input 
+                    type="text" 
+                    class="field-input" 
+                    placeholder="VD: 0396581067 hoặc anhtuyet@gmail.com"
+                    [(ngModel)]="forgotAccount" 
+                    name="forgotAccount"
+                    required>
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                class="btn-submit" 
+                [disabled]="forgotLoading">
+                {{ forgotLoading ? 'Đang gửi mã...' : 'Gửi mã OTP xác nhận' }}
+              </button>
+
+              <div class="form-switch-prompt">
+                <button type="button" class="link-action" (click)="setMode('login')">← Quay lại Đăng nhập</button>
+              </div>
+            </form>
+          </div>
+        }
       </div>
 
     </div>
   </div>
 
   <!-- =========================================================================
-       POPUP MODAL OTP (Figma Reference: Node 383:13636)
+       POPUP MODAL OTP CHO QUÊN MẬT KHẨU (Figma Reference: Node 383:13636)
        ========================================================================= -->
   @if (showOtpModal) {
     <div class="otp-modal-backdrop" (click)="closeOtpModal()">
@@ -269,22 +316,22 @@
         <button class="otp-close-btn" (click)="closeOtpModal()" aria-label="Đóng">&times;</button>
 
         <!-- Header -->
-        <h3 class="otp-title">Xác thực số điện thoại</h3>
-        <p class="otp-desc-1">Một mã xác thực đã được gửi qua SMS đến số điện thoại</p>
+        <h3 class="otp-title">Xác thực mã OTP</h3>
+        <p class="otp-desc-1">Mã xác thực 6 chữ số đã được gửi đến</p>
         
-        <!-- Masked Phone (Figma 03•• ••• 067) -->
+        <!-- Masked Target -->
         <div class="otp-phone-display">
           <span>{{ maskedPhoneDisplay }}</span>
         </div>
 
-        <p class="otp-desc-2">Vui lòng nhập mã OTP gồm 6 chữ số để tiếp tục đăng ký.</p>
+        <p class="otp-desc-2">Vui lòng nhập mã OTP và đặt mật khẩu mới.</p>
 
         <!-- Alert in OTP -->
         @if (otpError) {
           <div class="otp-alert-error">{{ otpError }}</div>
         }
         @if (otpSuccess) {
-          <div class="otp-alert-success">Xác thực thành công! Đang chuyển hướng...</div>
+          <div class="otp-alert-success">Đặt lại mật khẩu thành công! Đang chuyển hướng...</div>
         }
 
         <!-- 6-Digit OTP Inputs (Frame 2517 -> 6x Frame 2666) -->
@@ -310,6 +357,28 @@
           <strong class="timer-digits">{{ formatOtpTimer }}</strong>
         </div>
 
+        <!-- New Password Fields Inside Modal -->
+        <div class="modal-pass-fields">
+          <div class="form-field">
+            <label class="field-label">Mật khẩu mới *</label>
+            <input 
+              type="password" 
+              class="field-input" 
+              placeholder="8–32 ký tự (hoa, thường, số, ký tự đặc biệt)"
+              [(ngModel)]="forgotNewPassword" 
+              name="forgotNewPassword">
+          </div>
+          <div class="form-field">
+            <label class="field-label">Nhập lại mật khẩu mới *</label>
+            <input 
+              type="password" 
+              class="field-input" 
+              placeholder="Nhập lại mật khẩu mới"
+              [(ngModel)]="forgotConfirmPassword" 
+              name="forgotConfirmPassword">
+          </div>
+        </div>
+
         <!-- Resend Prompt -->
         <div class="otp-resend-row">
           <span class="resend-text">Chưa nhận được mã?</span>
@@ -322,20 +391,17 @@
           </button>
         </div>
 
-        <!-- Hourly Limit Hint -->
-        <p class="otp-limit-hint">Giới hạn 5 lần gửi mã mỗi giờ.</p>
-
         <!-- Action Button -->
         <div class="otp-action-row">
           <button 
             type="button" 
             class="btn-otp-verify" 
+            [disabled]="forgotLoading"
             (click)="verifyOtp()">
-            Xác nhận OTP
+            {{ forgotLoading ? 'Đang xác thực...' : 'Xác nhận & Đổi mật khẩu' }}
           </button>
         </div>
       </div>
     </div>
   }
 </div>
-

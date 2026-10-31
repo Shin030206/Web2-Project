@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AuthService, User } from '../../services/auth.service';
+import { BookingService } from '../../services/booking.service';
 
 interface BookingRecord {
   orderCode: string;
@@ -24,84 +26,102 @@ export class AccountComponent implements OnInit {
   activeTab: 'overview' | 'bookings' | 'profile' | 'points' = 'overview';
   bookingFilter: 'all' | 'pending' | 'deposited' | 'completed' | 'cancelled' = 'all';
 
+  currentUser: User | null = null;
+  loading: boolean = true;
+  profileSaved: boolean = false;
+
   // User Profile
   user = {
-    name: 'Võ Thị Thanh Vy',
-    phone: '0396581067',
-    email: 'thanhvy@gmail.com',
-    points: 150,
+    name: 'Khách hàng Ký Ức',
+    phone: '',
+    email: '',
+    points: 0,
     avatar: 'assets/images/intro-photo.png',
-    membershipTier: 'Thành viên Bạc'
+    membershipTier: 'Thành viên Ký Ức'
   };
 
-  // Mock & Real bookings list
-  bookings: BookingRecord[] = [
-    {
-      orderCode: 'KUC12345',
-      packageName: 'Chân Dung Tiêu Chuẩn',
-      conceptName: 'CD Ngày Mưa',
-      bookingDate: '08/10/2026',
-      timeSlot: '09:00 - 10:30',
-      totalPrice: 1500000,
-      depositAmount: 450000,
-      status: 'PENDING',
-      statusText: 'Chờ xác nhận',
-      image: 'assets/03.03. Concept/Chân dung/CD Ngày mưa.jpg'
-    },
-    {
-      orderCode: 'KUC12346',
-      packageName: 'Cặp Đôi Tình Thơ',
-      conceptName: 'CP Hoàng Hôn',
-      bookingDate: '11/10/2026',
-      timeSlot: '15:30 - 17:00',
-      totalPrice: 4800000,
-      depositAmount: 1440000,
-      status: 'DEPOSITED',
-      statusText: 'Đã đặt cọc',
-      image: 'assets/03.07. Bộ sưu tập/Ký ức đôi ta/CP Hoàng hôn.jpg'
-    },
-    {
-      orderCode: 'KUC12347',
-      packageName: 'Áo Dài Truyền Thống',
-      conceptName: 'AD Áo Tấc',
-      bookingDate: '20/09/2026',
-      timeSlot: '13:30 - 15:00',
-      totalPrice: 3800000,
-      depositAmount: 1140000,
-      status: 'COMPLETED',
-      statusText: 'Hoàn thành',
-      image: 'assets/03.03. Concept/Áo dài/AD ÁO TẤC.jpg'
-    }
-  ];
-
-  // Profile Edit form
   profileForm = {
-    name: this.user.name,
-    phone: this.user.phone,
-    email: this.user.email,
-    currentPassword: '',
+    name: '',
+    phone: '',
+    email: '',
     newPassword: '',
     confirmPassword: ''
   };
-  profileSaved: boolean = false;
 
-  constructor(private route: ActivatedRoute) {}
+  bookings: BookingRecord[] = [];
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    public authService: AuthService,
+    private bookingService: BookingService
+  ) {}
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      if (params['tab']) {
-        this.activeTab = params['tab'];
+    this.route.url.subscribe(segments => {
+      const path = segments[segments.length - 1]?.path;
+      if (path === 'bookings') {
+        this.activeTab = 'bookings';
+      } else if (path === 'profile') {
+        this.activeTab = 'profile';
+      }
+    });
+
+    this.loadUserData();
+  }
+
+  loadUserData(): void {
+    this.authService.getMe().subscribe({
+      next: (user) => {
+        this.currentUser = user;
+        this.user.name = user.fullName || 'Khách hàng Ký Ức';
+        this.user.phone = user.phone || '';
+        this.user.email = user.email || '';
+        this.user.points = user.points || 0;
+        this.user.membershipTier = (user.points || 0) > 500 ? 'Thành viên VIP Vàng' : ((user.points || 0) > 100 ? 'Thành viên Bạc' : 'Thành viên Mới');
+        
+        this.profileForm.name = this.user.name;
+        this.profileForm.phone = this.user.phone;
+        this.profileForm.email = this.user.email;
+
+        this.loadBookings();
+      },
+      error: () => {
+        this.loading = false;
+        if (!this.authService.isLoggedIn) {
+          this.router.navigate(['/login'], { queryParams: { returnUrl: '/account' } });
+        }
       }
     });
   }
 
-  get filteredBookings(): BookingRecord[] {
-    if (this.bookingFilter === 'all') return this.bookings;
-    if (this.bookingFilter === 'pending') return this.bookings.filter(b => b.status === 'PENDING');
-    if (this.bookingFilter === 'deposited') return this.bookings.filter(b => b.status === 'DEPOSITED');
-    if (this.bookingFilter === 'completed') return this.bookings.filter(b => b.status === 'COMPLETED');
-    if (this.bookingFilter === 'cancelled') return this.bookings.filter(b => b.status === 'CANCELLED');
-    return this.bookings;
+  loadBookings(): void {
+    this.bookingService.getMyBookings().subscribe({
+      next: (res) => {
+        this.loading = false;
+        const list = res.data || res || [];
+        if (Array.isArray(list) && list.length > 0) {
+          this.bookings = list.map((b: any) => ({
+            orderCode: b.bookingCode || 'KU' + (b._id || '').slice(-6),
+            packageName: b.pricing?.packageName || 'Gói chụp nghệ thuật',
+            conceptName: b.conceptCode || 'Concept Ký Ức',
+            bookingDate: b.bookingDate || '',
+            timeSlot: b.timeSlot || (b.startTime + ' - ' + b.endTime),
+            totalPrice: b.pricing?.totalPrice || b.pricing?.totalAmount || 0,
+            depositAmount: b.pricing?.depositAmount || 0,
+            status: b.bookingStatus === 'CONFIRMED' ? 'DEPOSITED' : (b.bookingStatus === 'CANCELLED' ? 'CANCELLED' : (b.bookingStatus === 'COMPLETED' ? 'COMPLETED' : 'PENDING')),
+            statusText: b.bookingStatus === 'CONFIRMED' ? 'Đã đặt cọc' : (b.bookingStatus === 'CANCELLED' ? 'Đã hủy' : (b.bookingStatus === 'COMPLETED' ? 'Hoàn thành' : 'Chờ cọc')),
+            image: 'assets/images/gallery-bst-01.png'
+          }));
+        } else {
+          this.bookings = [];
+        }
+      },
+      error: () => {
+        this.loading = false;
+        this.bookings = [];
+      }
+    });
   }
 
   saveProfile(): void {
@@ -110,7 +130,25 @@ export class AccountComponent implements OnInit {
     this.profileSaved = true;
     setTimeout(() => {
       this.profileSaved = false;
-    }, 2500);
+    }, 3000);
+  }
+
+  setTab(tab: 'overview' | 'bookings' | 'profile' | 'points'): void {
+    this.activeTab = tab;
+  }
+
+  setFilter(filter: 'all' | 'pending' | 'deposited' | 'completed' | 'cancelled'): void {
+    this.bookingFilter = filter;
+  }
+
+  get filteredBookings(): BookingRecord[] {
+    if (this.bookingFilter === 'all') return this.bookings;
+    return this.bookings.filter(b => b.status.toLowerCase() === this.bookingFilter);
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe(() => {
+      this.router.navigate(['/login']);
+    });
   }
 }
-
