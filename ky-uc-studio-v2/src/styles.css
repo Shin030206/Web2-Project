@@ -123,6 +123,10 @@ button {
   background-color: #EFE9E0;
 }
 
+.text-center {
+  text-align: center;
+}
+
 /* Section Container */
 .container {
   max-width: 1400px;
