@@ -1,0 +1,189 @@
+<div class="pricing-page">
+  <!-- 1. HEADER HERO (Figma 115:1818) -->
+  <section class="pricing-hero">
+    <div class="container text-center">
+      <span class="pricing-eyebrow">Bảng giá chụp ảnh 2026</span>
+      <h1 class="pricing-main-title">
+        CÂU CHUYỆN NÀO<br>THUỘC VỀ BẠN ?
+      </h1>
+      <p class="pricing-quote">
+        “Giữ trọn từng khoảnh khắc thanh xuân qua góc máy nghệ thuật. Chúng tôi mang đến các gói chụp đa dạng được thiết kế riêng cho cá nhân và nhóm bạn, cam kết chất lượng hình ảnh vượt trội và trải nghiệm dịch vụ chuyên nghiệp nhất.”
+      </p>
+
+      <!-- Category Filter Pills -->
+      <div class="category-nav-pills">
+        <button type="button" class="cat-pill" (click)="scrollTo('family-section')">Gia đình</button>
+        <button type="button" class="cat-pill" (click)="scrollTo('couple-section')">Cặp đôi</button>
+        <button type="button" class="cat-pill" (click)="scrollTo('portrait-section')">Cá nhân</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. SECTION 1: CHÂN DUNG -->
+  <section id="portrait-section" class="pricing-category-section container">
+    <h2 class="category-title">Chân dung</h2>
+    <div class="tiers-grid">
+      @for (tier of portraitTiers; track tier.id) {
+        <div class="tier-card" [class.highlighted]="tier.highlighted">
+          <div class="tier-header">
+            <h3 class="tier-name">{{ tier.name }}</h3>
+            <p class="tier-sub">{{ tier.subtitle }}</p>
+            <div class="tier-price">{{ tier.price }}</div>
+          </div>
+          <div class="tier-divider"></div>
+          <ul class="tier-features">
+            @for (feat of tier.features; track feat) {
+              <li>
+                <span class="bullet-icon">◎</span>
+                <span class="feat-text">{{ feat }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 3. SECTION 2: CẶP ĐÔI -->
+  <section id="couple-section" class="pricing-category-section container">
+    <h2 class="category-title">Cặp đôi</h2>
+    <div class="tiers-grid">
+      @for (tier of coupleTiers; track tier.id) {
+        <div class="tier-card" [class.highlighted]="tier.highlighted">
+          <div class="tier-header">
+            <h3 class="tier-name">{{ tier.name }}</h3>
+            <p class="tier-sub">{{ tier.subtitle }}</p>
+            <div class="tier-price">{{ tier.price }}</div>
+          </div>
+          <div class="tier-divider"></div>
+          <ul class="tier-features">
+            @for (feat of tier.features; track feat) {
+              <li>
+                <span class="bullet-icon">◎</span>
+                <span class="feat-text">{{ feat }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 4. SECTION 3: GIA ĐÌNH -->
+  <section id="family-section" class="pricing-category-section container">
+    <h2 class="category-title">Gia đình</h2>
+    <div class="tiers-grid">
+      @for (tier of familyTiers; track tier.id) {
+        <div class="tier-card" [class.highlighted]="tier.highlighted">
+          <div class="tier-header">
+            <h3 class="tier-name">{{ tier.name }}</h3>
+            <p class="tier-sub">{{ tier.subtitle }}</p>
+            <div class="tier-price">{{ tier.price }}</div>
+          </div>
+          <div class="tier-divider"></div>
+          <ul class="tier-features">
+            @for (feat of tier.features; track feat) {
+              <li>
+                <span class="bullet-icon">◎</span>
+                <span class="feat-text">{{ feat }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 5. SECTION 4: DỊCH VỤ GIÁ TRỊ GIA TĂNG -->
+  <section class="addons-section container">
+    <h2 class="category-title">Dịch vụ giá trị gia tăng</h2>
+    <div class="addons-list">
+      @for (item of addOns; track item.name) {
+        <div class="addon-capsule-card">
+          <div class="addon-head-row">
+            <h3 class="addon-title">{{ item.name }}</h3>
+            <span class="addon-price">{{ item.price }}</span>
+          </div>
+          <p class="addon-desc">{{ item.desc }}</p>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 6. SECTION 5: FORM ĐẶT LỊCH TƯ VẤN (Figma Frame 46) -->
+  <section class="consult-section">
+    <div class="container consult-container">
+      <div class="consult-header text-center">
+        <span class="consult-tagline">Bạn sẵn sàng chưa?</span>
+        <h2 class="consult-title">Lưu giữ từng kỷ niệm đẹp của bạn tại đây</h2>
+      </div>
+
+      <div class="consult-card">
+        <form (ngSubmit)="submitConsult()" class="consult-form">
+          <!-- Họ và tên -->
+          <div class="form-group">
+            <label class="form-label">Họ và tên</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="VD: Nguyễn Thị Hoa"
+              [(ngModel)]="consultForm.fullName" 
+              name="fullName"
+              required>
+          </div>
+
+          <!-- Số điện thoại -->
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input 
+              type="tel" 
+              class="form-control" 
+              placeholder="VD: 0987654321"
+              [(ngModel)]="consultForm.phone" 
+              name="phone"
+              required>
+          </div>
+
+          <!-- Concept yêu thích -->
+          <div class="form-group">
+            <label class="form-label">Concept yêu thích</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="VD: Áo dài, Mẹ và con,..."
+              [(ngModel)]="consultForm.favoriteConcept" 
+              name="favoriteConcept">
+          </div>
+
+          <!-- Ý tưởng 1 -->
+          <div class="form-group">
+            <label class="form-label">Ý tưởng concept cụ thể (nếu có)</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="VD: Áo dài, Mẹ và con,..."
+              [(ngModel)]="consultForm.conceptIdea1" 
+              name="conceptIdea1">
+          </div>
+
+          <!-- Ý tưởng 2 -->
+          <div class="form-group">
+            <label class="form-label">Ý tưởng concept cụ thể (nếu có)</label>
+            <textarea 
+              rows="3" 
+              class="form-control textarea-control" 
+              placeholder="VD: Chụp hình sinh nhật, chụp ảnh Tết,..."
+              [(ngModel)]="consultForm.conceptIdea2" 
+              name="conceptIdea2"></textarea>
+          </div>
+
+          <div class="form-action">
+            <button type="submit" class="btn-submit-consult">
+              <span>Để ekip liên hệ với bạn →</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>

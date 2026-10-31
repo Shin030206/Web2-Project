@@ -1,0 +1,120 @@
+<header class="site-header">
+  <div class="header-inner container">
+    <!-- Logo -->
+    <a routerLink="/" class="logo-wrap" (click)="closeMobileMenu()">
+      <img src="assets/images/logo.png" alt="Ký Ức Studio" class="logo-img">
+    </a>
+
+    <!-- Desktop Navigation Menu -->
+    <nav class="nav-menu">
+      @for (item of navLinks; track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{exact: item.path === '/'}">
+          {{ item.title }}
+        </a>
+      }
+      <!-- Hotline -->
+      <a [href]="'tel:' + hotline" class="hotline-link">
+        <svg class="phone-icon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.47 8.53a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328z"/>
+        </svg>
+        <span>{{ hotline }}</span>
+      </a>
+    </nav>
+
+    <!-- Header Actions (Desktop) -->
+    <div class="header-actions">
+      @if (currentUser) {
+        <a routerLink="/account" class="btn-account">
+          <svg class="user-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+          </svg>
+          <span>{{ currentUser.fullName || 'Tài khoản' }}</span>
+        </a>
+        <button type="button" class="btn-logout-link" (click)="logout()" title="Đăng xuất">
+          <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+      } @else {
+        <a routerLink="/login" class="btn-outline">Đăng nhập</a>
+        <a routerLink="/register" class="btn-ghost">Đăng ký</a>
+      }
+      <a routerLink="/dat-lich" class="btn-primary btn-book-header">Đặt lịch</a>
+
+      <!-- Hamburger Button (Mobile) -->
+      <button 
+        type="button" 
+        class="hamburger-btn" 
+        [class.open]="mobileMenuOpen"
+        (click)="toggleMobileMenu()" 
+        aria-label="Menu điều hướng">
+        <span class="bar bar-1"></span>
+        <span class="bar bar-2"></span>
+        <span class="bar bar-3"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Navigation Drawer -->
+@if (mobileMenuOpen) {
+  <div class="mobile-drawer-backdrop" (click)="closeMobileMenu()">
+    <div class="mobile-drawer-content" (click)="$event.stopPropagation()">
+      <div class="mobile-drawer-header">
+        <a routerLink="/" (click)="closeMobileMenu()">
+          <img src="assets/images/logo.png" alt="Ký Ức Studio" class="mobile-drawer-logo">
+        </a>
+        <button type="button" class="mobile-drawer-close" (click)="closeMobileMenu()" aria-label="Đóng menu">
+          &times;
+        </button>
+      </div>
+
+      <nav class="mobile-nav-list">
+        @for (item of navLinks; track item.path) {
+          <a 
+            [routerLink]="item.path" 
+            routerLinkActive="active" 
+            [routerLinkActiveOptions]="{exact: item.path === '/'}"
+            class="mobile-nav-link"
+            (click)="closeMobileMenu()">
+            {{ item.title }}
+          </a>
+        }
+      </nav>
+
+      <div class="mobile-hotline-wrap">
+        <a [href]="'tel:' + hotline" class="mobile-hotline-link">
+          <svg class="phone-icon" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.47 8.53a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328z"/>
+          </svg>
+          <span>Hotline: {{ hotline }}</span>
+        </a>
+      </div>
+
+      <div class="mobile-drawer-footer">
+        @if (currentUser) {
+          <div class="mobile-user-card">
+            <div class="user-info">
+              <span class="user-greeting">Xin chào,</span>
+              <strong class="user-name">{{ currentUser.fullName }}</strong>
+            </div>
+            <div class="user-actions">
+              <a routerLink="/account" class="btn-drawer-account" (click)="closeMobileMenu()">Tài khoản & Lịch chụp</a>
+              <button type="button" class="btn-drawer-logout" (click)="logout()">Đăng xuất</button>
+            </div>
+          </div>
+        } @else {
+          <div class="mobile-auth-actions">
+            <a routerLink="/login" class="btn-drawer-login" (click)="closeMobileMenu()">Đăng nhập</a>
+            <a routerLink="/register" class="btn-drawer-register" (click)="closeMobileMenu()">Đăng ký</a>
+          </div>
+        }
+        <a routerLink="/dat-lich" class="btn-drawer-book" (click)="closeMobileMenu()">
+          Đặt lịch chụp ngay
+        </a>
+      </div>
+    </div>
+  </div>
+}

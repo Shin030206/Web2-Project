@@ -6,7 +6,7 @@
     "tag": "Sâu Lắng",
     "starting_price": 1500000,
     "description": "Góc tĩnh lặng nếp bên ô cửa kính đọng nước, lật từng trang sách cũ. Khung hình mang hơi thở trầm lắng, riêng tư và giàu chiều sâu nội tâm.",
-    "thumbnail_url": "assets/images/concepts/cd01_ngay_mua.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Ngày mưa.jpg"
   },
   {
     "concept_code": "CD02",
@@ -15,7 +15,7 @@
     "tag": "Trong Trẻo",
     "starting_price": 1500000,
     "description": "Dạo bước giữa thảm hoa rực rỡ, nhẹ nhàng lưu giữ nét trong trẻo, tự nhiên giữa thiên nhiên ngát hương.",
-    "thumbnail_url": "assets/images/concepts/cd02_vuon_hoa.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Vườn hoa.png"
   },
   {
     "concept_code": "CD03",
@@ -24,7 +24,7 @@
     "tag": "Thuần Khiết",
     "starting_price": 1500000,
     "description": "Đón những vệt nắng đầu ngày dịu nhẹ bên hồ nước xanh mát, một khoảng không thanh bình và thuần khiết.",
-    "thumbnail_url": "assets/images/concepts/cd03_nang_som.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Nắng sớm.jpg"
   },
   {
     "concept_code": "CD04",
@@ -33,7 +33,7 @@
     "tag": "Nghệ Thuật",
     "starting_price": 1500000,
     "description": "Không gian nghệ thuật trầm mặc với tranh vẽ và ánh sáng mềm mại, tôn lên nét quyến rũ, sâu lắng.",
-    "thumbnail_url": "assets/images/concepts/cd04_phong_tranh.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Phòng tranh.jpg"
   },
   {
     "concept_code": "CD05",
@@ -42,7 +42,7 @@
     "tag": "Nghệ Sĩ",
     "starting_price": 1500000,
     "description": "Thả hồn theo giai điệu mộc mạc bên chiếc đàn guitar, tự do và đậm chất nghệ sĩ.",
-    "thumbnail_url": "assets/images/concepts/cd05_goc_nhac.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Góc nhạc.jpg"
   },
   {
     "concept_code": "CD06",
@@ -51,7 +51,7 @@
     "tag": "Ngọt Ngào",
     "starting_price": 1500000,
     "description": "Ngọt ngào và ấm áp giữa hương bánh thơm phức, bắt trọn từng khoảnh khắc đời thường xinh xắn.",
-    "thumbnail_url": "assets/images/concepts/cd06_tiem_banh.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Tiệm bánh.png"
   },
   {
     "concept_code": "CD07",
@@ -60,7 +60,7 @@
     "tag": "Urban",
     "starting_price": 1500000,
     "description": "Nét hoài niệm urban trẻ trung, bắt trọn bước chân dạo phố và những nhịp dừng chân ngơi nghỉ.",
-    "thumbnail_url": "assets/images/concepts/cd07_xe_buyt.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Xe buýt.jpg"
   },
   {
     "concept_code": "CD08",
@@ -69,7 +69,7 @@
     "tag": "Tự Do",
     "starting_price": 1500000,
     "description": "Tự do trước biển rộng sóng vỗ, vạt áo nhẹ bay cùng ánh nắng và làn gió biển phóng khoáng.",
-    "thumbnail_url": "assets/images/concepts/cd08_bai_bien.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Bãi biển.jpg"
   },
   {
     "concept_code": "CD09",
@@ -78,7 +78,7 @@
     "tag": "Điện Ảnh",
     "starting_price": 1500000,
     "description": "Bước chân thong dong giữa con đường đồi thông tĩnh lặng, thơ mộng và ngập tràn chất điện ảnh.",
-    "thumbnail_url": "assets/images/concepts/cd09_doi_thong.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Đồi thông.jpg"
   },
   {
     "concept_code": "CD10",
@@ -87,7 +87,7 @@
     "tag": "Bình Yên",
     "starting_price": 1500000,
     "description": "Tỉ mẩn bên mảng gốm thủ công, ghi lại khoảnh khắc tập trung đầy mộc mạc, bình yên.",
-    "thumbnail_url": "assets/images/concepts/cd10_gom_moc.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Gốm mộc.jpg"
   },
   {
     "concept_code": "CD11",
@@ -96,7 +96,7 @@
     "tag": "Dịu Dàng",
     "starting_price": 1500000,
     "description": "Đợi nắng dưới mái hiên nhà xanh mát, ghi lại nụ cười rạng rỡ và vẻ đẹp dịu dàng.",
-    "thumbnail_url": "assets/images/concepts/cd11_hien_vuon.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Hiên vườn.png"
   },
   {
     "concept_code": "CD12",
@@ -105,7 +105,7 @@
     "tag": "Thanh Xuân",
     "starting_price": 1500000,
     "description": "Hồn nhiên dạo xe đạp qua những nếp nhà, lưu giữ nét trong trẻo và sức sống thanh xuân.",
-    "thumbnail_url": "assets/images/concepts/cd12_dap_xe.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Đạp xe.png"
   },
   {
     "concept_code": "CD13",
@@ -114,7 +114,7 @@
     "tag": "Hoài Cổ",
     "starting_price": 1500000,
     "description": "Đắm chìm giữa những kệ sách cũ vương màu thời gian, tìm lại sự tĩnh lặng trong tâm hồn.",
-    "thumbnail_url": "assets/images/concepts/cd13_tiem_sach.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Tiệm sách.png"
   },
   {
     "concept_code": "CD14",
@@ -123,7 +123,7 @@
     "tag": "Năng Lượng",
     "starting_price": 1500000,
     "description": "Vui tươi, nghịch ngợm bên chiếc xích đu sân chơi, đong đầy năng lượng tích cực.",
-    "thumbnail_url": "assets/images/concepts/cd14_san_choi.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Sân chơi.jpg"
   },
   {
     "concept_code": "CD15",
@@ -132,7 +132,7 @@
     "tag": "Rạng Rỡ",
     "starting_price": 1500000,
     "description": "Mộc mạc và xinh xắn bên giỏ trái cây chín mộng, một khung hình rạng rỡ, tự nhiên.",
-    "thumbnail_url": "assets/images/concepts/cd15_trai_cay.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Trái cây.png"
   },
   {
     "concept_code": "CD16",
@@ -141,7 +141,7 @@
     "tag": "Cá Tính",
     "starting_price": 1500000,
     "description": "Tone màu phim hoài cổ đầy cá tính, lưu giữ nét lôi cuốn và thần thái cuốn hút.",
-    "thumbnail_url": "assets/images/concepts/cd16_phim_cuon.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Phim cuộn.jpg"
   },
   {
     "concept_code": "CP01",
@@ -150,7 +150,7 @@
     "tag": "Lãng Mạn",
     "starting_price": 2200000,
     "description": "Chuyến tàu mang theo những hẹn thề, khoảnh khắc ngọt ngào trao nhau giữa không gian đậm chất điện ảnh.",
-    "thumbnail_url": "assets/images/concepts/cp01_san_ga.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP SÂN GA.jpg"
   },
   {
     "concept_code": "CP02",
@@ -159,7 +159,7 @@
     "tag": "Bình Dị",
     "starting_price": 2200000,
     "description": "Cùng nhau vào bếp nấu ăn, tiếng cười giòn tan và những ánh mắt trao nhau tình yêu dịu dàng nhất.",
-    "thumbnail_url": "assets/images/concepts/cp02_bep_am.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP BẾP ẤM.jpg"
   },
   {
     "concept_code": "CP03",
@@ -168,7 +168,7 @@
     "tag": "Đời Thường",
     "starting_price": 2200000,
     "description": "Nhí nhảnh, tự nhiên trong chiếc xe đẩy siêu thị, cùng chia sẻ những niềm vui nho nhỏ thường ngày.",
-    "thumbnail_url": "assets/images/concepts/cp03_sieu_thi.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP SIÊU THỊ.jpg"
   },
   {
     "concept_code": "CP04",
@@ -177,7 +177,7 @@
     "tag": "Dã Ngoại",
     "starting_price": 2200000,
     "description": "Bên đống lửa đêm tàn và không gian dã ngoại ngoài trời, ghi lại những chiếc ôm ấm áp giữa thiên nhiên.",
-    "thumbnail_url": "assets/images/concepts/cp04_cam_trai.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP CẮM TRẠI.jpg"
   },
   {
     "concept_code": "CP05",
@@ -186,7 +186,7 @@
     "tag": "Hoàng Hôn",
     "starting_price": 2200000,
     "description": "Nằm bên nhau trên mái nhà ngắm hoàng hôn thành phố, một góc nhỏ riêng tư đầy lãng mạn.",
-    "thumbnail_url": "assets/images/concepts/cp05_san_thuong.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP SÂN THƯỢNG.jpg"
   },
   {
     "concept_code": "CP06",
@@ -195,7 +195,7 @@
     "tag": "Vui Tươi",
     "starting_price": 2200000,
     "description": "Nghịch ngợm cùng làn nước và tiếng cười giòn tan, khoảnh khắc yêu thương chân thật, không gượng gập.",
-    "thumbnail_url": "assets/images/concepts/cp06_rua_xe.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP RỬA XE.jpg"
   },
   {
     "concept_code": "CP07",
@@ -204,7 +204,7 @@
     "tag": "Trong Lành",
     "starting_price": 2200000,
     "description": "Băng qua thảm trà xanh ngút ngàn, nắm tay nhau giữa đất trời bao la và trong lành.",
-    "thumbnail_url": "assets/images/concepts/cp07_doi_che.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP ĐỒI CHÈ.jpg"
   },
   {
     "concept_code": "CP08",
@@ -213,7 +213,7 @@
     "tag": "Gắn Kết",
     "starting_price": 2200000,
     "description": "Góc tối riêng tư trong rạp chiếu bóng, những chiếc tựa đầu khẽ khàng và sự gắn kết ngọt ngào.",
-    "thumbnail_url": "assets/images/concepts/cp08_rap_phim.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP RẠP PHIM.jpg"
   },
   {
     "concept_code": "CP09",
@@ -222,7 +222,7 @@
     "tag": "Bình Yên",
     "starting_price": 2200000,
     "description": "Lặng lẽ tựa vai nhau trên chiếc ghế đá công viên ngợp nắng, bình yên trôi qua từng phút giây.",
-    "thumbnail_url": "assets/images/concepts/cp09_ghe_da.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP GHẾ ĐÁ.jpg"
   },
   {
     "concept_code": "CP10",
@@ -231,7 +231,7 @@
     "tag": "Trưởng Thành",
     "starting_price": 2200000,
     "description": "Cùng vơi vun trồng mầm xanh, gửi gắm lời hứa cùng nhau trưởng thành qua năm tháng.",
-    "thumbnail_url": "assets/images/concepts/cp10_trong_cay.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Couple/CP TRỒNG CÂY.jpg"
   },
   {
     "concept_code": "GD01",
@@ -240,7 +240,7 @@
     "tag": "Ấm Cúng",
     "starting_price": 3000000,
     "description": "Quây quần bên bàn trà ấm cúng, trao nhau tách trà nóng và những lời chuyện trò rộn rã.",
-    "thumbnail_url": "assets/images/concepts/gd01_ban_tra.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD BÀN TRÀ.jpg"
   },
   {
     "concept_code": "GD02",
@@ -249,7 +249,7 @@
     "tag": "Hoài Cổ",
     "starting_price": 3000000,
     "description": "Nét hoài cổ trong nếp nhà xưa với nội thất mây tre, lưu giữ nụ cười sum vầy của nhiều thế hệ.",
-    "thumbnail_url": "assets/images/concepts/gd02_ghe_may.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD GHẾ MÂY.jpg"
   },
   {
     "concept_code": "GD03",
@@ -258,7 +258,7 @@
     "tag": "Hạnh Phúc",
     "starting_price": 3000000,
     "description": "Nằm bên nhau trên thảm cỏ xanh đong đầy nắng, những tiếng cười trẻ thơ đong đầy hạnh phúc.",
-    "thumbnail_url": "assets/images/concepts/gd03_tham_co.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD THẢM CỎ.jpg"
   },
   {
     "concept_code": "GD04",
@@ -267,7 +267,7 @@
     "tag": "Tình Thân",
     "starting_price": 3000000,
     "description": "Căn phòng khách quen thuộc ngập tràn ánh nắng, nơi tình yêu thương luôn hiện hữu trong từng cái ôm.",
-    "thumbnail_url": "assets/images/concepts/gd04_ghe_sofa.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD GHẾ SOFA.jpg"
   },
   {
     "concept_code": "GD05",
@@ -276,7 +276,7 @@
     "tag": "Sum Vầy",
     "starting_price": 3000000,
     "description": "Bữa cơm gia đình đấm ấm, đơn sơ nhưng thiêng liêng, nơi vun đắp tình thân qua năm tháng.",
-    "thumbnail_url": "assets/images/concepts/gd05_mam_com.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD MÂM CƠM.jpg"
   },
   {
     "concept_code": "GD06",
@@ -285,7 +285,7 @@
     "tag": "Lớn Khôn",
     "starting_price": 3000000,
     "description": "Cùng con xây lâu đài cát bên bờ biển, bắt trọn khoảnh khắc lớn khôn tự nhiên của con trẻ.",
-    "thumbnail_url": "assets/images/concepts/gd06_bai_cat.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD BÃI CÁT.jpg"
   },
   {
     "concept_code": "GD07",
@@ -294,7 +294,7 @@
     "tag": "Hồn Nhiên",
     "starting_price": 3000000,
     "description": "Bố mẹ cùng con vui đùa bên chiếc xích đu, đong đầy tiếng cười hồn nhiên và hạnh phúc.",
-    "thumbnail_url": "assets/images/concepts/gd07_san_choi.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Chân dung/CD Sân chơi.jpg"
   },
   {
     "concept_code": "GD08",
@@ -303,7 +303,7 @@
     "tag": "Nếp Nhà",
     "starting_price": 3000000,
     "description": "Ngồi bên bậc thềm nhà xưa mộc mạc, ghi lại nét bình dị và sự gắn kết vẹn nguyên giữa các thành viên.",
-    "thumbnail_url": "assets/images/concepts/gd08_bac_them.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD BẬC THỀM.jpg"
   },
   {
     "concept_code": "GD09",
@@ -312,7 +312,7 @@
     "tag": "Giải Trí",
     "starting_price": 3000000,
     "description": "Những giờ phút giải trí quây quần ấm áp, nơi tình yêu thương được truyền tiếp tự nhiên.",
-    "thumbnail_url": "assets/images/concepts/gd09_xep_hinh.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD XẾP HÌNH.jpg"
   },
   {
     "concept_code": "GD10",
@@ -321,7 +321,7 @@
     "tag": "Phố Thị",
     "starting_price": 3000000,
     "description": "Cùng con dạo bước qua những góc phố quen, nhẹ nhàng ghi lại tình thân ấm áp giữa lòng đô thị.",
-    "thumbnail_url": "assets/images/concepts/gd10_dao_pho.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Gia đình/GD DẠO PHỐ.jpg"
   },
   {
     "concept_code": "MC01",
@@ -330,7 +330,7 @@
     "tag": "Đồng Điệu",
     "starting_price": 2500000,
     "description": "Đồng điệu trong tà áo đôi rực rỡ, mẹ cùng bé tung tăng giữa thiên nhiên xanh mát.",
-    "thumbnail_url": "assets/images/concepts/mc01_ao_doi.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC ÁO ĐÔI.jpg"
   },
   {
     "concept_code": "MC02",
@@ -339,7 +339,7 @@
     "tag": "Kỷ Niệm",
     "starting_price": 2500000,
     "description": "Nhẹ nhàng đón vệt nắng sớm bên chiếc bánh sinh nhật, lưu giữ từng cột mốc lớn khôn của con.",
-    "thumbnail_url": "assets/images/concepts/mc02_don_nang.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC ĐÓN NẮNG.jpg"
   },
   {
     "concept_code": "MC03",
@@ -348,7 +348,7 @@
     "tag": "Mẫu Tử",
     "starting_price": 2500000,
     "description": "Góc nhỏ ân cần khi mẹ chải tóc cho con, tình mẫu tử đọng lại trong từng cử chỉ dịu dàng.",
-    "thumbnail_url": "assets/images/concepts/mc03_chai_toc.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC CHẢI TÓC.jpg"
   },
   {
     "concept_code": "MC04",
@@ -357,7 +357,7 @@
     "tag": "Dạo Phố",
     "starting_price": 2500000,
     "description": "Bước chân dạo phố bình yên cùng chiếc xe đẩy, đơn giản nhưng ngập tràn yêu thương.",
-    "thumbnail_url": "assets/images/concepts/mc04_xe_day.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC XE ĐẨY.jpg"
   },
   {
     "concept_code": "MC05",
@@ -366,7 +366,7 @@
     "tag": "Ngọt Ngào",
     "starting_price": 2500000,
     "description": "Cùng con thưởng thức que kem mát lạnh, bắt trọn nụ cười hồn nhiên và ngọt ngào.",
-    "thumbnail_url": "assets/images/concepts/mc05_kem_que.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC KEM QUE.jpg"
   },
   {
     "concept_code": "MC06",
@@ -375,7 +375,7 @@
     "tag": "Gắn Kết",
     "starting_price": 2500000,
     "description": "Mẹ và bé cùng ghi lại những khoảnh khắc nhỏ qua ống kính, rèn luyện sự gắn kết tự nhiên.",
-    "thumbnail_url": "assets/images/concepts/mc06_chup_anh.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC CHỤP ẢNH.jpg"
   },
   {
     "concept_code": "MC07",
@@ -384,7 +384,7 @@
     "tag": "Dịu Dàng",
     "starting_price": 2500000,
     "description": "Ngồi bên nấc thang gạch cũ, mẹ ôm con vào lòng dịu dàng và ấm áp.",
-    "thumbnail_url": "assets/images/concepts/mc07_nac_thang.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC NẤC THANG.jpg"
   },
   {
     "concept_code": "MC08",
@@ -393,7 +393,7 @@
     "tag": "Yêu Thương",
     "starting_price": 2500000,
     "description": "Nằm bên con trên thảm cỏ xanh, ánh mắt trao nhau trọn vẹn tình yêu thương.",
-    "thumbnail_url": "assets/images/concepts/mc08_bai_co.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC BÃI CỎ.jpg"
   },
   {
     "concept_code": "MC09",
@@ -402,7 +402,7 @@
     "tag": "Tuổi Thơ",
     "starting_price": 2500000,
     "description": "Mẹ đẩy xích đu đưa con lên cao, tiếng cười giòn tan đong đầy ký ức tuổi thơ.",
-    "thumbnail_url": "assets/images/concepts/mc09_xich_du.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC XÍCH ĐU.jpg"
   },
   {
     "concept_code": "MC10",
@@ -411,16 +411,16 @@
     "tag": "Picnic",
     "starting_price": 2500000,
     "description": "Buổi picnic nhỏ bên bờ hồ mát lành, tận hưởng khoảng thời gian bình yên bên con.",
-    "thumbnail_url": "assets/images/concepts/mc10_da_ngoai.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Mẹ và con/MC DÃ NGOẠI.jpg"
   },
   {
     "concept_code": "AD01",
-    "concept_name": "AD Trắng Tròn",
+    "concept_name": "AD Trắng Trơn",
     "category": "Áo Dài",
     "tag": "Thuần Khiết",
     "starting_price": 1500000,
     "description": "Nét đẹp thuần khiết trong tà áo dài trắng cùng chiếc nón lá, dịu dàng giữa thiên nhiên xanh.",
-    "thumbnail_url": "assets/images/concepts/ad01_trang_tron.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD TRẮNG TRƠN.jpg"
   },
   {
     "concept_code": "AD02",
@@ -429,7 +429,7 @@
     "tag": "Cổ Phục",
     "starting_price": 1500000,
     "description": "Trang nghiêm và kiêu sa trong bộ cổ phục Áo Tấc, tái hiện nét đẹp văn hóa truyền thống.",
-    "thumbnail_url": "assets/images/concepts/ad02_ao_tac.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD ÁO TẤC.jpg"
   },
   {
     "concept_code": "AD03",
@@ -438,7 +438,7 @@
     "tag": "Di Sản",
     "starting_price": 1500000,
     "description": "Duyên dáng bên gian lò gốm cổ truyền, lưu giữ nét hoài niệm và giá trị di sản.",
-    "thumbnail_url": "assets/images/concepts/ad03_lo_gom.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD LÒ GỐM.jpg"
   },
   {
     "concept_code": "AD04",
@@ -447,7 +447,7 @@
     "tag": "Rạng Rỡ",
     "starting_price": 1500000,
     "description": "Ôm bó hoa tươi dạo bước qua chợ hoa, rạng rỡ và tràn đầy sức sống.",
-    "thumbnail_url": "assets/images/concepts/ad04_cho_hoa.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD CHỢ HOA.jpg"
   },
   {
     "concept_code": "AD05",
@@ -456,7 +456,7 @@
     "tag": "Thanh Cao",
     "starting_price": 1500000,
     "description": "Tà áo dài thướt tha nâng nhẹ đóa sen trắng bên hồ, nét đẹp thanh cao và tĩnh lặng.",
-    "thumbnail_url": "assets/images/concepts/ad05_sen_trang.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD SEN TRẮNG.jpg"
   },
   {
     "concept_code": "AD06",
@@ -465,7 +465,7 @@
     "tag": "Rêu Phong",
     "starting_price": 1500000,
     "description": "Dáng em bước nhẹ qua góc phố cổ rêu phong, dịu dàng đọng lại giữa dòng thời gian.",
-    "thumbnail_url": "assets/images/concepts/ad06_pho_cu.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD PHỐ CŨ.jpg"
   },
   {
     "concept_code": "AD07",
@@ -474,7 +474,7 @@
     "tag": "Đằm Thắm",
     "starting_price": 1500000,
     "description": "Nụ cười e ấp dưới vành nón lá, nét duyên dáng đằm thắm của người phụ nữ Việt.",
-    "thumbnail_url": "assets/images/concepts/ad07_non_la.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD NÓN LÁ.jpg"
   },
   {
     "concept_code": "AD08",
@@ -483,7 +483,7 @@
     "tag": "Thong Dong",
     "starting_price": 1500000,
     "description": "Thong dong thưởng thức tách trà/cà phê bên không gian gian nhà gỗ hoài cổ.",
-    "thumbnail_url": "assets/images/concepts/ad08_ca_phe.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD CÀ PHÊ.jpg"
   },
   {
     "concept_code": "AD09",
@@ -492,7 +492,7 @@
     "tag": "Sài Gòn 70s",
     "starting_price": 1500000,
     "description": "Phong cách Retro Sài Gòn xưa bên chiếc xe Vespa cổ, hoài niệm và vô cùng cá tính.",
-    "thumbnail_url": "assets/images/concepts/ad09_xe_co.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD XE CỔ.jpg"
   },
   {
     "concept_code": "AD10",
@@ -501,6 +501,6 @@
     "tag": "Thanh Lich",
     "starting_price": 1500000,
     "description": "Tà áo dài dáng xuông mộc mạc, nhẹ nhàng tôn lên nét đẹp thanh lịch, tự nhiên.",
-    "thumbnail_url": "assets/images/concepts/ad10_dang_xuong.jpg"
+    "thumbnail_url": "assets/03.03. Concept/Áo dài/AD DÁNG XUÔNG.jpg"
   }
 ]

@@ -1,0 +1,135 @@
+<div class="concept-detail-page">
+  <!-- Back Nav Bar (Figma 217:3089 -> Frame 11) -->
+  <section class="back-bar container">
+    <a routerLink="/concept" class="back-link">
+      <span>← Quay lại danh mục concept</span>
+    </a>
+  </section>
+
+  @if (concept) {
+    <!-- Main Concept Detail (Figma Frame 2515) -->
+    <section class="detail-main-section container">
+      <div class="detail-grid">
+        <!-- Left: Large High-Resolution Image with soft rounded corners (Figma 217:3089) -->
+        <div class="detail-visual-col">
+          <div class="visual-frame">
+            <img 
+              [src]="concept.thumbnail_url" 
+              [alt]="concept.concept_name" 
+              class="concept-hero-img">
+          </div>
+        </div>
+
+        <!-- Right: Concept Story & Pricing Card (Frame 2506 + Frame 2491) -->
+        <div class="detail-info-col">
+          <div class="concept-category-tag">
+            <span>{{ (concept.category || 'CHÂN DUNG') | uppercase }}</span>
+          </div>
+
+          <h1 class="concept-title">{{ concept.concept_name | uppercase }}</h1>
+
+          <!-- Deep 3-Paragraph Narrative Essay from Figma 217:3089 -->
+          <div class="concept-narrative-story">
+            <p>Có những ngày phố xá sũng ướt, lòng người chỉ muốn nép lại một góc tĩnh lặng.</p>
+            <p>
+              CD Ngày Mưa là như thế. Một chiếc cardigan len dệt kim mỏng, tóc xõa lơi tự nhiên bên ô cửa kính đọng nước. Tông màu phim trầm ấm, độ tương phản dịu nhẹ đủ để ánh nhìn sâu đằm chiếu và viền vai gầy hiện lên thật mộc. Bố cục gồm một khung cận mặt đong đầy cảm xúc kết hợp các góc trung cảnh bên bàn gỗ, tách trà ấm và trang sách mở dở.
+            </p>
+            <p>
+              Phù hợp cho những ai đang tìm kiếm một khoảng không riêng tư, muốn lưu giữ một nốt trầm dịu dàng hay đơn giản là muốn trò chuyện với chính mình. Không cần tạo dáng cầu kỳ, không đòi hỏi biểu cảm gượng gạo. Bộ ảnh này là nơi bạn thả lỏng tâm trí và tự do chìm đọng trong cảm xúc thật nhất.
+            </p>
+          </div>
+
+          <!-- Pricing Banner Card (Figma 217:3089) -->
+          <div class="concept-price-banner">
+            <div class="price-banner-left">
+              <span class="price-label">GIÁ TỪ</span>
+              <span class="price-package-name">Theo gói {{ concept.category || 'Chân dung' }}</span>
+            </div>
+            <div class="price-banner-right">
+              <span class="price-val">{{ (concept.starting_price || 3800000) | number }}đ</span>
+            </div>
+          </div>
+
+          <!-- Book This Concept Button (Chocolate Brown Pill) -->
+          <div class="book-action-wrap">
+            <button type="button" class="btn-book-concept" (click)="goToBooking()">
+              <span>Đặt lịch concept này →</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Consultation Form Section (Figma Frame 46) -->
+    <section class="detail-consult-section">
+      <div class="container consult-container">
+        <div class="consult-header text-center">
+          <span class="consult-tagline">KHI BẠN SẴN SÀNG</span>
+          <h2 class="consult-title">CÂU CHUYỆN CỦA BẠN<br>BẮT ĐẦU Ở ĐÂY</h2>
+        </div>
+
+        <div class="consult-card">
+          <form (ngSubmit)="submitQuickBooking()" class="consult-form">
+            <div class="form-group">
+              <label class="form-label">Họ và tên</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="VD: Nguyễn Thị Hoa"
+                [(ngModel)]="quickForm.fullName" 
+                name="fullName"
+                required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Số điện thoại</label>
+              <input 
+                type="tel" 
+                class="form-control" 
+                placeholder="VD: 0987654321"
+                [(ngModel)]="quickForm.phone" 
+                name="phone"
+                required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Concept yêu thích</label>
+              <select class="form-control select-control" [(ngModel)]="quickForm.favoriteConcept" name="favoriteConcept">
+                <option [value]="concept.concept_name">{{ concept.concept_name }}</option>
+                <option value="CD Vườn Hoa">CD Vườn Hoa</option>
+                <option value="CD Ngày Mưa">CD Ngày Mưa</option>
+                <option value="Áo Dài Trắng Trơn">Áo Dài Trắng Trơn</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Ý tưởng concept cụ thể (nếu có)</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                placeholder="VD: Áo dài, Mẹ và con,..."
+                [(ngModel)]="quickForm.conceptIdea1" 
+                name="conceptIdea1">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Ý tưởng concept cụ thể (nếu có)</label>
+              <textarea 
+                rows="3" 
+                class="form-control textarea-control" 
+                placeholder="VD: Chụp hình sinh nhật, chụp ảnh Tết,..."
+                [(ngModel)]="quickForm.conceptIdea2" 
+                name="conceptIdea2"></textarea>
+            </div>
+
+            <div class="form-action">
+              <button type="submit" class="btn-submit-consult">
+                <span>Đặt lịch →</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  }
+</div>

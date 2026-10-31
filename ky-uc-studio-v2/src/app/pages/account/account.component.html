@@ -1,0 +1,228 @@
+<div class="account-page">
+  <div class="container account-container">
+    <!-- Breadcrumb & Welcome (Figma 419:12412 -> Frame 2678) -->
+    <div class="account-header">
+      <div class="breadcrumb">
+        <a routerLink="/">TRANG CHỦ</a> / <span>TÀI KHOẢN</span>
+      </div>
+      <h1 class="welcome-title">Chào mừng bạn trở lại với Ký Ức.</h1>
+    </div>
+
+    <!-- Account Sub-Navigation -->
+    <div class="account-tabs">
+      <button 
+        type="button" 
+        class="tab-link" 
+        [class.active]="activeTab === 'overview'" 
+        (click)="activeTab = 'overview'">
+        Tổng quan
+      </button>
+      <button 
+        type="button" 
+        class="tab-link" 
+        [class.active]="activeTab === 'bookings'" 
+        (click)="activeTab = 'bookings'">
+        Lịch sử đặt lịch
+      </button>
+      <button 
+        type="button" 
+        class="tab-link" 
+        [class.active]="activeTab === 'profile'" 
+        (click)="activeTab = 'profile'">
+        Chỉnh sửa thông tin
+      </button>
+    </div>
+
+    <!-- =========================================================================
+         TAB 1: TỔNG QUAN TÀI KHOẢN (Figma 419:12412)
+         ========================================================================= -->
+    @if (activeTab === 'overview') {
+      <div class="overview-grid">
+        <!-- Card 1: Frame 2679 - THÔNG TIN CÁ NHÂN -->
+        <div class="account-card info-card">
+          <div class="card-top-header">
+            <span class="card-eyebrow">THÔNG TIN CÁ NHÂN</span>
+          </div>
+          <div class="user-profile-row">
+            <div class="user-avatar-wrap">
+              <svg class="avatar-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path fill-rule="evenodd" d="M12 2a5 5 0 100 10 5 5 0 000-10zm-7 18a7 7 0 1114 0H5z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="user-info-text">
+              <h3 class="user-name">{{ user.name }}</h3>
+              <p class="user-phone">SĐT: {{ user.phone }}</p>
+              <span class="membership-badge">{{ user.membershipTier }}</span>
+            </div>
+          </div>
+          <div class="card-foot-action">
+            <button class="link-btn" (click)="activeTab = 'profile'">Chỉnh sửa thông tin →</button>
+          </div>
+        </div>
+
+        <!-- Card 2: Frame 2680 - QUYỀN LỢI THÀNH VIÊN -->
+        <div class="account-card points-card">
+          <div class="card-top-header">
+            <span class="card-eyebrow">QUYỀN LỢI THÀNH VIÊN</span>
+          </div>
+          <div class="points-body">
+            <div class="points-val-box">
+              <span class="points-val">{{ user.points }} Xu</span>
+            </div>
+            <p class="points-desc">Số dư Ký Ức Xu dùng để giảm giá đặt cọc hoặc nâng cấp dịch vụ chụp ảnh.</p>
+          </div>
+          <div class="card-foot-action">
+            <button class="link-btn" (click)="activeTab = 'bookings'">Ưu đãi của bạn →</button>
+          </div>
+        </div>
+
+        <!-- Card 3: Frame 2681 - LỊCH ĐẶT CỦA TÔI -->
+        <div class="account-card booking-card-col">
+          <div class="card-top-header between">
+            <span class="card-eyebrow">LỊCH ĐẶT CỦA TÔI</span>
+            <button class="link-btn small" (click)="activeTab = 'bookings'">Xem tất cả →</button>
+          </div>
+
+          <div class="recent-booking-item">
+            <div class="rb-left">
+              <img [src]="bookings[0].image" alt="Concept" class="rb-img">
+            </div>
+            <div class="rb-right">
+              <span class="rb-code">MÃ ĐẶT LỊCH: {{ bookings[0].orderCode }}</span>
+              <h4 class="rb-title">{{ bookings[0].conceptName }} ({{ bookings[0].packageName }})</h4>
+              <p class="rb-date">Ngày chụp: {{ bookings[0].bookingDate }} ({{ bookings[0].timeSlot }})</p>
+              <div class="rb-status-tag" [class.pending]="bookings[0].status === 'PENDING'">
+                Trạng thái: {{ bookings[0].statusText }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Frame 2682 - TIỆN ÍCH TÀI KHOẢN -->
+        <div class="account-card utilities-card">
+          <div class="card-top-header">
+            <span class="card-eyebrow">TIỆN ÍCH TÀI KHOẢN</span>
+          </div>
+          <div class="utilities-list">
+            <div class="utility-item" (click)="activeTab = 'bookings'">
+              <span class="utility-icon">📅</span>
+              <span class="utility-name">Lịch sử đặt lịch</span>
+              <span class="utility-arrow">›</span>
+            </div>
+            <div class="utility-item" (click)="activeTab = 'bookings'">
+              <span class="utility-icon">💳</span>
+              <span class="utility-name">Lịch sử thanh toán cọc</span>
+              <span class="utility-arrow">›</span>
+            </div>
+            <div class="utility-item" (click)="activeTab = 'profile'">
+              <span class="utility-icon">⚙️</span>
+              <span class="utility-name">Cài đặt tài khoản & Mật khẩu</span>
+              <span class="utility-arrow">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- =========================================================================
+         TAB 2: LỊCH SỬ ĐẶT LỊCH (Figma 429:12629)
+         ========================================================================= -->
+    @if (activeTab === 'bookings') {
+      <div class="bookings-view">
+        <div class="view-header">
+          <h2 class="view-title">Lịch sử đặt lịch</h2>
+          <p class="view-subtitle">Theo dõi các yêu cầu đặt lịch và trạng thái dịch vụ của bạn.</p>
+        </div>
+
+        <!-- Filter bar matching Figma Group 2492 -->
+        <div class="booking-filters">
+          <button [class.active]="bookingFilter === 'all'" (click)="bookingFilter = 'all'">Tất cả</button>
+          <button [class.active]="bookingFilter === 'pending'" (click)="bookingFilter = 'pending'">Chờ xác nhận</button>
+          <button [class.active]="bookingFilter === 'deposited'" (click)="bookingFilter = 'deposited'">Đã đặt cọc</button>
+          <button [class.active]="bookingFilter === 'completed'" (click)="bookingFilter = 'completed'">Hoàn thành</button>
+          <button [class.active]="bookingFilter === 'cancelled'" (click)="bookingFilter = 'cancelled'">Đã hủy</button>
+        </div>
+
+        <!-- Bookings Cards List -->
+        <div class="bookings-list">
+          @for (item of filteredBookings; track item.orderCode) {
+            <div class="booking-item-card">
+              <div class="item-img-col">
+                <img [src]="item.image" [alt]="item.conceptName" class="item-img">
+              </div>
+
+              <div class="item-info-col">
+                <div class="item-top-row">
+                  <span class="item-code">MÃ ĐẶT LỊCH: {{ item.orderCode }}</span>
+                  <span class="item-badge" [class.badge-pending]="item.status === 'PENDING'" [class.badge-done]="item.status === 'COMPLETED'">
+                    {{ item.statusText }}
+                  </span>
+                </div>
+
+                <h3 class="item-concept-name">{{ item.conceptName }} — {{ item.packageName }}</h3>
+                <p class="item-detail-line"><strong>Thời gian chụp:</strong> {{ item.bookingDate }} ({{ item.timeSlot }})</p>
+                <p class="item-detail-line"><strong>Tổng chi phí:</strong> {{ item.totalPrice | number }}đ (Đã cọc 30%: {{ item.depositAmount | number }}đ)</p>
+              </div>
+
+              <div class="item-action-col">
+                <a routerLink="/dat-lich" class="btn-outline small">Đặt lại lịch</a>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- =========================================================================
+         TAB 3: CHỈNH SỬA THÔNG TIN (Figma 437:13484)
+         ========================================================================= -->
+    @if (activeTab === 'profile') {
+      <div class="profile-view">
+        <div class="view-header">
+          <h2 class="view-title">Chỉnh sửa thông tin cá nhân</h2>
+          <p class="view-subtitle">Cập nhật hồ sơ tài khoản và thông tin liên hệ của bạn.</p>
+        </div>
+
+        @if (profileSaved) {
+          <div class="alert-success">Cập nhật thông tin thành công!</div>
+        }
+
+        <form (ngSubmit)="saveProfile()" class="profile-form">
+          <div class="form-group">
+            <label class="form-label">Họ và tên *</label>
+            <input type="text" class="form-input" [(ngModel)]="profileForm.name" name="name" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Số điện thoại *</label>
+            <input type="tel" class="form-input" [(ngModel)]="profileForm.phone" name="phone" disabled>
+            <small class="form-hint">Số điện thoại dùng để xác thực OTP không thể tự thay đổi.</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Địa chỉ Email</label>
+            <input type="email" class="form-input" [(ngModel)]="profileForm.email" name="email">
+          </div>
+
+          <div class="form-divider"></div>
+          <h3 class="section-subheading">Đổi mật khẩu</h3>
+
+          <div class="form-group">
+            <label class="form-label">Mật khẩu mới</label>
+            <input type="password" class="form-input" placeholder="Tối thiểu 6 ký tự" [(ngModel)]="profileForm.newPassword" name="newPassword">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Xác nhận mật khẩu mới</label>
+            <input type="password" class="form-input" placeholder="Nhập lại mật khẩu mới" [(ngModel)]="profileForm.confirmPassword" name="confirmPassword">
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Lưu thay đổi</button>
+          </div>
+        </form>
+      </div>
+    }
+  </div>
+</div>
+
