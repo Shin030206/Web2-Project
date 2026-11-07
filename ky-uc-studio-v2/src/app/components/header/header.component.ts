@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService, User } from '../../services/auth.service';
@@ -10,6 +10,8 @@ import { AuthService, User } from '../../services/auth.service';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent implements OnInit {
+  private cdr = inject(ChangeDetectorRef);
+
   hotline = '0396581067';
   mobileMenuOpen: boolean = false;
   currentUser: User | null = null;
@@ -31,6 +33,7 @@ export class HeaderComponent implements OnInit {
     // Listen to user auth changes
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      this.cdr.markForCheck();
     });
 
     // Close mobile menu on route change
@@ -38,6 +41,7 @@ export class HeaderComponent implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe(() => {
       this.closeMobileMenu();
+      this.cdr.markForCheck();
     });
   }
 
@@ -48,16 +52,19 @@ export class HeaderComponent implements OnInit {
     } else {
       document.body.style.overflow = '';
     }
+    this.cdr.markForCheck();
   }
 
   closeMobileMenu(): void {
     this.mobileMenuOpen = false;
     document.body.style.overflow = '';
+    this.cdr.markForCheck();
   }
 
   logout(): void {
     this.authService.logout().subscribe(() => {
       this.closeMobileMenu();
+      this.cdr.markForCheck();
       this.router.navigate(['/']);
     });
   }

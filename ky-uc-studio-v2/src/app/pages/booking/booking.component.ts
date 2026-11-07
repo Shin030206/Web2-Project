@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BookingService, PaymentInfo, QuoteResponse } from '../../services/booking.service';
 import { PackageService } from '../../services/package.service';
@@ -14,6 +14,8 @@ import { Concept } from '../../models/concept.model';
   styleUrl: './booking.component.css'
 })
 export class BookingComponent implements OnInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
   // Packages & Concepts
   packages: Package[] = [];
   selectedPackage: Package | null = null;
@@ -92,6 +94,7 @@ export class BookingComponent implements OnInit, OnDestroy {
         if (!this.customerName) this.customerName = user.fullName || '';
         if (!this.customerPhone) this.customerPhone = user.phone || '';
         if (!this.customerEmail) this.customerEmail = user.email || '';
+        this.cdr.markForCheck();
       }
     });
 
@@ -121,10 +124,12 @@ export class BookingComponent implements OnInit, OnDestroy {
           this.selectedPackage = matched || pkgs[0];
           this.selectedPackageId = this.selectedPackage.package_id || this.selectedPackage.packageId || 102;
         }
+        this.cdr.markForCheck();
         // 2. Load draft if exists
         this.loadDraft();
       },
       error: () => {
+        this.cdr.markForCheck();
         // Fallback default
         this.loadDraft();
       }
@@ -142,6 +147,10 @@ export class BookingComponent implements OnInit, OnDestroy {
             this.selectedConceptCode = this.selectedConcept.concept_code;
           }
         }
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.cdr.markForCheck();
       }
     });
   }
@@ -186,11 +195,13 @@ export class BookingComponent implements OnInit, OnDestroy {
             this.quote = res.quote;
           }
         }
+        this.cdr.markForCheck();
         // Load slots and quote
         this.fetchSlots();
         this.fetchQuote();
       },
       error: () => {
+        this.cdr.markForCheck();
         this.fetchSlots();
         this.fetchQuote();
       }
@@ -230,10 +241,12 @@ export class BookingComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.loadingSlots = false;
         this.availableSlots = res.slots || [];
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loadingSlots = false;
         this.availableSlots = [];
+        this.cdr.markForCheck();
       }
     });
   }
@@ -248,6 +261,7 @@ export class BookingComponent implements OnInit, OnDestroy {
       // Focus phone field
       const phoneInput = document.getElementById('bookingPhoneInput');
       if (phoneInput) phoneInput.focus();
+      this.cdr.markForCheck();
       return;
     }
 
@@ -264,9 +278,11 @@ export class BookingComponent implements OnInit, OnDestroy {
         this.holdExpired = false;
         this.startHoldTimer(res.expiresInSeconds || 600);
         this.saveProgressDraft();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.bookingError = err.message || 'Khung giờ này vừa có người giữ chỗ, vui lòng chọn khung giờ khác!';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -277,12 +293,14 @@ export class BookingComponent implements OnInit, OnDestroy {
     this.holdTimerInterval = setInterval(() => {
       if (this.holdExpiresInSeconds > 0) {
         this.holdExpiresInSeconds--;
+        this.cdr.markForCheck();
       } else {
         this.clearHoldTimer();
         this.holdExpired = true;
         this.holdId = '';
         this.selectedSlot = null;
         this.bookingError = 'Thời gian giữ chỗ 10 phút đã hết hạn. Vui lòng chọn lại khung giờ!';
+        this.cdr.markForCheck();
       }
     }, 1000);
   }
@@ -315,12 +333,14 @@ export class BookingComponent implements OnInit, OnDestroy {
       next: (q) => {
         this.loadingQuote = false;
         this.quote = q;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.loadingQuote = false;
         if (this.voucherCode) {
           this.voucherError = err.message || 'Mã ưu đãi không hợp lệ!';
         }
+        this.cdr.markForCheck();
       }
     });
   }
@@ -333,19 +353,17 @@ export class BookingComponent implements OnInit, OnDestroy {
   saveProgressDraft(): void {
     this.bookingService.saveDraft({
       step: 1,
-      data: {
-        packageId: this.selectedPackageId,
-        conceptCode: this.selectedConceptCode,
-        bookingDate: this.bookingDate,
-        startTime: this.selectedSlot?.startTime,
-        holdId: this.holdId || undefined,
-        voucherCode: this.voucherCode ? this.voucherCode.trim() : undefined,
-        customer: {
-          name: this.customerName,
-          phone: this.customerPhone,
-          email: this.customerEmail,
-          note: this.note
-        }
+      packageId: this.selectedPackageId,
+      conceptCode: this.selectedConceptCode || undefined,
+      bookingDate: this.bookingDate || undefined,
+      startTime: this.selectedSlot?.startTime || undefined,
+      holdId: this.holdId || undefined,
+      voucherCode: this.voucherCode ? this.voucherCode.trim() : undefined,
+      customer: {
+        name: this.customerName || undefined,
+        phone: this.customerPhone || undefined,
+        email: this.customerEmail || undefined,
+        note: this.note || undefined
       }
     }).subscribe({
       error: () => {}
@@ -404,6 +422,7 @@ export class BookingComponent implements OnInit, OnDestroy {
         this.createdBookingId = res.bookingId;
         this.createdBookingCode = res.bookingCode;
         this.paymentInfo = res.paymentInfo || null;
+        this.cdr.markForCheck();
 
         // If VNPay: redirect immediately to paymentUrl
         if (this.selectedPaymentMethod === 'vnpay') {
@@ -415,6 +434,7 @@ export class BookingComponent implements OnInit, OnDestroy {
             },
             error: (vnpErr) => {
               this.bookingError = vnpErr.message || 'Không thể tạo link VNPay lúc này, vui lòng chuyển khoản ngân hàng!';
+              this.cdr.markForCheck();
             }
           });
         }
@@ -422,6 +442,7 @@ export class BookingComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.submittingBooking = false;
         this.bookingError = err.message || 'Đặt lịch chưa thành công, vui lòng kiểm tra lại thông tin!';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -437,11 +458,13 @@ export class BookingComponent implements OnInit, OnDestroy {
       next: () => {
         this.transferLoading = false;
         this.transferConfirmed = true;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.transferLoading = false;
         this.bookingError = err.message || 'Lỗi gửi xác nhận, studio sẽ đối soát giao dịch tự động.';
         this.transferConfirmed = true;
+        this.cdr.markForCheck();
       }
     });
   }

@@ -81,52 +81,7 @@
 
         <div class="card-line-divider"></div>
 
-        <!-- 2. Chọn Ngày & Khung Giờ (Real Slots from Server) -->
-        <div class="slot-picker-section">
-          <div class="date-picker-wrap">
-            <label class="item-label">Chọn ngày chụp *</label>
-            <input 
-              type="date" 
-              class="form-date-input" 
-              [(ngModel)]="bookingDate" 
-              [min]="minBookingDate" 
-              (change)="onDateChange()" 
-              name="bookingDate">
-          </div>
-
-          <div class="slots-grid-wrap">
-            <label class="item-label">Khung giờ chụp còn trống (Thời lượng {{ selectedPackage?.duration_minutes || 90 }} phút) *</label>
-            
-            @if (loadingSlots) {
-              <p class="slots-loading-text">Đang kiểm tra lịch trống...</p>
-            } @else {
-              @if (availableSlots.length === 0) {
-                <p class="slots-empty-text">Ngày này studio đã kín lịch hoặc không có giờ phù hợp. Quý khách vui lòng chọn ngày khác.</p>
-              } @else {
-                <div class="slots-chips-grid">
-                  @for (s of availableSlots; track s.startTime) {
-                    <button 
-                      type="button" 
-                      class="slot-chip" 
-                      [class.active]="selectedSlot?.startTime === s.startTime" 
-                      [class.disabled]="!s.available && s.status !== 'AVAILABLE'"
-                      [disabled]="!s.available && s.status !== 'AVAILABLE'"
-                      (click)="selectSlot(s)">
-                      <span class="slot-time">{{ s.startTime }}</span>
-                      <span class="slot-status">
-                        {{ s.status === 'AVAILABLE' ? 'Trống' : (s.status === 'HOLDING' ? 'Đang giữ' : 'Đã kín') }}
-                      </span>
-                    </button>
-                  }
-                </div>
-              }
-            }
-          </div>
-        </div>
-
-        <div class="card-line-divider"></div>
-
-        <!-- 3. Thông tin khách hàng -->
+        <!-- 2. Thông tin khách hàng (Nhập thông tin trước để hệ thống giữ chỗ khi chọn giờ) -->
         <div class="customer-info-section">
           <h3 class="subsection-title">Thông tin người đặt lịch</h3>
           <div class="customer-grid">
@@ -174,6 +129,51 @@
                 (ngModelChange)="saveProgressDraft()"
                 name="bookingNote"></textarea>
             </div>
+          </div>
+        </div>
+
+        <div class="card-line-divider"></div>
+
+        <!-- 3. Chọn Ngày & Khung Giờ (Real Slots from Server) -->
+        <div class="slot-picker-section">
+          <div class="date-picker-wrap">
+            <label class="item-label">Chọn ngày chụp *</label>
+            <input 
+              type="date" 
+              class="form-date-input" 
+              [(ngModel)]="bookingDate" 
+              [min]="minBookingDate" 
+              (change)="onDateChange()" 
+              name="bookingDate">
+          </div>
+
+          <div class="slots-grid-wrap">
+            <label class="item-label">Khung giờ chụp còn trống (Thời lượng {{ selectedPackage?.duration_minutes || 90 }} phút) *</label>
+            
+            @if (loadingSlots) {
+              <p class="slots-loading-text">Đang kiểm tra lịch trống...</p>
+            } @else {
+              @if (availableSlots.length === 0) {
+                <p class="slots-empty-text">Ngày này studio đã kín lịch hoặc không có giờ phù hợp. Quý khách vui lòng chọn ngày khác.</p>
+              } @else {
+                <div class="slots-chips-grid">
+                  @for (s of availableSlots; track s.startTime) {
+                    <button 
+                      type="button" 
+                      class="slot-chip" 
+                      [class.active]="selectedSlot?.startTime === s.startTime" 
+                      [class.disabled]="!s.available && s.status !== 'AVAILABLE'"
+                      [disabled]="!s.available && s.status !== 'AVAILABLE'"
+                      (click)="selectSlot(s)">
+                      <span class="slot-time">{{ s.startTime }}</span>
+                      <span class="slot-status">
+                        {{ s.status === 'AVAILABLE' ? 'Trống' : (s.status === 'HOLDING' ? 'Đang giữ' : 'Đã kín') }}
+                      </span>
+                    </button>
+                  }
+                </div>
+              }
+            }
           </div>
         </div>
 

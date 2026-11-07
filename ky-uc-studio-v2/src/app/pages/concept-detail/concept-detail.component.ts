@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConceptService } from '../../services/concept.service';
 import { Concept } from '../../models/concept.model';
@@ -10,6 +10,8 @@ import { Concept } from '../../models/concept.model';
   styleUrl: './concept-detail.component.css'
 })
 export class ConceptDetailComponent implements OnInit {
+  private cdr = inject(ChangeDetectorRef);
+
   concept: Concept | null = null;
   relatedConcepts: Concept[] = [];
   loading: boolean = true;
@@ -69,9 +71,11 @@ export class ConceptDetailComponent implements OnInit {
           this.relatedConcepts = concepts.slice(1, 5);
         }
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

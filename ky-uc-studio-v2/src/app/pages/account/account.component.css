@@ -508,3 +508,30 @@
   font-size: 0.9rem;
 }
 
+.empty-recent-booking {
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.empty-recent-booking .empty-text {
+  font-size: 0.95rem;
+  color: #7A6F68;
+  margin-bottom: 12px;
+}
+
+.btn-book-now-sm {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: var(--color-primary, #A68A5B);
+  color: #FFFFFF;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.btn-book-now-sm:hover {
+  opacity: 0.9;
+}
+

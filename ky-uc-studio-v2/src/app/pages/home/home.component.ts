@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 
 interface HeroSlide {
   image: string;
@@ -32,6 +32,8 @@ interface MosaicPhoto {
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
   // 1. CAROUSEL SLIDER (❖ Slider Component Figma 82:158)
   heroSlides: HeroSlide[] = [
     {
@@ -213,19 +215,23 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   goToSlide(index: number): void {
     this.currentSlideIndex = index;
+    this.cdr.markForCheck();
     this.startAutoPlay(); // Reset timer
   }
 
   nextSlide(): void {
     this.currentSlideIndex = (this.currentSlideIndex + 1) % this.heroSlides.length;
+    this.cdr.markForCheck();
   }
 
   prevSlide(): void {
     this.currentSlideIndex = (this.currentSlideIndex - 1 + this.heroSlides.length) % this.heroSlides.length;
+    this.cdr.markForCheck();
   }
 
   setCategory(cat: 'all' | 'family' | 'couple' | 'portrait'): void {
     this.selectedCategory = cat;
+    this.cdr.markForCheck();
   }
 
   submitConsult(): void {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BookingService } from '../../services/booking.service';
 
@@ -9,6 +9,8 @@ import { BookingService } from '../../services/booking.service';
   styleUrl: './payment-result.component.css'
 })
 export class PaymentResultComponent implements OnInit {
+  private cdr = inject(ChangeDetectorRef);
+
   loading: boolean = true;
   success: boolean = false;
   message: string = '';
@@ -28,6 +30,7 @@ export class PaymentResultComponent implements OnInit {
     if (!search) {
       this.loading = false;
       this.errorMessage = 'Không tìm thấy thông tin phản hồi từ cổng thanh toán.';
+      this.cdr.markForCheck();
       return;
     }
 
@@ -40,11 +43,13 @@ export class PaymentResultComponent implements OnInit {
         this.transactionCode = res.transactionCode || '';
         this.bankCode = res.bankCode || '';
         this.booking = res.booking || null;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.loading = false;
         this.success = false;
         this.errorMessage = err.message || 'Chữ ký phản hồi không hợp lệ hoặc giao dịch đã hết hạn.';
+        this.cdr.markForCheck();
       }
     });
   }

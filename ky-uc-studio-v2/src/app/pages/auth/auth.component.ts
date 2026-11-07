@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChildren, QueryList, ChangeDetectorRef, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -9,6 +9,8 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './auth.component.css'
 })
 export class AuthComponent implements OnInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
   // Mode: 'login' | 'register' | 'forgot'
   mode: 'login' | 'register' | 'forgot' = 'login';
   returnUrl: string = '/';
@@ -102,6 +104,7 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.regSuccess = '';
     this.forgotError = '';
     this.forgotSuccess = '';
+    this.cdr.markForCheck();
   }
 
   // Validate strong password matching server rules exactly
@@ -129,15 +132,18 @@ export class AuthComponent implements OnInit, OnDestroy {
     const account = this.loginPhoneOrEmail.trim();
     if (!account) {
       this.loginError = 'Vui lòng nhập số điện thoại hoặc email.';
+      this.cdr.markForCheck();
       return;
     }
 
     if (!this.loginPassword) {
       this.loginError = 'Vui lòng nhập mật khẩu của bạn.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.loginLoading = true;
+    this.cdr.markForCheck();
     this.authService.login({
       account: account,
       password: this.loginPassword,
@@ -146,6 +152,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.loginLoading = false;
         this.loginSuccess = res.message || 'Đăng nhập thành công! Đang chuyển hướng...';
+        this.cdr.markForCheck();
         setTimeout(() => {
           this.router.navigateByUrl(this.returnUrl);
         }, 800);
@@ -153,6 +160,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.loginLoading = false;
         this.loginError = err.error?.error || err.error?.message || err.message || 'Sai số điện thoại hoặc mật khẩu!';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -165,42 +173,50 @@ export class AuthComponent implements OnInit, OnDestroy {
     const fullName = this.regFullName.trim();
     if (!fullName) {
       this.regError = 'Vui lòng nhập họ và tên của bạn.';
+      this.cdr.markForCheck();
       return;
     }
 
     const cleanPhone = this.regPhone.trim().replace(/\s/g, '');
     if (!cleanPhone || !/^[0-9]{9,11}$/.test(cleanPhone)) {
       this.regError = 'Vui lòng nhập số điện thoại hợp lệ (9 - 11 chữ số).';
+      this.cdr.markForCheck();
       return;
     }
 
     const email = this.regEmail.trim();
     if (!email) {
       this.regError = 'Vui lòng nhập địa chỉ email để nhận thông tin bộ ảnh và tài khoản.';
+      this.cdr.markForCheck();
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       this.regError = 'Định dạng email chưa chính xác.';
+      this.cdr.markForCheck();
       return;
     }
 
     const passError = this.validatePasswordStrength(this.regPassword);
     if (passError) {
       this.regError = passError;
+      this.cdr.markForCheck();
       return;
     }
 
     if (this.regPassword !== this.regConfirmPassword) {
       this.regError = 'Mật khẩu xác nhận không khớp.';
+      this.cdr.markForCheck();
       return;
     }
 
     if (!this.regAgreeTerms) {
       this.regError = 'Vui lòng đồng ý với Điều khoản dịch vụ và Chính sách bảo mật.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.regLoading = true;
+    this.cdr.markForCheck();
     this.authService.register({
       fullName: fullName,
       email: email,
@@ -210,6 +226,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.regLoading = false;
         this.regSuccess = res.message || 'Đăng ký tài khoản thành công! Đang chuyển hướng...';
+        this.cdr.markForCheck();
         setTimeout(() => {
           this.router.navigateByUrl(this.returnUrl);
         }, 1000);
@@ -217,6 +234,7 @@ export class AuthComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.regLoading = false;
         this.regError = err.error?.error || err.error?.message || err.message || 'Đăng ký thất bại, vui lòng kiểm tra lại thông tin!';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -229,10 +247,12 @@ export class AuthComponent implements OnInit, OnDestroy {
     const target = this.forgotAccount.trim();
     if (!target) {
       this.forgotError = 'Vui lòng nhập số điện thoại hoặc email đã đăng ký.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.forgotLoading = true;
+    this.cdr.markForCheck();
     this.authService.forgotPassword({ account: target }).subscribe({
       next: (res) => {
         this.forgotLoading = false;
@@ -241,10 +261,12 @@ export class AuthComponent implements OnInit, OnDestroy {
         this.showOtpModal = true;
         this.resetOtpForm();
         this.startOtpTimer();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.forgotLoading = false;
         this.forgotError = err.error?.error || err.error?.message || err.message || 'Không thể gửi mã xác nhận lúc này!';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -254,21 +276,25 @@ export class AuthComponent implements OnInit, OnDestroy {
     const otp = this.otpDigits.join('');
     if (otp.length !== 6) {
       this.otpError = 'Vui lòng nhập đầy đủ 6 chữ số OTP.';
+      this.cdr.markForCheck();
       return;
     }
 
     const passError = this.validatePasswordStrength(this.forgotNewPassword);
     if (passError) {
       this.otpError = passError;
+      this.cdr.markForCheck();
       return;
     }
 
     if (this.forgotNewPassword !== this.forgotConfirmPassword) {
       this.otpError = 'Mật khẩu xác nhận không khớp.';
+      this.cdr.markForCheck();
       return;
     }
 
     this.forgotLoading = true;
+    this.cdr.markForCheck();
     this.authService.resetPassword({
       account: this.forgotAccount.trim(),
       otp: otp,
@@ -277,15 +303,18 @@ export class AuthComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.forgotLoading = false;
         this.otpSuccess = true;
+        this.cdr.markForCheck();
         setTimeout(() => {
           this.closeOtpModal();
           this.setMode('login');
           this.loginSuccess = 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.';
+          this.cdr.markForCheck();
         }, 1200);
       },
       error: (err) => {
         this.forgotLoading = false;
         this.otpError = err.error?.error || err.error?.message || err.message || 'Mã OTP không đúng hoặc đã hết hạn!';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -294,12 +323,14 @@ export class AuthComponent implements OnInit, OnDestroy {
   closeOtpModal(): void {
     this.showOtpModal = false;
     this.clearOtpTimer();
+    this.cdr.markForCheck();
   }
 
   resetOtpForm(): void {
     this.otpDigits = ['', '', '', '', '', ''];
     this.otpError = '';
     this.otpSuccess = false;
+    this.cdr.markForCheck();
   }
 
   startOtpTimer(): void {
@@ -308,8 +339,10 @@ export class AuthComponent implements OnInit, OnDestroy {
     this.otpTimerInterval = setInterval(() => {
       if (this.otpSecondsRemaining > 0) {
         this.otpSecondsRemaining--;
+        this.cdr.markForCheck();
       } else {
         this.clearOtpTimer();
+        this.cdr.markForCheck();
       }
     }, 1000);
   }

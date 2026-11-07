@@ -53,21 +53,19 @@ export interface QuoteResponse {
 }
 
 export interface DraftPayload {
-  step?: number;
-  data: {
-    packageId?: number | string;
-    conceptCode?: string;
-    addons?: string[];
-    voucherCode?: string;
-    bookingDate?: string;
-    startTime?: string;
-    holdId?: string;
-    customer?: {
-      name?: string;
-      phone?: string;
-      email?: string;
-      note?: string;
-    };
+  step?: number | string;
+  packageId?: number | string;
+  conceptCode?: string;
+  addons?: { addon_id: number; quantity?: number }[] | string[];
+  voucherCode?: string;
+  bookingDate?: string;
+  startTime?: string;
+  holdId?: string;
+  customer?: {
+    name?: string;
+    phone?: string;
+    email?: string;
+    note?: string;
   };
 }
 

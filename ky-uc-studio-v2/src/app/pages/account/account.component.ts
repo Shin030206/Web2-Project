@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
@@ -23,6 +23,8 @@ interface BookingRecord {
   styleUrl: './account.component.css'
 })
 export class AccountComponent implements OnInit {
+  private cdr = inject(ChangeDetectorRef);
+
   activeTab: 'overview' | 'bookings' | 'profile' | 'points' = 'overview';
   bookingFilter: 'all' | 'pending' | 'deposited' | 'completed' | 'cancelled' = 'all';
 
@@ -65,6 +67,7 @@ export class AccountComponent implements OnInit {
       } else if (path === 'profile') {
         this.activeTab = 'profile';
       }
+      this.cdr.markForCheck();
     });
 
     this.loadUserData();
@@ -84,10 +87,12 @@ export class AccountComponent implements OnInit {
         this.profileForm.phone = this.user.phone;
         this.profileForm.email = this.user.email;
 
+        this.cdr.markForCheck();
         this.loadBookings();
       },
       error: () => {
         this.loading = false;
+        this.cdr.markForCheck();
         if (!this.authService.isLoggedIn) {
           this.router.navigate(['/login'], { queryParams: { returnUrl: '/account' } });
         }
@@ -116,10 +121,12 @@ export class AccountComponent implements OnInit {
         } else {
           this.bookings = [];
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loading = false;
         this.bookings = [];
+        this.cdr.markForCheck();
       }
     });
   }
@@ -128,17 +135,21 @@ export class AccountComponent implements OnInit {
     this.user.name = this.profileForm.name;
     this.user.email = this.profileForm.email;
     this.profileSaved = true;
+    this.cdr.markForCheck();
     setTimeout(() => {
       this.profileSaved = false;
+      this.cdr.markForCheck();
     }, 3000);
   }
 
   setTab(tab: 'overview' | 'bookings' | 'profile' | 'points'): void {
     this.activeTab = tab;
+    this.cdr.markForCheck();
   }
 
   setFilter(filter: 'all' | 'pending' | 'deposited' | 'completed' | 'cancelled'): void {
     this.bookingFilter = filter;
+    this.cdr.markForCheck();
   }
 
   get filteredBookings(): BookingRecord[] {
