@@ -615,3 +615,100 @@
   box-shadow: 0 4px 12px rgba(87, 46, 47, 0.25);
 }
 
+/* ==========================================================================
+   SUCCESS MODAL (Figma: ĐĂNG KÝ (thành công))
+   ========================================================================== */
+.register-success-modal-box {
+  background-color: #FAF6F0;
+  border-radius: 16px;
+  width: 440px;
+  max-width: 90vw;
+  padding: 36px 32px 32px;
+  box-shadow: 0 20px 48px rgba(43, 33, 29, 0.25);
+  text-align: center;
+  position: relative;
+  animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.success-logo-wrap {
+  margin-bottom: 20px;
+}
+
+.success-modal-logo {
+  height: 34px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+.success-check-circle {
+  width: 52px;
+  height: 52px;
+  background-color: #4E7B5C;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  color: #FFFFFF;
+}
+
+.success-check-circle svg {
+  width: 26px;
+  height: 26px;
+}
+
+.success-modal-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #4A3B32;
+  margin-bottom: 10px;
+}
+
+.success-modal-msg {
+  font-size: 0.92rem;
+  color: #7D6E65;
+  line-height: 1.55;
+  margin-bottom: 24px;
+}
+
+.success-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-success-primary {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #6B4734;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-success-primary:hover {
+  background-color: #553728;
+}
+
+.btn-success-secondary {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #FFFFFF;
+  color: #6B4734;
+  border: 1px solid #D6CBC1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-success-secondary:hover {
+  background-color: #F5EFEB;
+}
+

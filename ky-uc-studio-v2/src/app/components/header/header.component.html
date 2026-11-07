@@ -24,6 +24,11 @@
     <!-- Header Actions (Desktop) -->
     <div class="header-actions">
       @if (currentUser) {
+        @if (currentUser.role === 'admin') {
+          <a routerLink="/admin" class="btn-outline btn-admin-badge" style="background:#5C4033;color:#fff;border-color:#5C4033;margin-right:6px;font-size:13px;padding:6px 12px;border-radius:6px;text-decoration:none;font-weight:600;">
+            Quản trị
+          </a>
+        }
         <a routerLink="/account" class="btn-account">
           <svg class="user-icon" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>

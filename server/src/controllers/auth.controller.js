@@ -61,12 +61,23 @@ exports.register = async (req, res) => {
   res.status(201).send({ message: "Đăng ký thành công!", ...(await startSession(req, res, user)) });
 };
 
-// Đăng nhập bằng email hoặc số điện thoại
+// Đăng nhập bằng email hoặc số điện thoại / username
 exports.login = async (req, res) => {
   requireFields(req.body, ["account", "password"]);
-  const account = String(req.body.account).trim().toLowerCase();
+  const account = String(req.body.account).trim();
+  const lower = account.toLowerCase();
   const user = await collections.userCollection.findOne(
-    account.includes("@") ? { email: account } : { phone: normalizePhone(account) }
+    account.includes("@")
+      ? { email: lower }
+      : {
+          $or: [
+            { phone: normalizePhone(account) },
+            { phone: account },
+            { username: account },
+            { username: lower },
+            { username: new RegExp(`^${account}$`, 'i') }
+          ]
+        }
   );
   if (!user || !(await bcrypt.compare(String(req.body.password), user.passwordHash))) {
     throw httpError(401, "Sai tài khoản hoặc mật khẩu!");

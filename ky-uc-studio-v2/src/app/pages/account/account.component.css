@@ -535,3 +535,340 @@
   opacity: 0.9;
 }
 
+/* ==========================================================================
+   BOOKING DETAIL VIEW (Figma Screen 2)
+   ========================================================================== */
+.back-link-btn {
+  background: none;
+  border: none;
+  color: #A68A5B;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.back-link-btn:hover {
+  text-decoration: underline;
+}
+
+.status-highlight {
+  color: #A68A5B;
+}
+
+.detail-card-box {
+  background: #FFFFFF;
+  border: 1px solid #EBE4DA;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.detail-section-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2B211D;
+  margin-bottom: 16px;
+}
+
+.detail-info-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.92rem;
+}
+
+.di-label {
+  color: #7A6F68;
+}
+
+.di-val {
+  color: #2B211D;
+  font-weight: 600;
+}
+
+.card-line-divider {
+  height: 1px;
+  background-color: #F0EAE1;
+  margin: 24px 0;
+}
+
+.detail-concept-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dc-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.dc-meta {
+  flex: 1;
+}
+
+.dc-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2B211D;
+  margin-bottom: 4px;
+}
+
+.dc-package {
+  font-size: 0.88rem;
+  color: #7A6F68;
+}
+
+.dc-price-col {
+  text-align: right;
+}
+
+.dc-price-main {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2B211D;
+}
+
+.dc-deposit-note {
+  font-size: 0.82rem;
+  color: #A68A5B;
+}
+
+.detail-status-section {
+  margin-bottom: 24px;
+}
+
+.status-indicator-tag {
+  display: inline-block;
+  padding: 6px 14px;
+  background-color: #FEF3C7;
+  color: #92400E;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+.detail-actions-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-cancel-action {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #D1D5DB;
+  color: #4B5563;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-contact-action {
+  padding: 10px 20px;
+  background-color: #6B4734;
+  color: #FFFFFF;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-detail-link {
+  background: none;
+  border: none;
+  color: #A68A5B;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-detail-link:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   POINTS VIEW (Figma Screen 3)
+   ========================================================================== */
+.points-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.point-stat-card {
+  background: #FFFFFF;
+  border: 1px solid #EBE4DA;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.stat-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.stat-icon-wrap.xu {
+  background-color: #FEF3C7;
+}
+
+.stat-icon-wrap.star {
+  background-color: #EDE9FE;
+}
+
+.stat-eyebrow {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #7A6F68;
+  margin-bottom: 4px;
+}
+
+.stat-number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #2B211D;
+  line-height: 1.2;
+}
+
+.stat-sub {
+  font-size: 0.8rem;
+  color: #9CA3AF;
+}
+
+.points-history-box {
+  background: #FFFFFF;
+  border: 1px solid #EBE4DA;
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.history-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.history-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2B211D;
+}
+
+.point-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.point-filters button {
+  background: #F4EFEA;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #7A6F68;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.point-filters button.active {
+  background: #2B211D;
+  color: #FFFFFF;
+}
+
+.point-txns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.txn-row-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F3EDE5;
+}
+
+.txn-row-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.txn-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.txn-badge.earn {
+  background-color: #ECFDF5;
+  color: #059669;
+}
+
+.txn-badge.spend {
+  background-color: #FEF2F2;
+  color: #DC2626;
+}
+
+.txn-details {
+  flex: 1;
+}
+
+.txn-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2B211D;
+  margin-bottom: 4px;
+}
+
+.txn-timestamp {
+  font-size: 0.82rem;
+  color: #9CA3AF;
+}
+
+.txn-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.txn-value.earn-val {
+  color: #059669;
+}
+
+.txn-value.spend-val {
+  color: #DC2626;
+}
+

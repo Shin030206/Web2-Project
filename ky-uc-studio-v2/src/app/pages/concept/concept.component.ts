@@ -160,11 +160,16 @@ export class ConceptComponent implements OnInit {
       return;
     }
     // Redirect to booking with query params
+    const matched = this.concepts.find(c => 
+      c.concept_name.toLowerCase() === (this.quickForm.favoriteConcept || '').toLowerCase() ||
+      c.concept_code.toLowerCase() === (this.quickForm.favoriteConcept || '').toLowerCase()
+    );
     this.router.navigate(['/dat-lich'], {
       queryParams: {
         name: this.quickForm.fullName,
         phone: this.quickForm.phone,
-        concept: this.quickForm.conceptInterest
+        concept: matched ? matched.concept_code : (this.quickForm.favoriteConcept || 'CD02'),
+        conceptCode: matched ? matched.concept_code : 'CD02'
       }
     });
   }

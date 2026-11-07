@@ -45,6 +45,7 @@ export class AuthComponent implements OnInit, OnDestroy {
 
   // OTP Modal state (Figma 383:13636 & Password Reset)
   showOtpModal: boolean = false;
+  showRegisterSuccessModal: boolean = false;
   otpDigits: string[] = ['', '', '', '', '', ''];
   otpSecondsRemaining: number = 300; // 5 minutes
   otpTimerInterval: any = null;
@@ -154,7 +155,11 @@ export class AuthComponent implements OnInit, OnDestroy {
         this.loginSuccess = res.message || 'Đăng nhập thành công! Đang chuyển hướng...';
         this.cdr.markForCheck();
         setTimeout(() => {
-          this.router.navigateByUrl(this.returnUrl);
+          if (res.user?.role === 'admin') {
+            this.router.navigateByUrl(this.returnUrl !== '/' ? this.returnUrl : '/admin');
+          } else {
+            this.router.navigateByUrl(this.returnUrl);
+          }
         }, 800);
       },
       error: (err) => {
@@ -225,11 +230,8 @@ export class AuthComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (res) => {
         this.regLoading = false;
-        this.regSuccess = res.message || 'Đăng ký tài khoản thành công! Đang chuyển hướng...';
+        this.showRegisterSuccessModal = true;
         this.cdr.markForCheck();
-        setTimeout(() => {
-          this.router.navigateByUrl(this.returnUrl);
-        }, 1000);
       },
       error: (err) => {
         this.regLoading = false;
@@ -237,6 +239,25 @@ export class AuthComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  closeRegisterSuccessModal(): void {
+    this.showRegisterSuccessModal = false;
+    this.cdr.markForCheck();
+  }
+
+  onRegisterSuccessLogin(): void {
+    this.showRegisterSuccessModal = false;
+    this.router.navigateByUrl(this.returnUrl || '/');
+  }
+
+  onRegisterSuccessContinue(): void {
+    this.showRegisterSuccessModal = false;
+    if (this.returnUrl && this.returnUrl.includes('dat-lich')) {
+      this.router.navigateByUrl('/dat-lich');
+    } else {
+      this.router.navigateByUrl('/');
+    }
   }
 
   // 3. Forgot Password Flow

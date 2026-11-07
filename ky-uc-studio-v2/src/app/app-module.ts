@@ -17,6 +17,7 @@ import { ConceptComponent } from './pages/concept/concept.component';
 import { ConceptDetailComponent } from './pages/concept-detail/concept-detail.component';
 import { AccountComponent } from './pages/account/account.component';
 import { PaymentResultComponent } from './pages/payment-result/payment-result.component';
+import { AdminComponent } from './pages/admin/admin.component';
 import { authInterceptor } from './interceptors/auth.interceptor';
 
 @NgModule({
@@ -33,7 +34,8 @@ import { authInterceptor } from './interceptors/auth.interceptor';
     ConceptComponent,
     ConceptDetailComponent,
     AccountComponent,
-    PaymentResultComponent
+    PaymentResultComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,

@@ -91,7 +91,9 @@ export class ConceptDetailComponent implements OnInit {
     if (this.concept) {
       this.router.navigate(['/dat-lich'], {
         queryParams: {
-          concept: this.concept.concept_name,
+          concept: this.concept.concept_code,
+          conceptCode: this.concept.concept_code,
+          conceptName: this.concept.concept_name,
           category: this.concept.category
         }
       });
@@ -107,7 +109,8 @@ export class ConceptDetailComponent implements OnInit {
       queryParams: {
         name: this.quickForm.fullName,
         phone: this.quickForm.phone,
-        concept: this.concept?.concept_name || this.quickForm.conceptInterest
+        concept: this.concept?.concept_code || this.quickForm.favoriteConcept || 'CD02',
+        conceptCode: this.concept?.concept_code || 'CD02'
       }
     });
   }

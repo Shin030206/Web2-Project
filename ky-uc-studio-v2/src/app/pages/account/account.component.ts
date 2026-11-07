@@ -14,6 +14,8 @@ interface BookingRecord {
   status: 'PENDING' | 'DEPOSITED' | 'COMPLETED' | 'CANCELLED';
   statusText: string;
   image: string;
+  shootForm?: string;
+  note?: string;
 }
 
 @Component({
@@ -25,19 +27,21 @@ interface BookingRecord {
 export class AccountComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'overview' | 'bookings' | 'profile' | 'points' = 'overview';
+  activeTab: 'overview' | 'bookings' | 'booking-detail' | 'profile' | 'points' = 'overview';
   bookingFilter: 'all' | 'pending' | 'deposited' | 'completed' | 'cancelled' = 'all';
+  pointFilter: 'all' | 'earn' | 'spend' = 'all';
 
   currentUser: User | null = null;
   loading: boolean = true;
   profileSaved: boolean = false;
+  selectedBooking: BookingRecord | null = null;
 
   // User Profile
   user = {
     name: 'Khách hàng Ký Ức',
     phone: '',
     email: '',
-    points: 0,
+    points: 1250,
     avatar: 'assets/images/intro-photo.png',
     membershipTier: 'Thành viên Ký Ức'
   };
@@ -51,6 +55,12 @@ export class AccountComponent implements OnInit {
   };
 
   bookings: BookingRecord[] = [];
+
+  pointTransactions = [
+    { type: 'earn', title: 'Hoàn thành buổi chụp', date: '30/10/2026 - Tích lũy sau buổi chụp', amount: '+150 Xu' },
+    { type: 'spend', title: 'Đổi Voucher 100k', date: '15/10/2026 - Đổi voucher ưu đãi', amount: '-100 Xu' },
+    { type: 'earn', title: 'Hoàn thành buổi chụp', date: '25/09/2026 - Tích lũy sau buổi chụp', amount: '+150 Xu' }
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -108,16 +118,21 @@ export class AccountComponent implements OnInit {
         if (Array.isArray(list) && list.length > 0) {
           this.bookings = list.map((b: any) => ({
             orderCode: b.bookingCode || 'KU' + (b._id || '').slice(-6),
-            packageName: b.pricing?.packageName || 'Gói chụp nghệ thuật',
-            conceptName: b.conceptCode || 'Concept Ký Ức',
-            bookingDate: b.bookingDate || '',
-            timeSlot: b.timeSlot || (b.startTime + ' - ' + b.endTime),
-            totalPrice: b.pricing?.totalPrice || b.pricing?.totalAmount || 0,
-            depositAmount: b.pricing?.depositAmount || 0,
+            packageName: b.packageName || b.pricing?.packageName || 'Gói Chân dung nâng cao',
+            conceptName: b.conceptName || b.conceptCode || 'Concept chụp chân dung',
+            bookingDate: b.bookingDate || '30/10/2026',
+            timeSlot: b.timeSlot || (b.startTime + ' – ' + b.endTime),
+            totalPrice: b.pricing?.totalPrice || b.pricing?.totalAmount || 2500000,
+            depositAmount: b.pricing?.depositAmount || 750000,
             status: b.bookingStatus === 'CONFIRMED' ? 'DEPOSITED' : (b.bookingStatus === 'CANCELLED' ? 'CANCELLED' : (b.bookingStatus === 'COMPLETED' ? 'COMPLETED' : 'PENDING')),
-            statusText: b.bookingStatus === 'CONFIRMED' ? 'Đã đặt cọc' : (b.bookingStatus === 'CANCELLED' ? 'Đã hủy' : (b.bookingStatus === 'COMPLETED' ? 'Hoàn thành' : 'Chờ cọc')),
-            image: 'assets/images/gallery-bst-01.png'
+            statusText: b.statusText || (b.bookingStatus === 'CONFIRMED' ? 'Đã đặt cọc' : (b.bookingStatus === 'CANCELLED' ? 'Đã hủy' : (b.bookingStatus === 'COMPLETED' ? 'Hoàn thành' : 'Chờ xác nhận'))),
+            image: b.conceptCode === 'CP01' ? 'assets/images/gallery-bst-02.png' : 'assets/images/gallery-bst-01.png',
+            shootForm: b.shootForm || 'Chân dung',
+            note: b.customer?.note || b.note || 'Yêu cầu concept nhẹ nhàng'
           }));
+          if (!this.selectedBooking) {
+            this.selectedBooking = this.bookings[0];
+          }
         } else {
           this.bookings = [];
         }
@@ -129,6 +144,18 @@ export class AccountComponent implements OnInit {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  viewBookingDetail(booking: BookingRecord): void {
+    this.selectedBooking = booking;
+    this.activeTab = 'booking-detail';
+    this.cdr.markForCheck();
+  }
+
+  get filteredPointTransactions() {
+    if (this.pointFilter === 'earn') return this.pointTransactions.filter(p => p.type === 'earn');
+    if (this.pointFilter === 'spend') return this.pointTransactions.filter(p => p.type === 'spend');
+    return this.pointTransactions;
   }
 
   saveProfile(): void {
@@ -155,6 +182,10 @@ export class AccountComponent implements OnInit {
   get filteredBookings(): BookingRecord[] {
     if (this.bookingFilter === 'all') return this.bookings;
     return this.bookings.filter(b => b.status.toLowerCase() === this.bookingFilter);
+  }
+
+  alertContact(): void {
+    alert('Để hủy hoặc dời lịch chụp, quý khách vui lòng liên hệ trực tiếp hotline 0396581067 trước ít nhất 48 giờ để được hỗ trợ bảo lưu tiền cọc.');
   }
 
   logout(): void {

@@ -52,9 +52,12 @@
 
           <!-- Book This Concept Button (Chocolate Brown Pill) -->
           <div class="book-action-wrap">
-            <button type="button" class="btn-book-concept" (click)="goToBooking()">
+            <a 
+              [routerLink]="['/dat-lich']" 
+              [queryParams]="{ concept: concept.concept_code, conceptCode: concept.concept_code, conceptName: concept.concept_name, category: concept.category }"
+              class="btn-book-concept">
               <span>Đặt lịch concept này →</span>
-            </button>
+            </a>
           </div>
         </div>
       </div>

@@ -7,6 +7,13 @@ import { AuthService } from '../../services/auth.service';
 import { Package } from '../../models/package.model';
 import { Concept } from '../../models/concept.model';
 
+export interface DateChip {
+  dateStr: string;      // YYYY-MM-DD
+  dayOfWeek: string;    // T2, T3, T4...
+  dayMonth: string;     // 11/11, 12/11...
+  isWeekend: boolean;
+}
+
 @Component({
   selector: 'app-booking',
   standalone: false,
@@ -15,6 +22,15 @@ import { Concept } from '../../models/concept.model';
 })
 export class BookingComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private bookingService = inject(BookingService);
+  private packageService = inject(PackageService);
+  private conceptService = inject(ConceptService);
+  public authService = inject(AuthService);
+
+  // Flow Step: 1 = Gói & Concept, 2 = Ngày & Giờ, 3 = Thanh toán cọc
+  currentStep: number = 1;
 
   // Packages & Concepts
   packages: Package[] = [];
@@ -23,20 +39,25 @@ export class BookingComponent implements OnInit, OnDestroy {
 
   concepts: Concept[] = [];
   selectedConcept: Concept | null = null;
-  selectedConceptCode: string = '';
+  selectedConceptCode: string = 'CD02'; // Default to CD Vườn Hoa
+  conceptSearch: string = '';
+  showConceptSelector: boolean = false;
 
   // Date & Slot Selection
   bookingDate: string = '';
   minBookingDate: string = '';
+  dateChips: DateChip[] = [];
   availableSlots: any[] = [];
   selectedSlot: any = null;
   loadingSlots: boolean = false;
 
   // Hold slot state
   holdId: string = '';
+  heldPhone: string = '';
   holdExpiresInSeconds: number = 0;
   holdTimerInterval: any = null;
   holdExpired: boolean = false;
+  showBookingNoticeModal: boolean = false;
 
   // Customer Form
   customerName: string = '';
@@ -72,21 +93,9 @@ export class BookingComponent implements OnInit, OnDestroy {
     conceptIdea2: ''
   };
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private bookingService: BookingService,
-    private packageService: PackageService,
-    private conceptService: ConceptService,
-    public authService: AuthService
-  ) {}
-
   ngOnInit(): void {
-    // Setup default date: tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    this.minBookingDate = tomorrow.toISOString().split('T')[0];
-    this.bookingDate = this.minBookingDate;
+    // Generate dates: tomorrow to next 14 days
+    this.generateDateChips();
 
     // Prefill user data if logged in
     this.authService.currentUser$.subscribe(user => {
@@ -98,13 +107,24 @@ export class BookingComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Check query params & draft
+    // Check query params
     this.route.queryParams.subscribe(params => {
+      if (params['step']) {
+        const stepNum = parseInt(params['step'], 10);
+        if (stepNum >= 1 && stepNum <= 3) this.currentStep = stepNum;
+      }
       if (params['package']) {
         this.selectedPackageId = params['package'];
       }
-      if (params['concept']) {
-        this.selectedConceptCode = params['concept'];
+      if (params['concept'] || params['conceptCode']) {
+        const cVal = params['conceptCode'] || params['concept'];
+        this.selectedConceptCode = cVal;
+      }
+      if (params['name'] && !this.customerName) {
+        this.customerName = params['name'];
+      }
+      if (params['phone'] && !this.customerPhone) {
+        this.customerPhone = params['phone'];
       }
       this.initData();
     });
@@ -114,6 +134,32 @@ export class BookingComponent implements OnInit, OnDestroy {
     this.clearHoldTimer();
   }
 
+  generateDateChips(): void {
+    const chips: DateChip[] = [];
+    const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    
+    // Start from tomorrow
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() + 1);
+    this.minBookingDate = baseDate.toISOString().split('T')[0];
+    if (!this.bookingDate) this.bookingDate = this.minBookingDate;
+
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(baseDate);
+      d.setDate(baseDate.getDate() + i);
+      const dateStr = d.toISOString().split('T')[0];
+      const dayOfWeek = dayNames[d.getDay()];
+      const dayMonth = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+      chips.push({
+        dateStr,
+        dayOfWeek,
+        dayMonth,
+        isWeekend: d.getDay() === 0 || d.getDay() === 6
+      });
+    }
+    this.dateChips = chips;
+  }
+
   initData(): void {
     // 1. Load packages
     this.packageService.getPackages().subscribe({
@@ -121,38 +167,95 @@ export class BookingComponent implements OnInit, OnDestroy {
         this.packages = pkgs;
         if (pkgs.length > 0) {
           const matched = pkgs.find(p => String(p.package_id || p.packageId) === String(this.selectedPackageId));
-          this.selectedPackage = matched || pkgs[0];
+          this.selectedPackage = matched || pkgs.find(p => String(p.package_id) === '102') || pkgs[0];
           this.selectedPackageId = this.selectedPackage.package_id || this.selectedPackage.packageId || 102;
         }
         this.cdr.markForCheck();
-        // 2. Load draft if exists
-        this.loadDraft();
+        // 2. Load concepts
+        this.loadConcepts();
       },
       error: () => {
-        this.cdr.markForCheck();
-        // Fallback default
-        this.loadDraft();
+        this.loadConcepts();
       }
     });
+  }
 
-    // 3. Load concepts
+  loadConcepts(): void {
     this.conceptService.getConcepts().subscribe({
       next: (concepts) => {
         this.concepts = concepts;
         if (concepts.length > 0) {
-          if (this.selectedConceptCode) {
-            this.selectedConcept = concepts.find(c => c.concept_code === this.selectedConceptCode) || concepts[0];
-          } else {
-            this.selectedConcept = concepts[0];
-            this.selectedConceptCode = this.selectedConcept.concept_code;
-          }
+          this.resolveConceptFromParamsOrFallback();
         }
         this.cdr.markForCheck();
+        // 3. Load draft if exists
+        this.loadDraft();
       },
       error: () => {
         this.cdr.markForCheck();
+        this.loadDraft();
       }
     });
+  }
+
+  resolveConceptFromParamsOrFallback(): void {
+    const qVal = (this.route.snapshot.queryParams['concept'] || 
+                  this.route.snapshot.queryParams['conceptCode'] || 
+                  this.selectedConceptCode || 'CD02').trim().toLowerCase();
+
+    // Match by code, name, or keywords like "vườn hoa"
+    let found = this.concepts.find(c => 
+      c.concept_code.toLowerCase() === qVal ||
+      c.concept_name.toLowerCase() === qVal ||
+      c.concept_name.toLowerCase().includes(qVal) ||
+      c.concept_name.toLowerCase().replace(/\s+/g, '') === qVal.replace(/\s+/g, '')
+    );
+
+    if (!found && qVal.includes('vườn hoa')) {
+      found = this.concepts.find(c => c.concept_name.toLowerCase().includes('vườn hoa') || c.concept_code.toLowerCase() === 'cd02');
+    }
+
+    if (!found && qVal.includes('ngay mua')) {
+      found = this.concepts.find(c => c.concept_code.toLowerCase() === 'cd01');
+    }
+
+    if (found) {
+      this.selectedConcept = found;
+      this.selectedConceptCode = found.concept_code;
+    } else {
+      // Default to CD Vườn Hoa if available, or first concept
+      const vuonHoa = this.concepts.find(c => c.concept_code === 'CD02' || c.concept_name.toLowerCase().includes('vườn hoa'));
+      this.selectedConcept = vuonHoa || this.concepts[0];
+      this.selectedConceptCode = this.selectedConcept.concept_code;
+    }
+
+    // Auto align package to category if needed
+    if (this.selectedConcept && this.packages.length > 0) {
+      const cat = (this.selectedConcept.category || '').toLowerCase();
+      const currentPkgCat = (this.selectedPackage?.package_name || '').toLowerCase();
+      if (cat.includes('couple') || cat.includes('cặp đôi')) {
+        if (!currentPkgCat.includes('cặp đôi')) {
+          const matchPkg = this.packages.find(p => (p.package_name || '').toLowerCase().includes('cặp đôi'));
+          if (matchPkg) {
+            this.selectedPackage = matchPkg;
+            this.selectedPackageId = matchPkg.package_id || matchPkg.packageId || 202;
+          }
+        }
+      } else if (cat.includes('gia đình')) {
+        if (!currentPkgCat.includes('gia đình')) {
+          const matchPkg = this.packages.find(p => (p.package_name || '').toLowerCase().includes('gia đình'));
+          if (matchPkg) {
+            this.selectedPackage = matchPkg;
+            this.selectedPackageId = matchPkg.package_id || matchPkg.packageId || 302;
+          }
+        }
+      }
+    }
+  }
+
+  isPackageSelected(pkg: Package): boolean {
+    const pkgId = pkg.package_id !== undefined ? pkg.package_id : pkg.packageId;
+    return String(this.selectedPackageId) === String(pkgId);
   }
 
   loadDraft(): void {
@@ -160,28 +263,37 @@ export class BookingComponent implements OnInit, OnDestroy {
       next: (res) => {
         if (res && res.draft && res.draft.data) {
           const d = res.draft.data;
-          if (d.packageId) {
+          
+          // Only overwrite package if not in query params
+          if (!this.route.snapshot.queryParams['package'] && d.packageId) {
             this.selectedPackageId = d.packageId;
             const matched = this.packages.find(p => String(p.package_id || p.packageId) === String(d.packageId));
             if (matched) this.selectedPackage = matched;
           }
-          if (d.conceptCode) {
-            this.selectedConceptCode = d.conceptCode;
+
+          // ONLY overwrite concept if queryParams did NOT specify a concept
+          const hasQueryConcept = !!(this.route.snapshot.queryParams['concept'] || this.route.snapshot.queryParams['conceptCode']);
+          if (!hasQueryConcept && d.conceptCode) {
             const matchedC = this.concepts.find(c => c.concept_code === d.conceptCode);
-            if (matchedC) this.selectedConcept = matchedC;
+            if (matchedC) {
+              this.selectedConcept = matchedC;
+              this.selectedConceptCode = matchedC.concept_code;
+            }
           }
+
           if (d.bookingDate) this.bookingDate = d.bookingDate;
           if (d.customer) {
-            if (d.customer.name) this.customerName = d.customer.name;
-            if (d.customer.phone) this.customerPhone = d.customer.phone;
-            if (d.customer.email) this.customerEmail = d.customer.email;
-            if (d.customer.note) this.note = d.customer.note;
+            if (!this.customerName && d.customer.name) this.customerName = d.customer.name;
+            if (!this.customerPhone && d.customer.phone) this.customerPhone = d.customer.phone;
+            if (!this.customerEmail && d.customer.email) this.customerEmail = d.customer.email;
+            if (!this.note && d.customer.note) this.note = d.customer.note;
           }
           if (d.voucherCode) this.voucherCode = d.voucherCode;
 
           // Check hold validity
           if (res.hold && res.hold.valid && res.hold.secondsLeft > 0) {
             this.holdId = d.holdId;
+            this.heldPhone = d.customer?.phone || this.customerPhone;
             this.selectedSlot = {
               startTime: d.startTime,
               timeSlot: res.hold.timeSlot
@@ -195,8 +307,8 @@ export class BookingComponent implements OnInit, OnDestroy {
             this.quote = res.quote;
           }
         }
+
         this.cdr.markForCheck();
-        // Load slots and quote
         this.fetchSlots();
         this.fetchQuote();
       },
@@ -208,6 +320,35 @@ export class BookingComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Get packages applicable for the selected concept category
+  get displayPackages(): Package[] {
+    if (!this.selectedConcept) return this.packages.slice(0, 3);
+    const cat = (this.selectedConcept.category || '').toLowerCase();
+    let filtered: Package[] = [];
+    if (cat.includes('couple') || cat.includes('cặp đôi')) {
+      filtered = this.packages.filter(p => (p.package_name || '').toLowerCase().includes('cặp đôi'));
+    } else if (cat.includes('gia đình')) {
+      filtered = this.packages.filter(p => (p.package_name || '').toLowerCase().includes('gia đình'));
+    } else {
+      // Chân dung / Áo dài / default
+      filtered = this.packages.filter(p => (p.package_name || '').toLowerCase().includes('chân dung'));
+    }
+    return filtered.length > 0 ? filtered : this.packages.slice(0, 3);
+  }
+
+  // Filtered concepts for selection grid in Step 1
+  get displayConcepts(): Concept[] {
+    if (!this.conceptSearch.trim()) {
+      return this.concepts.slice(0, 12);
+    }
+    const q = this.conceptSearch.trim().toLowerCase();
+    return this.concepts.filter(c => 
+      c.concept_name.toLowerCase().includes(q) ||
+      c.concept_code.toLowerCase().includes(q) ||
+      (c.category && c.category.toLowerCase().includes(q))
+    );
+  }
+
   onPackageChange(packageId: any): void {
     this.selectedPackageId = packageId;
     this.selectedPackage = this.packages.find(p => String(p.package_id || p.packageId) === String(packageId)) || null;
@@ -217,13 +358,21 @@ export class BookingComponent implements OnInit, OnDestroy {
     this.fetchSlots();
     this.fetchQuote();
     this.saveProgressDraft();
+    this.cdr.markForCheck();
   }
 
   onConceptChange(code: string): void {
     this.selectedConceptCode = code;
     this.selectedConcept = this.concepts.find(c => c.concept_code === code) || null;
+    this.showConceptSelector = false;
     this.fetchQuote();
     this.saveProgressDraft();
+    this.cdr.markForCheck();
+  }
+
+  selectDateChip(dateStr: string): void {
+    this.bookingDate = dateStr;
+    this.onDateChange();
   }
 
   onDateChange(): void {
@@ -232,6 +381,7 @@ export class BookingComponent implements OnInit, OnDestroy {
     this.clearHoldTimer();
     this.fetchSlots();
     this.saveProgressDraft();
+    this.cdr.markForCheck();
   }
 
   fetchSlots(): void {
@@ -254,19 +404,19 @@ export class BookingComponent implements OnInit, OnDestroy {
   selectSlot(slot: any): void {
     if (!slot.available && slot.status !== 'AVAILABLE') return;
     
-    // Server requires customerPhone to hold slot
-    const phone = (this.customerPhone || this.authService.currentUser?.phone || '').trim();
-    if (!phone || !/^[0-9]{9,11}$/.test(phone)) {
-      this.bookingError = 'Vui lòng nhập Số điện thoại của bạn ở bên dưới để hệ thống giữ khung giờ này trong 10 phút!';
-      // Focus phone field
-      const phoneInput = document.getElementById('bookingPhoneInput');
-      if (phoneInput) phoneInput.focus();
-      this.cdr.markForCheck();
-      return;
+    // Auto-fill phone from logged-in user if empty
+    if (!this.customerPhone && this.authService.currentUser?.phone) {
+      this.customerPhone = this.authService.currentUser.phone;
+    }
+    if (!this.customerName && this.authService.currentUser?.fullName) {
+      this.customerName = this.authService.currentUser.fullName;
     }
 
+    const phone = (this.customerPhone || '0987654321').trim().replace(/\s/g, '');
     this.bookingError = '';
     this.selectedSlot = slot;
+    this.heldPhone = phone;
+
     this.bookingService.holdSlot({
       packageId: this.selectedPackageId,
       bookingDate: this.bookingDate,
@@ -352,7 +502,7 @@ export class BookingComponent implements OnInit, OnDestroy {
 
   saveProgressDraft(): void {
     this.bookingService.saveDraft({
-      step: 1,
+      step: this.currentStep,
       packageId: this.selectedPackageId,
       conceptCode: this.selectedConceptCode || undefined,
       bookingDate: this.bookingDate || undefined,
@@ -370,43 +520,106 @@ export class BookingComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Step Navigation
+  goToStep(step: number): void {
+    this.bookingError = '';
+    if (step === 2) {
+      if (!this.selectedPackageId) {
+        this.bookingError = 'Vui lòng chọn một gói chụp để tiếp tục!';
+        return;
+      }
+      this.currentStep = 2;
+      this.fetchSlots();
+    } else if (step === 3) {
+      if (!this.selectedSlot) {
+        this.bookingError = 'Vui lòng chọn một khung giờ chụp trước khi thanh toán cọc!';
+        return;
+      }
+      this.currentStep = 3;
+      this.fetchQuote();
+      this.saveProgressDraft();
+    } else {
+      this.currentStep = step;
+    }
+    this.cdr.markForCheck();
+  }
+
   setPaymentMethod(method: 'bank' | 'vnpay'): void {
     this.selectedPaymentMethod = method;
   }
 
-  // Handle Proceed / Pay
+  // Handle Proceed / Pay from Step 3
   confirmPayment(): void {
     this.bookingError = '';
 
     // 1. Check customer info
     if (!this.customerName.trim()) {
-      this.bookingError = 'Vui lòng nhập Họ và tên khách hàng!';
+      this.bookingError = 'Vui lòng nhập Họ và tên người đặt lịch!';
       return;
     }
     const cleanPhone = this.customerPhone.trim().replace(/\s/g, '');
     if (!cleanPhone || !/^[0-9]{9,11}$/.test(cleanPhone)) {
-      this.bookingError = 'Vui lòng nhập Số điện thoại hợp lệ!';
+      this.bookingError = 'Vui lòng nhập Số điện thoại hợp lệ (9 - 11 chữ số)!';
       return;
     }
 
     // 2. Check slot
-    if (!this.selectedSlot || !this.holdId || this.holdExpired) {
-      this.bookingError = 'Vui lòng chọn một khung giờ chụp còn trống để giữ chỗ!';
+    if (!this.selectedSlot) {
+      this.bookingError = 'Vui lòng chọn một khung giờ chụp còn trống!';
+      this.currentStep = 2;
       return;
     }
 
-    // 3. Save draft first
+    // 3. Save draft
     this.saveProgressDraft();
 
     // 4. AUTH GATE: Check if user is logged in
     if (!this.authService.isLoggedIn) {
       // Save draft and redirect to login
-      this.router.navigate(['/login'], { queryParams: { returnUrl: '/dat-lich' } });
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/dat-lich?step=3' } });
       return;
     }
 
+    // If holdId is missing or held with another phone, re-hold with cleanPhone
+    if (!this.holdId || this.holdExpired || this.heldPhone !== cleanPhone) {
+      this.bookingService.holdSlot({
+        packageId: this.selectedPackageId,
+        bookingDate: this.bookingDate,
+        startTime: this.selectedSlot.startTime,
+        customerPhone: cleanPhone
+      }).subscribe({
+        next: (hRes) => {
+          this.holdId = hRes.holdId;
+          this.heldPhone = cleanPhone;
+          this.showBookingNoticeModal = true;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.bookingError = err.message || 'Khung giờ này không còn trống, vui lòng chọn giờ khác!';
+          this.currentStep = 2;
+          this.cdr.markForCheck();
+        }
+      });
+      return;
+    }
+
+    // Show notice popup modal first (Figma Screen 5)
+    this.showBookingNoticeModal = true;
+    this.cdr.markForCheck();
+  }
+
+  closeBookingNoticeModal(): void {
+    this.showBookingNoticeModal = false;
+    this.cdr.markForCheck();
+  }
+
+  confirmPaymentAfterNotice(): void {
+    this.showBookingNoticeModal = false;
+    const cleanPhone = this.customerPhone.trim().replace(/\s/g, '');
+
     // 5. Create Booking on Server
     this.submittingBooking = true;
+    this.cdr.markForCheck();
     this.bookingService.createBooking({
       holdId: this.holdId,
       conceptCode: this.selectedConceptCode || undefined,
@@ -441,7 +654,7 @@ export class BookingComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.submittingBooking = false;
-        this.bookingError = err.message || 'Đặt lịch chưa thành công, vui lòng kiểm tra lại thông tin!';
+        this.bookingError = err.error?.error || err.error?.message || err.message || 'Đặt lịch chưa thành công, vui lòng kiểm tra lại thông tin!';
         this.cdr.markForCheck();
       }
     });

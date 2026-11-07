@@ -404,4 +404,42 @@
       </div>
     </div>
   }
+
+  <!-- =========================================================================
+       POPUP MODAL ĐĂNG KÝ THÀNH CÔNG (Figma Reference: Node ĐĂNG KÝ (thành công))
+       ========================================================================= -->
+  @if (showRegisterSuccessModal) {
+    <div class="otp-modal-backdrop" (click)="closeRegisterSuccessModal()">
+      <div class="register-success-modal-box" (click)="$event.stopPropagation()">
+        <!-- Ký Ức Logo -->
+        <div class="success-logo-wrap">
+          <img src="assets/03.01. Home/Header/Logo.png" alt="Ký Ức" class="success-modal-logo" onerror="this.style.display='none'">
+        </div>
+
+        <!-- Green Checkmark Circle -->
+        <div class="success-check-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <!-- Title & Message -->
+        <h3 class="success-modal-title">Đăng ký tài khoản thành công!</h3>
+        <p class="success-modal-msg">
+          Chào mừng bạn gia nhập Ký Ức Studio!<br>
+          Tài khoản của bạn đã được kích hoạt thành công.
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="success-modal-actions">
+          <button type="button" class="btn-success-primary" (click)="onRegisterSuccessLogin()">
+            Đăng nhập ngay
+          </button>
+          <button type="button" class="btn-success-secondary" (click)="onRegisterSuccessContinue()">
+            {{ returnUrl && returnUrl.includes('dat-lich') ? 'Tiếp tục đặt lịch' : 'Về trang chủ' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

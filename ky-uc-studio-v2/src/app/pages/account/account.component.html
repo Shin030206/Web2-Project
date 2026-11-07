@@ -14,21 +14,28 @@
         type="button" 
         class="tab-link" 
         [class.active]="activeTab === 'overview'" 
-        (click)="activeTab = 'overview'">
+        (click)="setTab('overview')">
         Tổng quan
       </button>
       <button 
         type="button" 
         class="tab-link" 
-        [class.active]="activeTab === 'bookings'" 
-        (click)="activeTab = 'bookings'">
+        [class.active]="activeTab === 'bookings' || activeTab === 'booking-detail'" 
+        (click)="setTab('bookings')">
         Lịch sử đặt lịch
       </button>
       <button 
         type="button" 
         class="tab-link" 
+        [class.active]="activeTab === 'points'" 
+        (click)="setTab('points')">
+        Lịch sử điểm thưởng
+      </button>
+      <button 
+        type="button" 
+        class="tab-link" 
         [class.active]="activeTab === 'profile'" 
-        (click)="activeTab = 'profile'">
+        (click)="setTab('profile')">
         Chỉnh sửa thông tin
       </button>
     </div>
@@ -51,12 +58,12 @@
             </div>
             <div class="user-info-text">
               <h3 class="user-name">{{ user.name }}</h3>
-              <p class="user-phone">SĐT: {{ user.phone }}</p>
+              <p class="user-phone">Số điện thoại đã đăng ký: {{ user.phone }}</p>
               <span class="membership-badge">{{ user.membershipTier }}</span>
             </div>
           </div>
           <div class="card-foot-action">
-            <button class="link-btn" (click)="activeTab = 'profile'">Chỉnh sửa thông tin →</button>
+            <button class="link-btn" (click)="setTab('profile')">Chỉnh sửa thông tin →</button>
           </div>
         </div>
 
@@ -67,12 +74,12 @@
           </div>
           <div class="points-body">
             <div class="points-val-box">
-              <span class="points-val">{{ user.points }} Xu</span>
+              <span class="points-val">{{ user.points | number }} Xu</span>
             </div>
             <p class="points-desc">Số dư Ký Ức Xu dùng để giảm giá đặt cọc hoặc nâng cấp dịch vụ chụp ảnh.</p>
           </div>
           <div class="card-foot-action">
-            <button class="link-btn" (click)="activeTab = 'bookings'">Ưu đãi của bạn →</button>
+            <button class="link-btn" (click)="setTab('points')">Xem lịch sử điểm →</button>
           </div>
         </div>
 
@@ -80,7 +87,7 @@
         <div class="account-card booking-card-col">
           <div class="card-top-header between">
             <span class="card-eyebrow">LỊCH ĐẶT CỦA TÔI</span>
-            <button class="link-btn small" (click)="activeTab = 'bookings'">Xem tất cả →</button>
+            <button class="link-btn small" (click)="setTab('bookings')">Xem tất cả →</button>
           </div>
 
           @if (bookings && bookings.length > 0) {
@@ -90,11 +97,12 @@
               </div>
               <div class="rb-right">
                 <span class="rb-code">MÃ ĐẶT LỊCH: {{ bookings[0].orderCode }}</span>
-                <h4 class="rb-title">{{ bookings[0].conceptName }} ({{ bookings[0].packageName }})</h4>
+                <h4 class="rb-title">{{ bookings[0].conceptName }}</h4>
                 <p class="rb-date">Ngày chụp: {{ bookings[0].bookingDate }} ({{ bookings[0].timeSlot }})</p>
                 <div class="rb-status-tag" [class.pending]="bookings[0].status === 'PENDING'">
                   Trạng thái: {{ bookings[0].statusText }}
                 </div>
+                <button type="button" class="link-btn small mt-1" style="display: block; margin-top: 6px; text-align: left;" (click)="viewBookingDetail(bookings[0])">Xem chi tiết →</button>
               </div>
             </div>
           } @else {
@@ -111,17 +119,17 @@
             <span class="card-eyebrow">TIỆN ÍCH TÀI KHOẢN</span>
           </div>
           <div class="utilities-list">
-            <div class="utility-item" (click)="activeTab = 'bookings'">
+            <div class="utility-item" (click)="setTab('bookings')">
               <span class="utility-icon">📅</span>
               <span class="utility-name">Lịch sử đặt lịch</span>
               <span class="utility-arrow">›</span>
             </div>
-            <div class="utility-item" (click)="activeTab = 'bookings'">
+            <div class="utility-item" (click)="setTab('points')">
               <span class="utility-icon">💳</span>
-              <span class="utility-name">Lịch sử thanh toán cọc</span>
+              <span class="utility-name">Lịch sử điểm thưởng</span>
               <span class="utility-arrow">›</span>
             </div>
-            <div class="utility-item" (click)="activeTab = 'profile'">
+            <div class="utility-item" (click)="setTab('profile')">
               <span class="utility-icon">⚙️</span>
               <span class="utility-name">Cài đặt tài khoản & Mật khẩu</span>
               <span class="utility-arrow">›</span>
@@ -132,7 +140,7 @@
     }
 
     <!-- =========================================================================
-         TAB 2: LỊCH SỬ ĐẶT LỊCH (Figma 429:12629)
+         TAB 2: LỊCH SỬ ĐẶT LỊCH (Figma Screen 1)
          ========================================================================= -->
     @if (activeTab === 'bookings') {
       <div class="bookings-view">
@@ -143,11 +151,11 @@
 
         <!-- Filter bar matching Figma Group 2492 -->
         <div class="booking-filters">
-          <button [class.active]="bookingFilter === 'all'" (click)="bookingFilter = 'all'">Tất cả</button>
-          <button [class.active]="bookingFilter === 'pending'" (click)="bookingFilter = 'pending'">Chờ xác nhận</button>
-          <button [class.active]="bookingFilter === 'deposited'" (click)="bookingFilter = 'deposited'">Đã đặt cọc</button>
-          <button [class.active]="bookingFilter === 'completed'" (click)="bookingFilter = 'completed'">Hoàn thành</button>
-          <button [class.active]="bookingFilter === 'cancelled'" (click)="bookingFilter = 'cancelled'">Đã hủy</button>
+          <button [class.active]="bookingFilter === 'all'" (click)="setFilter('all')">Tất cả</button>
+          <button [class.active]="bookingFilter === 'pending'" (click)="setFilter('pending')">Chờ xác nhận</button>
+          <button [class.active]="bookingFilter === 'deposited'" (click)="setFilter('deposited')">Đã đặt cọc</button>
+          <button [class.active]="bookingFilter === 'completed'" (click)="setFilter('completed')">Hoàn thành</button>
+          <button [class.active]="bookingFilter === 'cancelled'" (click)="setFilter('cancelled')">Đã hủy</button>
         </div>
 
         <!-- Bookings Cards List -->
@@ -166,13 +174,14 @@
                   </span>
                 </div>
 
-                <h3 class="item-concept-name">{{ item.conceptName }} — {{ item.packageName }}</h3>
+                <h3 class="item-concept-name">{{ item.conceptName }}</h3>
+                <p class="item-detail-line"><strong>Gói dịch vụ:</strong> {{ item.packageName }}</p>
                 <p class="item-detail-line"><strong>Thời gian chụp:</strong> {{ item.bookingDate }} ({{ item.timeSlot }})</p>
                 <p class="item-detail-line"><strong>Tổng chi phí:</strong> {{ item.totalPrice | number }}đ (Đã cọc 30%: {{ item.depositAmount | number }}đ)</p>
               </div>
 
               <div class="item-action-col">
-                <a routerLink="/dat-lich" class="btn-outline small">Đặt lại lịch</a>
+                <button type="button" class="btn-detail-link" (click)="viewBookingDetail(item)">Xem chi tiết →</button>
               </div>
             </div>
           }
@@ -181,7 +190,133 @@
     }
 
     <!-- =========================================================================
-         TAB 3: CHỈNH SỬA THÔNG TIN (Figma 437:13484)
+         TAB 3: CHI TIẾT ĐẶT LỊCH (Figma Screen 2)
+         ========================================================================= -->
+    @if (activeTab === 'booking-detail' && selectedBooking) {
+      <div class="booking-detail-view">
+        <div class="view-header">
+          <div class="breadcrumb" style="margin-bottom: 8px;">
+            <button type="button" class="back-link-btn" (click)="setTab('bookings')">← Quay lại danh sách đặt lịch</button>
+          </div>
+          <h2 class="view-title">Chi tiết đặt lịch</h2>
+          <p class="view-subtitle">Mã đơn: <strong>{{ selectedBooking.orderCode }}</strong></p>
+        </div>
+
+        <div class="detail-card-box">
+          <h3 class="detail-section-title">Thông tin đặt lịch</h3>
+          <div class="detail-info-table">
+            <div class="detail-info-row">
+              <span class="di-label">Ngày chụp dự kiến:</span>
+              <span class="di-val">{{ selectedBooking.bookingDate }}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="di-label">Hình thức chụp:</span>
+              <span class="di-val">{{ selectedBooking.shootForm || 'Chân dung' }}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="di-label">Khung giờ:</span>
+              <span class="di-val">{{ selectedBooking.timeSlot }}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="di-label">Ghi chú:</span>
+              <span class="di-val">{{ selectedBooking.note || '—' }}</span>
+            </div>
+          </div>
+
+          <div class="card-line-divider"></div>
+
+          <h3 class="detail-section-title">Dịch vụ đã chọn</h3>
+          <div class="detail-concept-item">
+            <img [src]="selectedBooking.image" alt="Concept" class="dc-img">
+            <div class="dc-meta">
+              <h4 class="dc-name">{{ selectedBooking.conceptName }}</h4>
+              <p class="dc-package">{{ selectedBooking.packageName }}</p>
+            </div>
+            <div class="dc-price-col">
+              <span class="dc-price-main">{{ selectedBooking.totalPrice | number }}đ</span>
+              <small class="dc-deposit-note">Đã cọc 30%: {{ selectedBooking.depositAmount | number }}đ</small>
+            </div>
+          </div>
+
+          <div class="card-line-divider"></div>
+
+          <div class="detail-status-section">
+            <span class="status-indicator-tag" [class.pending]="selectedBooking.status === 'PENDING'">
+              Trạng thái: {{ selectedBooking.statusText }}
+            </span>
+          </div>
+
+          <div class="detail-actions-footer">
+            <button type="button" class="btn-cancel-action" (click)="alertContact()">Hủy lịch đặt</button>
+            <a href="tel:0396581067" class="btn-contact-action">Liên hệ Studio: 0396581067</a>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- =========================================================================
+         TAB 4: LỊCH SỬ ĐIỂM THƯỞNG (Figma Screen 3)
+         ========================================================================= -->
+    @if (activeTab === 'points') {
+      <div class="points-view">
+        <div class="view-header">
+          <h2 class="view-title">Lịch sử điểm thưởng</h2>
+          <p class="view-subtitle">Tích lũy Ký Ức Xu qua mỗi buổi chụp để đổi voucher và quà tặng.</p>
+        </div>
+
+        <!-- 2 Stat Boxes -->
+        <div class="points-stat-grid">
+          <div class="point-stat-card">
+            <div class="stat-icon-wrap xu">🪙</div>
+            <div class="stat-content">
+              <span class="stat-eyebrow">XU HIỆN CÓ</span>
+              <h3 class="stat-number">{{ user.points | number }}</h3>
+            </div>
+          </div>
+
+          <div class="point-stat-card">
+            <div class="stat-icon-wrap star">⭐</div>
+            <div class="stat-content">
+              <span class="stat-eyebrow">TỔNG SAO TÍCH LŨY</span>
+              <h3 class="stat-number">850</h3>
+              <span class="stat-sub">Dùng xét hạng thành viên</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transaction List -->
+        <div class="points-history-box">
+          <div class="history-top-row">
+            <h3 class="history-title">Giao dịch điểm</h3>
+            <div class="point-filters">
+              <button [class.active]="pointFilter === 'all'" (click)="pointFilter = 'all'">Tất cả</button>
+              <button [class.active]="pointFilter === 'earn'" (click)="pointFilter = 'earn'">Điểm cộng</button>
+              <button [class.active]="pointFilter === 'spend'" (click)="pointFilter = 'spend'">Điểm trừ</button>
+            </div>
+          </div>
+
+          <div class="point-txns-list">
+            @for (txn of filteredPointTransactions; track $index) {
+              <div class="txn-row-item">
+                <div class="txn-badge" [class.earn]="txn.type === 'earn'" [class.spend]="txn.type === 'spend'">
+                  {{ txn.type === 'earn' ? '✓' : '−' }}
+                </div>
+                <div class="txn-details">
+                  <h4 class="txn-name">{{ txn.title }}</h4>
+                  <p class="txn-timestamp">{{ txn.date }}</p>
+                </div>
+                <div class="txn-value" [class.earn-val]="txn.type === 'earn'" [class.spend-val]="txn.type === 'spend'">
+                  {{ txn.amount }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- =========================================================================
+         TAB 5: CHỈNH SỬA THÔNG TIN (Figma Screen 4)
          ========================================================================= -->
     @if (activeTab === 'profile') {
       <div class="profile-view">

@@ -1,0 +1,841 @@
+<div class="admin-layout">
+  <!-- =========================================================================
+       SIDEBAR TRÁI (Figma Style)
+       ========================================================================= -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/03.01. Home/Header/Logo.png" alt="Ký Ức Studio" class="sidebar-logo" onerror="this.style.display='none'">
+      <div class="brand-text-wrap">
+        <span class="brand-name">KÝ ỨC STUDIO</span>
+        <span class="brand-sub">PORTAL QUẢN TRỊ</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeTab === 'dashboard'" 
+        (click)="setTab('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Dashboard</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeTab === 'bookings'" 
+        (click)="setTab('bookings')">
+        <span class="nav-icon">📅</span>
+        <span class="nav-text">Quản lí đặt lịch</span>
+        <span class="nav-badge" *ngIf="pendingBookingsCount > 0">{{ pendingBookingsCount }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeTab === 'catalog'" 
+        (click)="setTab('catalog')">
+        <span class="nav-icon">📁</span>
+        <span class="nav-text">Quản lí catalog</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeTab === 'customers'" 
+        (click)="setTab('customers')">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Quản lí khách hàng</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeTab === 'reviews'" 
+        (click)="setTab('reviews')">
+        <span class="nav-icon">⭐</span>
+        <span class="nav-text">Kiểm duyệt đánh giá</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a routerLink="/" class="btn-back-home">
+        <span>← Về trang chủ</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       KHU VỰC CHÍNH (MAIN CONTENT)
+       ========================================================================= -->
+  <main class="admin-main">
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="topbar-search">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Tìm kiếm nhanh đơn hàng, khách hàng, concept..." class="topbar-search-input">
+      </div>
+
+      <div class="topbar-user-area">
+        <div class="admin-user-pill">
+          <div class="admin-avatar">AD</div>
+          <div class="admin-meta">
+            <span class="admin-name">Admin</span>
+            <span class="admin-role">Quản trị viên</span>
+          </div>
+        </div>
+
+        <button type="button" class="btn-admin-logout" (click)="logout()">
+          <span>Đăng xuất</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-content-area">
+
+      <!-- =====================================================================
+           TAB 1: DASHBOARD ADMIN (Figma Screen 1)
+           ===================================================================== -->
+      @if (activeTab === 'dashboard') {
+        <div class="tab-panel dashboard-panel">
+          <!-- 4 Stat Summary Cards -->
+          <div class="stats-overview-grid">
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Tổng doanh thu</span>
+                <span class="stat-badge green">{{ stats.revenueGrowth }}</span>
+              </div>
+              <div class="stat-number">{{ stats.revenueTotal | number }}đ</div>
+              <span class="stat-sub">So với tháng trước</span>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Tổng đơn đặt lịch</span>
+                <span class="stat-badge green">{{ stats.bookingsGrowth }}</span>
+              </div>
+              <div class="stat-number">{{ stats.bookingsTotal }}</div>
+              <span class="stat-sub">Đơn chụp trong tháng</span>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Khách hàng mới</span>
+                <span class="stat-badge green">{{ stats.customersGrowth }}</span>
+              </div>
+              <div class="stat-number">{{ stats.newCustomers }}</div>
+              <span class="stat-sub">30 ngày vừa qua</span>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Đánh giá trung bình</span>
+                <span class="stat-badge green">{{ stats.ratingGrowth }}</span>
+              </div>
+              <div class="stat-number">{{ stats.avgRating }} / 5.0</div>
+              <span class="stat-sub">⭐⭐⭐⭐⭐ Hài lòng</span>
+            </div>
+          </div>
+
+          <!-- Charts Row (Figma Style: Line Chart & Donut Chart) -->
+          <div class="charts-row">
+            <!-- Line Chart: Doanh thu theo thời gian -->
+            <div class="chart-card line-chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">Doanh thu theo thời gian</h3>
+                <span class="chart-tag">Tháng 8 – Tháng 11</span>
+              </div>
+              <div class="chart-body svg-chart-wrap">
+                <svg viewBox="0 0 450 180" class="revenue-svg">
+                  <!-- Grid lines -->
+                  <line x1="40" y1="30" x2="430" y2="30" stroke="#EFE7DE" stroke-dasharray="4" />
+                  <line x1="40" y1="75" x2="430" y2="75" stroke="#EFE7DE" stroke-dasharray="4" />
+                  <line x1="40" y1="120" x2="430" y2="120" stroke="#EFE7DE" stroke-dasharray="4" />
+                  <line x1="40" y1="150" x2="430" y2="150" stroke="#D8C7B5" />
+
+                  <!-- Y-Axis labels -->
+                  <text x="5" y="35" fill="#8C7E77" font-size="11">800Tr</text>
+                  <text x="5" y="80" fill="#8C7E77" font-size="11">500Tr</text>
+                  <text x="5" y="125" fill="#8C7E77" font-size="11">200Tr</text>
+
+                  <!-- Line Curve -->
+                  <polyline
+                    fill="none"
+                    stroke="#A68A5B"
+                    stroke-width="3.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    points="70,120 170,65 270,80 370,35"
+                  />
+                  <!-- Dots -->
+                  <circle cx="70" cy="120" r="5" fill="#A68A5B" />
+                  <circle cx="170" cy="65" r="5" fill="#A68A5B" />
+                  <circle cx="270" cy="80" r="5" fill="#A68A5B" />
+                  <circle cx="370" cy="35" r="6" fill="#5C3D2E" stroke="#FFFFFF" stroke-width="2" />
+
+                  <!-- X-Axis Labels -->
+                  <text x="60" y="172" fill="#5C4840" font-weight="600" font-size="12">Tháng 8</text>
+                  <text x="160" y="172" fill="#5C4840" font-weight="600" font-size="12">Tháng 9</text>
+                  <text x="255" y="172" fill="#5C4840" font-weight="600" font-size="12">Tháng 10</text>
+                  <text x="355" y="172" fill="#A68A5B" font-weight="700" font-size="12">Tháng 11</text>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Donut Chart: Tỉ lệ dịch vụ concept -->
+            <div class="chart-card donut-chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">Tỉ lệ dịch vụ concept</h3>
+                <span class="chart-tag">Phân bố %</span>
+              </div>
+              <div class="donut-chart-body">
+                <svg viewBox="0 0 160 160" class="donut-svg">
+                  <!-- Donut segments -->
+                  <circle cx="80" cy="80" r="55" fill="none" stroke="#FF9AA2" stroke-width="24" stroke-dasharray="138 208" stroke-dashoffset="0" />
+                  <circle cx="80" cy="80" r="55" fill="none" stroke="#70A1FF" stroke-width="24" stroke-dasharray="86 260" stroke-dashoffset="-138" />
+                  <circle cx="80" cy="80" r="55" fill="none" stroke="#7BED9F" stroke-width="24" stroke-dasharray="69 277" stroke-dashoffset="-224" />
+                  <circle cx="80" cy="80" r="55" fill="none" stroke="#FFEAA7" stroke-width="24" stroke-dasharray="52 294" stroke-dashoffset="-293" />
+                  <!-- Center hole text -->
+                  <text x="80" y="76" text-anchor="middle" font-size="12" fill="#7A6F68">TỔNG CỘNG</text>
+                  <text x="80" y="94" text-anchor="middle" font-size="15" font-weight="bold" fill="#3C2A21">100%</text>
+                </svg>
+
+                <div class="donut-legend">
+                  <div class="legend-item" *ngFor="let item of categoryShare">
+                    <span class="legend-color" [style.background-color]="item.color"></span>
+                    <span class="legend-name">{{ item.name }}</span>
+                    <span class="legend-val">{{ item.percent }}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Bookings Table -->
+          <div class="admin-card table-card">
+            <div class="table-card-header">
+              <h3 class="table-card-title">Đơn đặt lịch gần đây</h3>
+              <button type="button" class="btn-link-action" (click)="setTab('bookings')">Xem tất cả →</button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Concept & Gói</th>
+                    <th>Ngày chụp</th>
+                    <th>Giờ chụp</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of recentBookings">
+                    <td><strong class="code-link">{{ item.bookingCode }}</strong></td>
+                    <td>
+                      <div class="cust-name">{{ item.customer?.name }}</div>
+                      <div class="cust-phone">{{ item.customer?.phone }}</div>
+                    </td>
+                    <td>{{ item.pricing?.package?.package_name || 'Gói Chân dung nâng cao' }}</td>
+                    <td>{{ item.bookingDate }}</td>
+                    <td>{{ item.timeSlot || item.startTime }}</td>
+                    <td><strong>{{ (item.pricing?.totalAmount || 2500000) | number }}đ</strong></td>
+                    <td>
+                      <span class="status-pill" [class]="(item.bookingStatus || 'pending').toLowerCase()">
+                        {{ item.bookingStatus === 'Confirmed' ? 'Đã đặt cọc' : (item.bookingStatus === 'Completed' ? 'Hoàn thành' : 'Chờ xác nhận') }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- =====================================================================
+           TAB 2: QUẢN LÍ ĐẶT LỊCH (Figma Screen 2 & Modal Screen 6)
+           ===================================================================== -->
+      @if (activeTab === 'bookings') {
+        <div class="tab-panel bookings-panel">
+          <!-- 3 Stats Quick Summary Boxes (Figma Reference) -->
+          <div class="quick-counter-row">
+            <div class="counter-box orange">
+              <div class="counter-num">{{ pendingBookingsCount }}</div>
+              <div class="counter-label">Chờ xác nhận</div>
+            </div>
+            <div class="counter-box yellow">
+              <div class="counter-num">{{ confirmedBookingsCount }}</div>
+              <div class="counter-label">Đã đặt cọc</div>
+            </div>
+            <div class="counter-box green">
+              <div class="counter-num">{{ completedBookingsCount }}</div>
+              <div class="counter-label">Đã hoàn thành</div>
+            </div>
+          </div>
+
+          <!-- Filter Toolbar -->
+          <div class="table-toolbar">
+            <div class="search-box">
+              <input 
+                type="text" 
+                class="filter-input" 
+                placeholder="Tìm mã đơn, tên hoặc số điện thoại..." 
+                [(ngModel)]="bookingSearchText">
+            </div>
+
+            <div class="filter-actions">
+              <select class="filter-select" [(ngModel)]="bookingFilter">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="pending">Chờ xác nhận</option>
+                <option value="confirmed">Đã đặt cọc</option>
+                <option value="completed">Đã hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bookings Table -->
+          <div class="admin-card table-card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>Gói & Concept</th>
+                    <th>Ngày & Giờ</th>
+                    <th>Cọc / Tổng</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let b of filteredBookings; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td><strong class="code-link" (click)="openBookingModal(b)">{{ b.bookingCode }}</strong></td>
+                    <td>
+                      <div class="cust-name">{{ b.customer?.name }}</div>
+                      <div class="cust-phone">{{ b.customer?.phone }}</div>
+                    </td>
+                    <td>
+                      <div>{{ b.pricing?.package?.package_name || 'Gói Chân dung' }}</div>
+                      <small class="text-muted">{{ b.pricing?.concept?.concept_name || 'Concept tự chọn' }}</small>
+                    </td>
+                    <td>
+                      <div>{{ b.bookingDate }}</div>
+                      <small class="text-muted">{{ b.timeSlot || b.startTime }}</small>
+                    </td>
+                    <td>
+                      <div class="deposit-val">{{ (b.pricing?.depositAmount || 750000) | number }}đ</div>
+                      <small class="total-val">/ {{ (b.pricing?.totalAmount || 2500000) | number }}đ</small>
+                    </td>
+                    <td>
+                      <span class="status-pill" [class]="(b.bookingStatus || 'pending').toLowerCase()">
+                        {{ b.bookingStatus === 'Confirmed' ? 'Đã đặt cọc' : (b.bookingStatus === 'Completed' ? 'Hoàn thành' : (b.bookingStatus === 'Cancelled' ? 'Đã hủy' : 'Chờ xác nhận')) }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button type="button" class="btn-icon" title="Xem chi tiết" (click)="openBookingModal(b)">👁️</button>
+                        <button type="button" class="btn-icon green" title="Xác nhận cọc" *ngIf="(b.bookingStatus || '').toLowerCase() === 'pending'" (click)="updateBookingStatus(b._id, 'Confirmed')">✓</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- =====================================================================
+           TAB 3: QUẢN LÍ CATALOG (Figma Screen 3 & Modal Screen 7)
+           ===================================================================== -->
+      @if (activeTab === 'catalog') {
+        <div class="tab-panel catalog-panel">
+          <!-- 3 Stats Boxes -->
+          <div class="quick-counter-row">
+            <div class="counter-box orange">
+              <div class="counter-num">{{ conceptsList.length }}</div>
+              <div class="counter-label">Tổng concept</div>
+            </div>
+            <div class="counter-box green">
+              <div class="counter-num">{{ packagesList.length || 9 }}</div>
+              <div class="counter-label">Gói chụp ảnh</div>
+            </div>
+            <div class="counter-box pink">
+              <div class="counter-num">04</div>
+              <div class="counter-label">Dịch vụ thêm</div>
+            </div>
+          </div>
+
+          <!-- Catalog Sub Tabs & Add Button -->
+          <div class="catalog-header-bar">
+            <div class="catalog-sub-tabs">
+              <button 
+                type="button" 
+                class="sub-tab-btn" 
+                [class.active]="catalogTab === 'concepts'"
+                (click)="catalogTab = 'concepts'">
+                Concept chụp ảnh ({{ conceptsList.length }})
+              </button>
+              <button 
+                type="button" 
+                class="sub-tab-btn" 
+                [class.active]="catalogTab === 'packages'"
+                (click)="catalogTab = 'packages'">
+                Gói dịch vụ ({{ packagesList.length }})
+              </button>
+            </div>
+
+            <button type="button" class="btn-add-item" (click)="openAddConceptModal()">
+              <span>+ Thêm concept mới</span>
+            </button>
+          </div>
+
+          <!-- Concepts Table -->
+          <div class="admin-card table-card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Mã</th>
+                    <th>Ảnh</th>
+                    <th>Tên Concept</th>
+                    <th>Thể loại</th>
+                    <th>Giá gợi ý</th>
+                    <th>Hiển thị</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of filteredConcepts; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td><strong>{{ c.concept_code }}</strong></td>
+                    <td>
+                      <img [src]="c.thumbnail_url || c.image || 'assets/03.01. Home/Cá nhân.jpg'" alt="" class="concept-thumb">
+                    </td>
+                    <td>
+                      <div class="concept-name-cell">{{ c.concept_name }}</div>
+                    </td>
+                    <td><span class="badge-tag">{{ c.category || 'Chân dung' }}</span></td>
+                    <td><strong>{{ (c.price_hint || 1500000) | number }}đ</strong></td>
+                    <td>
+                      <label class="switch-toggle">
+                        <input type="checkbox" [checked]="c.status === 'ACTIVE'" (change)="toggleConceptStatus(c)">
+                        <span class="slider"></span>
+                      </label>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button type="button" class="btn-icon" title="Chỉnh sửa" (click)="openEditConceptModal(c)">✏️</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- =====================================================================
+           TAB 4: QUẢN LÍ KHÁCH HÀNG (Figma Screen 4 & Modal Screen 8)
+           ===================================================================== -->
+      @if (activeTab === 'customers') {
+        <div class="tab-panel customers-panel">
+          <div class="table-toolbar">
+            <div class="search-box">
+              <input 
+                type="text" 
+                class="filter-input" 
+                placeholder="Tìm tên khách hàng, số điện thoại hoặc email..." 
+                [(ngModel)]="customerSearchText">
+            </div>
+
+            <div class="filter-actions">
+              <select class="filter-select" [(ngModel)]="customerFilter">
+                <option value="all">Tất cả hạng thành viên</option>
+                <option value="vip">VIP Vàng</option>
+                <option value="silver">Hạng Bạc</option>
+                <option value="new">Thành viên Mới</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="admin-card table-card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>STT</th>
+                    <th>Họ và tên</th>
+                    <th>Số điện thoại</th>
+                    <th>Email</th>
+                    <th>Hạng</th>
+                    <th>Điểm Xu</th>
+                    <th>Tổng chi</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let cust of filteredCustomers; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td><strong class="cust-click" (click)="openCustomerModal(cust)">{{ cust.fullName }}</strong></td>
+                    <td>{{ cust.phone }}</td>
+                    <td>{{ cust.email }}</td>
+                    <td>
+                      <span class="tier-pill" [class.vip]="cust.tier === 'VIP Vàng'" [class.silver]="cust.tier === 'Bạc'">
+                        {{ cust.tier }}
+                      </span>
+                    </td>
+                    <td><strong>{{ cust.points | number }} Xu</strong></td>
+                    <td>{{ cust.totalSpent | number }}đ</td>
+                    <td>
+                      <span class="badge-lock" [class.locked]="cust.isLocked">
+                        {{ cust.isLocked ? 'Đã khóa' : 'Hoạt động' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button type="button" class="btn-icon" title="Xem hồ sơ" (click)="openCustomerModal(cust)">👤</button>
+                        <button type="button" class="btn-icon" [title]="cust.isLocked ? 'Mở khóa' : 'Khóa tài khoản'" (click)="toggleUserLock(cust)">
+                          {{ cust.isLocked ? '🔓' : '🔒' }}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- =====================================================================
+           TAB 5: KIỂM DUYỆT ĐÁNH GIÁ (Figma Screen 5 & Modal Screen 9)
+           ===================================================================== -->
+      @if (activeTab === 'reviews') {
+        <div class="tab-panel reviews-panel">
+          <div class="table-toolbar">
+            <div class="search-box">
+              <input 
+                type="text" 
+                class="filter-input" 
+                placeholder="Tìm đánh giá theo tên, nội dung hoặc concept..." 
+                [(ngModel)]="reviewSearchText">
+            </div>
+
+            <div class="filter-actions">
+              <select class="filter-select" [(ngModel)]="reviewFilter">
+                <option value="all">Tất cả đánh giá</option>
+                <option value="pending">Chờ kiểm duyệt</option>
+                <option value="approved">Đã phê duyệt</option>
+                <option value="rejected">Đã từ chối</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="admin-card table-card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Khách hàng</th>
+                    <th>Concept chụp</th>
+                    <th>Đánh giá</th>
+                    <th>Nội dung nhận xét</th>
+                    <th>Ngày gửi</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of filteredReviews">
+                    <td>
+                      <div class="cust-name">{{ r.customerName }}</div>
+                      <small class="text-muted">{{ r.customerPhone }}</small>
+                    </td>
+                    <td>{{ r.conceptName }}</td>
+                    <td>
+                      <div class="star-rating">
+                        <span *ngFor="let s of [1,2,3,4,5]">{{ s <= r.rating ? '★' : '☆' }}</span>
+                      </div>
+                    </td>
+                    <td class="comment-cell">
+                      <p class="comment-text">{{ r.comment }}</p>
+                    </td>
+                    <td>{{ r.createdAt }}</td>
+                    <td>
+                      <span class="status-pill" [class]="r.status.toLowerCase()">
+                        {{ r.status === 'APPROVED' ? 'Đã duyệt' : (r.status === 'REJECTED' ? 'Từ chối' : 'Chờ duyệt') }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button type="button" class="btn-icon" title="Xem chi tiết" (click)="openReviewModal(r)">👁️</button>
+                        <button type="button" class="btn-icon green" title="Duyệt" *ngIf="r.status === 'PENDING'" (click)="approveReview(r._id)">✓</button>
+                        <button type="button" class="btn-icon red" title="Từ chối" *ngIf="r.status === 'PENDING'" (click)="rejectReview(r._id)">✕</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       POPUP MODAL 1: CHI TIẾT ĐƠN ĐẶT LỊCH (Figma Screen 6)
+       ========================================================================= -->
+  @if (showBookingModal && selectedBooking) {
+    <div class="admin-modal-overlay" (click)="closeBookingModal()">
+      <div class="admin-modal-card booking-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">CHI TIẾT ĐƠN ĐẶT LỊCH #{{ selectedBooking.bookingCode }}</h3>
+          <button type="button" class="btn-close-modal" (click)="closeBookingModal()">✕</button>
+        </div>
+
+        <div class="modal-body-grid">
+          <!-- Left: Customer & Service info -->
+          <div class="modal-col">
+            <h4 class="sub-heading">1. THÔNG TIN KHÁCH HÀNG</h4>
+            <div class="meta-list">
+              <div class="meta-row"><span class="lbl">Họ và tên:</span> <strong>{{ selectedBooking.customer?.name }}</strong></div>
+              <div class="meta-row"><span class="lbl">Số điện thoại:</span> <strong>{{ selectedBooking.customer?.phone }}</strong></div>
+              <div class="meta-row"><span class="lbl">Email:</span> <span>{{ selectedBooking.customer?.email || 'Chưa cung cấp' }}</span></div>
+              <div class="meta-row"><span class="lbl">Ghi chú:</span> <span>{{ selectedBooking.customer?.note || 'Không có ghi chú' }}</span></div>
+            </div>
+
+            <h4 class="sub-heading" style="margin-top: 20px;">2. THÔNG TIN DỊCH VỤ</h4>
+            <div class="meta-list">
+              <div class="meta-row"><span class="lbl">Gói chụp:</span> <strong>{{ selectedBooking.pricing?.package?.package_name || 'Gói Chân dung' }}</strong></div>
+              <div class="meta-row"><span class="lbl">Concept:</span> <span>{{ selectedBooking.pricing?.concept?.concept_name || 'Concept tự chọn' }}</span></div>
+              <div class="meta-row"><span class="lbl">Ngày chụp:</span> <strong>{{ selectedBooking.bookingDate }}</strong></div>
+              <div class="meta-row"><span class="lbl">Khung giờ:</span> <span>{{ selectedBooking.timeSlot || selectedBooking.startTime }}</span></div>
+            </div>
+          </div>
+
+          <!-- Right: Payment & Status -->
+          <div class="modal-col">
+            <h4 class="sub-heading">3. TIẾN TRÌNH THANH TOÁN</h4>
+            <div class="payment-card-box">
+              <div class="price-row">
+                <span>Tổng giá trị đơn:</span>
+                <strong>{{ (selectedBooking.pricing?.totalAmount || 2500000) | number }}đ</strong>
+              </div>
+              <div class="price-row highlight">
+                <span>Tiền cọc yêu cầu (30%):</span>
+                <strong class="gold">{{ (selectedBooking.pricing?.depositAmount || 750000) | number }}đ</strong>
+              </div>
+              <div class="price-row">
+                <span>Đã thanh toán:</span>
+                <span class="green-text">{{ (selectedBooking.paidAmount || 0) | number }}đ</span>
+              </div>
+              <div class="price-row">
+                <span>Trạng thái đơn:</span>
+                <span class="status-pill" [class]="(selectedBooking.bookingStatus || 'pending').toLowerCase()">
+                  {{ selectedBooking.bookingStatus }}
+                </span>
+              </div>
+            </div>
+
+            <div class="qr-verify-box text-center">
+              <img src="assets/03.01. Home/Header/Logo.png" alt="QR" class="modal-qr-img" onerror="this.style.display='none'">
+              <p class="qr-label">Quét mã đối soát giao dịch VietQR</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" (click)="updateBookingStatus(selectedBooking._id, 'Cancelled')">Hủy đơn</button>
+          <button type="button" class="btn-modal-confirm" (click)="updateBookingStatus(selectedBooking._id, 'Confirmed')" *ngIf="(selectedBooking.bookingStatus || '').toLowerCase() === 'pending'">Xác nhận cọc</button>
+          <button type="button" class="btn-modal-complete" (click)="updateBookingStatus(selectedBooking._id, 'Completed')" *ngIf="(selectedBooking.bookingStatus || '').toLowerCase() === 'confirmed'">Hoàn tất buổi chụp</button>
+          <button type="button" class="btn-modal-close" (click)="closeBookingModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- =========================================================================
+       POPUP MODAL 2: THÊM / SỬA CATALOG CONCEPT (Figma Screen 7)
+       ========================================================================= -->
+  @if (showCatalogModal) {
+    <div class="admin-modal-overlay" (click)="closeCatalogModal()">
+      <div class="admin-modal-card catalog-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">{{ isEditingConcept ? 'CHỈNH SỬA CONCEPT' : 'THÊM CONCEPT MỚI' }}</h3>
+          <button type="button" class="btn-close-modal" (click)="closeCatalogModal()">✕</button>
+        </div>
+
+        <div class="modal-body-grid">
+          <!-- Left: Image Preview & Upload -->
+          <div class="modal-col">
+            <label class="input-label">Ảnh đại diện Concept</label>
+            <div class="image-upload-preview">
+              <img [src]="conceptForm.thumbnail_url" alt="Preview" class="preview-img">
+              <div class="upload-btn-wrap">
+                <input type="text" class="modal-input" placeholder="Nhập đường dẫn ảnh..." [(ngModel)]="conceptForm.thumbnail_url">
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Concept Form -->
+          <div class="modal-col form-col">
+            <div class="form-group">
+              <label class="input-label">Mã Concept *</label>
+              <input type="text" class="modal-input" [(ngModel)]="conceptForm.concept_code" placeholder="VD: CP05">
+            </div>
+
+            <div class="form-group">
+              <label class="input-label">Tên Concept *</label>
+              <input type="text" class="modal-input" [(ngModel)]="conceptForm.concept_name" placeholder="VD: Nàng Thơ Áo Dài">
+            </div>
+
+            <div class="form-group">
+              <label class="input-label">Thể loại</label>
+              <select class="modal-select" [(ngModel)]="conceptForm.category">
+                <option value="Chân dung">Chân dung</option>
+                <option value="Cặp đôi">Cặp đôi</option>
+                <option value="Áo dài">Áo dài</option>
+                <option value="Gia đình">Gia đình</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="input-label">Giá chụp gợi ý (VNĐ)</label>
+              <input type="number" class="modal-input" [(ngModel)]="conceptForm.price_hint">
+            </div>
+
+            <div class="form-group">
+              <label class="input-label">Mô tả concept</label>
+              <textarea class="modal-textarea" rows="3" [(ngModel)]="conceptForm.description" placeholder="Mô tả bối cảnh, ánh sáng, trang phục..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel" (click)="closeCatalogModal()">Hủy</button>
+          <button type="button" class="btn-modal-confirm" (click)="saveConcept()">Lưu thay đổi</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- =========================================================================
+       POPUP MODAL 3: CHI TIẾT KHÁCH HÀNG (Figma Screen 8)
+       ========================================================================= -->
+  @if (showCustomerModal && selectedCustomer) {
+    <div class="admin-modal-overlay" (click)="closeCustomerModal()">
+      <div class="admin-modal-card customer-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">HỒ SƠ KHÁCH HÀNG: {{ selectedCustomer.fullName }}</h3>
+          <button type="button" class="btn-close-modal" (click)="closeCustomerModal()">✕</button>
+        </div>
+
+        <!-- 3 Quick Customer Summary Cards (Figma Reference) -->
+        <div class="customer-stats-cards">
+          <div class="c-card">
+            <span class="c-card-lbl">Số đơn đã đặt</span>
+            <strong class="c-card-val">{{ selectedCustomer.bookingCount || 2 }} Đơn</strong>
+          </div>
+          <div class="c-card green">
+            <span class="c-card-lbl">Tổng chi tiêu</span>
+            <strong class="c-card-val">{{ (selectedCustomer.totalSpent || 5200000) | number }}đ</strong>
+          </div>
+          <div class="c-card orange">
+            <span class="c-card-lbl">Hạng thành viên</span>
+            <strong class="c-card-val">{{ selectedCustomer.tier }}</strong>
+          </div>
+        </div>
+
+        <div class="customer-detail-meta">
+          <p><strong>Số điện thoại:</strong> {{ selectedCustomer.phone }}</p>
+          <p><strong>Email:</strong> {{ selectedCustomer.email }}</p>
+          <p><strong>Số dư tích lũy:</strong> {{ selectedCustomer.points | number }} Ký Ức Xu</p>
+        </div>
+
+        <h4 class="sub-heading" style="margin-top: 20px;">LỊCH SỬ CÁC ĐƠN ĐÃ ĐẶT</h4>
+        <div class="table-responsive">
+          <table class="admin-table mini-table">
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Concept</th>
+                <th>Ngày chụp</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let b of selectedCustomerBookings">
+                <td><strong>{{ b.bookingCode }}</strong></td>
+                <td>{{ b.pricing?.package?.package_name || 'Chân dung nâng cao' }}</td>
+                <td>{{ b.bookingDate }}</td>
+                <td><span class="status-pill" [class]="(b.bookingStatus || 'pending').toLowerCase()">{{ b.bookingStatus }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-close" (click)="closeCustomerModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- =========================================================================
+       POPUP MODAL 4: KIỂM DUYỆT ĐÁNH GIÁ (Figma Screen 9)
+       ========================================================================= -->
+  @if (showReviewModal && selectedReview) {
+    <div class="admin-modal-overlay" (click)="closeReviewModal()">
+      <div class="admin-modal-card review-modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">CHI TIẾT ĐÁNH GIÁ CỦA KHÁCH HÀNG</h3>
+          <button type="button" class="btn-close-modal" (click)="closeReviewModal()">✕</button>
+        </div>
+
+        <div class="review-modal-body">
+          <div class="review-user-row">
+            <div>
+              <h4 class="review-user-name">{{ selectedReview.customerName }}</h4>
+              <p class="review-meta">Dịch vụ: <strong>{{ selectedReview.conceptName }}</strong> · Ngày gửi: {{ selectedReview.createdAt }}</p>
+            </div>
+            <div class="star-rating big">
+              <span *ngFor="let s of [1,2,3,4,5]">{{ s <= selectedReview.rating ? '★' : '☆' }}</span>
+            </div>
+          </div>
+
+          <div class="review-comment-box">
+            <p class="comment-full">“{{ selectedReview.comment }}”</p>
+          </div>
+
+          <div class="review-images-row">
+            <label class="input-label">Ảnh khách hàng đính kèm:</label>
+            <div class="review-img-grid">
+              <img *ngFor="let img of selectedReview.images" [src]="img" alt="Review Photo" class="review-large-thumb">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-cancel red-btn" (click)="rejectReview(selectedReview._id)">Từ chối hiển thị</button>
+          <button type="button" class="btn-modal-confirm green-btn" (click)="approveReview(selectedReview._id)">Duyệt hiển thị</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
+

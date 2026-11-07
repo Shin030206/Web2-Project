@@ -128,6 +128,10 @@
 
 .btn-book-concept {
   width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
   background-color: #572E2F;
   color: #ffffff;
   border: none;
