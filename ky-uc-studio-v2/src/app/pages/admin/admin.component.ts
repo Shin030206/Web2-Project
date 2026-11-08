@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 export interface AdminBooking {
@@ -42,21 +44,10 @@ export interface AdminCustomer {
   createdAt: string;
 }
 
-export interface AdminReview {
-  _id: string;
-  customerName: string;
-  customerPhone?: string;
-  conceptName: string;
-  rating: number;
-  comment: string;
-  images: string[];
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
-  createdAt: string;
-}
-
 @Component({
   selector: 'app-admin',
-  standalone: false,
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.css'
 })
@@ -67,50 +58,46 @@ export class AdminComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   // Active Main Navigation Tab
-  activeTab: 'dashboard' | 'bookings' | 'catalog' | 'customers' | 'reviews' = 'dashboard';
+  activeTab: 'dashboard' | 'bookings' | 'catalog' | 'customers' = 'dashboard';
 
   // 1. Dashboard Data
   stats = {
-    revenueTotal: 750000000,
-    revenueGrowth: '+12%',
-    bookingsTotal: 97,
-    bookingsGrowth: '+8%',
-    newCustomers: 35,
-    customersGrowth: '+5%',
-    avgRating: 4.9,
-    ratingGrowth: '+0.2'
+    revenueTotal: 0,
+    revenueExpected: 0,
+    bookingsTotal: 0,
+    newCustomers: 0
   };
 
+  topPackages: Array<{ package_id: number; package_name: string; count: number }> = [];
   recentBookings: AdminBooking[] = [];
-
-  revenueHistory = [
-    { label: 'Tháng 8', value: 450000000, heightPct: 60 },
-    { label: 'Tháng 9', value: 620000000, heightPct: 82 },
-    { label: 'Tháng 10', value: 580000000, heightPct: 76 },
-    { label: 'Tháng 11', value: 750000000, heightPct: 100 }
-  ];
-
-  categoryShare = [
-    { name: 'Chân dung', percent: 40, color: '#FF8A65' },
-    { name: 'Cặp đôi', percent: 25, color: '#64B5F6' },
-    { name: 'Gia đình', percent: 20, color: '#81C784' },
-    { name: 'Áo dài', percent: 15, color: '#FFD54F' }
-  ];
 
   // 2. Booking Management Data
   bookings: AdminBooking[] = [];
-  bookingFilter: 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' = 'all';
+  bookingFilter: 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' = 'all';
   bookingSearchText: string = '';
+  bookingPage: number = 1;
+  bookingLimit: number = 10;
+  bookingTotal: number = 0;
+  bookingError: string = '';
   selectedBooking: AdminBooking | null = null;
   showBookingModal: boolean = false;
 
+  bookingStatusCounts = {
+    pending: 0,
+    confirmed: 0,
+    completed: 0,
+    cancelled: 0,
+    no_show: 0
+  };
+
   // 3. Catalog Management Data
-  catalogTab: 'concepts' | 'packages' | 'addons' = 'concepts';
+  catalogTab: 'concepts' | 'packages' = 'concepts';
   conceptsList: any[] = [];
   packagesList: any[] = [];
   catalogSearchText: string = '';
   showCatalogModal: boolean = false;
   isEditingConcept: boolean = false;
+  uploadingImage: boolean = false;
   conceptForm = {
     _id: '',
     concept_code: '',
@@ -130,31 +117,11 @@ export class AdminComponent implements OnInit {
   showCustomerModal: boolean = false;
   selectedCustomerBookings: AdminBooking[] = [];
 
-  // 5. Review Moderation Data
-  reviews: AdminReview[] = [];
-  reviewFilter: 'all' | 'pending' | 'approved' | 'rejected' = 'all';
-  reviewSearchText: string = '';
-  selectedReview: AdminReview | null = null;
-  showReviewModal: boolean = false;
-
   ngOnInit(): void {
-    // Check Admin auth
-    this.authService.getMe().subscribe({
-      next: (user) => {
-        if (user.role !== 'admin') {
-          alert('Khu vực này chỉ dành cho Quản trị viên!');
-          this.router.navigate(['/']);
-          return;
-        }
-        this.loadAllData();
-      },
-      error: () => {
-        this.router.navigate(['/login'], { queryParams: { returnUrl: '/admin' } });
-      }
-    });
+    this.loadAllData();
   }
 
-  setTab(tab: 'dashboard' | 'bookings' | 'catalog' | 'customers' | 'reviews'): void {
+  setTab(tab: 'dashboard' | 'bookings' | 'catalog' | 'customers'): void {
     this.activeTab = tab;
     this.cdr.markForCheck();
   }
@@ -164,7 +131,6 @@ export class AdminComponent implements OnInit {
     this.loadBookings();
     this.loadCatalog();
     this.loadCustomers();
-    this.loadReviews();
   }
 
   // --- 1. Dashboard ---
@@ -172,9 +138,29 @@ export class AdminComponent implements OnInit {
     this.http.get<any>('/api/admin/stats').subscribe({
       next: (res) => {
         if (res) {
-          if (res.revenue?.collected) this.stats.revenueTotal = res.revenue.collected;
-          if (res.bookings?.total) this.stats.bookingsTotal = res.bookings.total;
-          if (res.newCustomersLast30Days) this.stats.newCustomers = res.newCustomersLast30Days;
+          if (res.revenue) {
+            this.stats.revenueTotal = res.revenue.collected || 0;
+            this.stats.revenueExpected = res.revenue.expected || 0;
+          }
+          if (res.bookings) {
+            this.stats.bookingsTotal = res.bookings.total || 0;
+            if (res.bookings.byStatus) {
+              this.bookingStatusCounts.pending = res.bookings.byStatus['Pending'] || 0;
+              this.bookingStatusCounts.confirmed = res.bookings.byStatus['Confirmed'] || 0;
+              this.bookingStatusCounts.completed = res.bookings.byStatus['Completed'] || 0;
+              this.bookingStatusCounts.cancelled = res.bookings.byStatus['Cancelled'] || 0;
+              this.bookingStatusCounts.no_show = res.bookings.byStatus['No_Show'] || 0;
+            }
+          }
+          if (res.newCustomersLast30Days !== undefined) {
+            this.stats.newCustomers = res.newCustomersLast30Days;
+          }
+          if (res.topPackages) {
+            this.topPackages = res.topPackages;
+          }
+          if (res.upcoming && Array.isArray(res.upcoming)) {
+            this.recentBookings = res.upcoming;
+          }
         }
         this.cdr.markForCheck();
       },
@@ -186,51 +172,81 @@ export class AdminComponent implements OnInit {
 
   // --- 2. Bookings ---
   loadBookings(): void {
-    this.http.get<any>('/api/bookings').subscribe({
+    this.bookingError = '';
+    const queryParams: string[] = [
+      `page=${this.bookingPage}`,
+      `limit=${this.bookingLimit}`
+    ];
+
+    if (this.bookingFilter !== 'all') {
+      const statusMap: Record<string, string> = {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        completed: 'Completed',
+        cancelled: 'Cancelled',
+        no_show: 'No_Show'
+      };
+      const mapped = statusMap[this.bookingFilter] || this.bookingFilter;
+      queryParams.push(`status=${encodeURIComponent(mapped)}`);
+    }
+
+    if (this.bookingSearchText.trim()) {
+      queryParams.push(`code=${encodeURIComponent(this.bookingSearchText.trim())}`);
+    }
+
+    this.http.get<any>(`/api/bookings?${queryParams.join('&')}`).subscribe({
       next: (res) => {
-        const list = res.data || res.bookings || res || [];
-        this.bookings = Array.isArray(list) ? list : [];
-        this.recentBookings = this.bookings.slice(0, 5);
+        this.bookings = res.data || [];
+        this.bookingTotal = res.total !== undefined ? res.total : this.bookings.length;
+        if (this.recentBookings.length === 0 && this.bookings.length > 0) {
+          this.recentBookings = this.bookings.slice(0, 5);
+        }
         this.cdr.markForCheck();
       },
-      error: () => {
-        this.bookings = this.getMockBookings();
-        this.recentBookings = this.bookings.slice(0, 5);
+      error: (err) => {
+        this.bookings = [];
+        this.bookingTotal = 0;
+        this.bookingError = err.error?.error || 'Không tải được danh sách đơn';
         this.cdr.markForCheck();
       }
     });
   }
 
   get filteredBookings(): AdminBooking[] {
-    return this.bookings.filter(b => {
-      // Filter status
-      if (this.bookingFilter !== 'all') {
-        const s = (b.bookingStatus || '').toLowerCase();
-        if (this.bookingFilter === 'pending' && s !== 'pending') return false;
-        if (this.bookingFilter === 'confirmed' && s !== 'confirmed') return false;
-        if (this.bookingFilter === 'completed' && s !== 'completed') return false;
-        if (this.bookingFilter === 'cancelled' && s !== 'cancelled') return false;
-      }
-      // Search text
-      if (this.bookingSearchText.trim()) {
-        const q = this.bookingSearchText.trim().toLowerCase();
-        const code = (b.bookingCode || '').toLowerCase();
-        const name = (b.customer?.name || '').toLowerCase();
-        const phone = (b.customer?.phone || '').toLowerCase();
-        return code.includes(q) || name.includes(q) || phone.includes(q);
-      }
-      return true;
-    });
+    return this.bookings;
   }
 
   get pendingBookingsCount(): number {
-    return this.bookings.filter(b => (b.bookingStatus || '').toLowerCase() === 'pending').length;
+    return this.bookingStatusCounts.pending;
   }
+
   get confirmedBookingsCount(): number {
-    return this.bookings.filter(b => (b.bookingStatus || '').toLowerCase() === 'confirmed').length;
+    return this.bookingStatusCounts.confirmed;
   }
+
   get completedBookingsCount(): number {
-    return this.bookings.filter(b => (b.bookingStatus || '').toLowerCase() === 'completed').length;
+    return this.bookingStatusCounts.completed;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.bookingTotal / this.bookingLimit));
+  }
+
+  setBookingFilter(filter: 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'): void {
+    this.bookingFilter = filter;
+    this.bookingPage = 1;
+    this.loadBookings();
+  }
+
+  onBookingSearch(): void {
+    this.bookingPage = 1;
+    this.loadBookings();
+  }
+
+  goToBookingPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.bookingPage = page;
+    this.loadBookings();
   }
 
   openBookingModal(booking: AdminBooking): void {
@@ -254,16 +270,13 @@ export class AdminComponent implements OnInit {
         const b = this.bookings.find(item => item._id === id);
         if (b) b.bookingStatus = newStatus;
         this.closeBookingModal();
+        this.loadStats();
+        this.loadBookings();
         this.cdr.markForCheck();
       },
-      error: () => {
-        // Fallback optimistic update
-        if (this.selectedBooking && this.selectedBooking._id === id) {
-          this.selectedBooking.bookingStatus = newStatus;
-        }
-        const b = this.bookings.find(item => item._id === id);
-        if (b) b.bookingStatus = newStatus;
-        this.closeBookingModal();
+      error: (err) => {
+        const errorMsg = err.error?.error || 'Cập nhật trạng thái thất bại!';
+        alert(errorMsg);
         this.cdr.markForCheck();
       }
     });
@@ -277,7 +290,7 @@ export class AdminComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
-        this.conceptsList = this.getMockConcepts();
+        this.conceptsList = [];
         this.cdr.markForCheck();
       }
     });
@@ -288,6 +301,7 @@ export class AdminComponent implements OnInit {
         this.cdr.markForCheck();
       },
       error: () => {
+        this.packagesList = [];
         this.cdr.markForCheck();
       }
     });
@@ -322,12 +336,12 @@ export class AdminComponent implements OnInit {
   openEditConceptModal(concept: any): void {
     this.isEditingConcept = true;
     this.conceptForm = {
-      _id: concept._id || concept.concept_code,
+      _id: concept.concept_code || concept._id,
       concept_code: concept.concept_code,
       concept_name: concept.concept_name,
       category: concept.category || 'Chân dung',
       description: concept.description || '',
-      price_hint: concept.price_hint || 1500000,
+      price_hint: concept.starting_price || concept.price_hint || 1500000,
       thumbnail_url: concept.thumbnail_url || concept.image || 'assets/03.01. Home/Cá nhân.jpg',
       status: concept.status || 'ACTIVE'
     };
@@ -340,27 +354,84 @@ export class AdminComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  onImageSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    this.uploadingImage = true;
+    this.http.post<any>('/api/admin/uploads', formData).subscribe({
+      next: (res) => {
+        this.uploadingImage = false;
+        if (res && res.url) {
+          this.conceptForm.thumbnail_url = res.url;
+        }
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.uploadingImage = false;
+        alert(err.error?.error || 'Upload ảnh thất bại!');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   saveConcept(): void {
     if (!this.conceptForm.concept_name.trim()) {
       alert('Vui lòng nhập tên Concept!');
       return;
     }
 
-    if (this.isEditingConcept) {
-      const idx = this.conceptsList.findIndex(c => c.concept_code === this.conceptForm.concept_code);
-      if (idx !== -1) {
-        this.conceptsList[idx] = { ...this.conceptsList[idx], ...this.conceptForm };
-      }
+    const payload = {
+      concept_code: this.conceptForm.concept_code.trim().toUpperCase(),
+      concept_name: this.conceptForm.concept_name.trim(),
+      category: this.conceptForm.category,
+      starting_price: Number(this.conceptForm.price_hint) || 1500000,
+      description: this.conceptForm.description || '',
+      thumbnail_url: this.conceptForm.thumbnail_url,
+      status: this.conceptForm.status || 'ACTIVE'
+    };
+
+    if (this.isEditingConcept && this.conceptForm._id) {
+      this.http.put<any>(`/api/concepts/${encodeURIComponent(this.conceptForm._id)}`, payload).subscribe({
+        next: () => {
+          this.closeCatalogModal();
+          this.loadCatalog();
+        },
+        error: (err) => {
+          alert(err.error?.error || 'Cập nhật concept thất bại!');
+          this.cdr.markForCheck();
+        }
+      });
     } else {
-      this.conceptsList.unshift({ ...this.conceptForm });
+      this.http.post<any>('/api/concepts', payload).subscribe({
+        next: () => {
+          this.closeCatalogModal();
+          this.loadCatalog();
+        },
+        error: (err) => {
+          alert(err.error?.error || 'Thêm concept mới thất bại!');
+          this.cdr.markForCheck();
+        }
+      });
     }
-    this.closeCatalogModal();
-    this.cdr.markForCheck();
   }
 
   toggleConceptStatus(concept: any): void {
-    concept.status = concept.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    this.cdr.markForCheck();
+    const nextStatus = concept.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const id = concept.concept_code || concept._id;
+    this.http.put<any>(`/api/concepts/${encodeURIComponent(id)}`, { status: nextStatus }).subscribe({
+      next: () => {
+        concept.status = nextStatus;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        alert(err.error?.error || 'Không thể thay đổi trạng thái!');
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   // --- 4. Customers ---
@@ -372,19 +443,19 @@ export class AdminComponent implements OnInit {
           _id: u._id,
           fullName: u.fullName || 'Khách hàng',
           username: u.username || 'user' + idx,
-          phone: u.phone || '0900000000',
-          email: u.email || 'customer@gmail.com',
+          phone: u.phone || '—',
+          email: u.email || '—',
           points: u.points || 0,
           tier: (u.points || 0) > 500 ? 'VIP Vàng' : ((u.points || 0) > 100 ? 'Bạc' : 'Thành viên Mới'),
-          bookingCount: u.bookingCount || Math.floor(Math.random() * 4) + 1,
-          totalSpent: u.totalSpent || (Math.floor(Math.random() * 5) + 1) * 2500000,
+          bookingCount: u.bookingCount || 0,
+          totalSpent: u.totalSpent || 0,
           isLocked: u.isLocked || false,
-          createdAt: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '2026-10-15'
+          createdAt: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '—'
         }));
         this.cdr.markForCheck();
       },
       error: () => {
-        this.customers = this.getMockCustomers();
+        this.customers = [];
         this.cdr.markForCheck();
       }
     });
@@ -411,9 +482,6 @@ export class AdminComponent implements OnInit {
     this.selectedCustomerBookings = this.bookings.filter(b => 
       b.customer?.phone === customer.phone || (b.customer?.name && b.customer.name.toLowerCase() === customer.fullName.toLowerCase())
     );
-    if (this.selectedCustomerBookings.length === 0) {
-      this.selectedCustomerBookings = this.bookings.slice(0, 2);
-    }
     this.showCustomerModal = true;
     this.cdr.markForCheck();
   }
@@ -431,84 +499,8 @@ export class AdminComponent implements OnInit {
         customer.isLocked = newLockState;
         this.cdr.markForCheck();
       },
-      error: () => {
-        customer.isLocked = newLockState;
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
-  // --- 5. Reviews ---
-  loadReviews(): void {
-    this.http.get<AdminReview[]>('/api/admin/reviews').subscribe({
-      next: (res) => {
-        this.reviews = res || [];
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.reviews = this.getMockReviews();
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
-  get filteredReviews(): AdminReview[] {
-    return this.reviews.filter(r => {
-      if (this.reviewFilter === 'pending' && r.status !== 'PENDING') return false;
-      if (this.reviewFilter === 'approved' && r.status !== 'APPROVED') return false;
-      if (this.reviewFilter === 'rejected' && r.status !== 'REJECTED') return false;
-
-      if (this.reviewSearchText.trim()) {
-        const q = this.reviewSearchText.trim().toLowerCase();
-        return (r.customerName || '').toLowerCase().includes(q) ||
-               (r.conceptName || '').toLowerCase().includes(q) ||
-               (r.comment || '').toLowerCase().includes(q);
-      }
-      return true;
-    });
-  }
-
-  openReviewModal(review: AdminReview): void {
-    this.selectedReview = review;
-    this.showReviewModal = true;
-    this.cdr.markForCheck();
-  }
-
-  closeReviewModal(): void {
-    this.selectedReview = null;
-    this.showReviewModal = false;
-    this.cdr.markForCheck();
-  }
-
-  approveReview(id: string): void {
-    this.http.patch<any>(`/api/admin/reviews/${id}`, { status: 'APPROVED' }).subscribe({
-      next: () => {
-        const item = this.reviews.find(r => r._id === id);
-        if (item) item.status = 'APPROVED';
-        this.closeReviewModal();
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        const item = this.reviews.find(r => r._id === id);
-        if (item) item.status = 'APPROVED';
-        this.closeReviewModal();
-        this.cdr.markForCheck();
-      }
-    });
-  }
-
-  rejectReview(id: string): void {
-    this.http.patch<any>(`/api/admin/reviews/${id}`, { status: 'REJECTED' }).subscribe({
-      next: () => {
-        const item = this.reviews.find(r => r._id === id);
-        if (item) item.status = 'REJECTED';
-        this.closeReviewModal();
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        const item = this.reviews.find(r => r._id === id);
-        if (item) item.status = 'REJECTED';
-        this.closeReviewModal();
+      error: (err) => {
+        alert(err.error?.error || 'Không thể đổi trạng thái khóa tài khoản!');
         this.cdr.markForCheck();
       }
     });
@@ -518,97 +510,5 @@ export class AdminComponent implements OnInit {
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/login']);
     });
-  }
-
-  // --- Fallback Mock Data ---
-  private getMockBookings(): AdminBooking[] {
-    return [
-      {
-        _id: 'b01',
-        bookingCode: 'KU012345',
-        customer: { name: 'Thanh Vy', phone: '0396581067', email: 'thanhvy@kyucstudio.vn', note: 'Concept ấm áp' },
-        pricing: { package: { package_name: 'Chân Dung – Nâng Cao', price: 2500000 }, concept: { concept_name: 'Concept Chụp Chân Dung', concept_code: 'CD01' }, totalAmount: 2500000, depositAmount: 750000 },
-        bookingDate: '2026-10-30',
-        startTime: '15:30',
-        endTime: '17:00',
-        timeSlot: '15:30 – 17:00',
-        bookingStatus: 'Pending',
-        paymentStatus: 'Unpaid',
-        paidAmount: 0,
-        createdAt: '2026-10-25'
-      },
-      {
-        _id: 'b02',
-        bookingCode: 'KU261108531370',
-        customer: { name: 'Nguyễn Thu Trang', phone: '0987654321', email: 'thutrang@gmail.com' },
-        pricing: { package: { package_name: 'Chân Dung – Tiêu Chuẩn', price: 1500000 }, concept: { concept_name: 'AD Trắng Trơn', concept_code: 'AD01' }, totalAmount: 1500000, depositAmount: 450000 },
-        bookingDate: '2026-11-08',
-        startTime: '08:00',
-        endTime: '09:30',
-        timeSlot: '08:00 – 09:30',
-        bookingStatus: 'Confirmed',
-        paymentStatus: 'Paid',
-        paidAmount: 450000,
-        createdAt: '2026-11-07'
-      },
-      {
-        _id: 'b03',
-        bookingCode: 'KU012344',
-        customer: { name: 'Trần Minh Anh', phone: '0912345678', email: 'minhanh@gmail.com' },
-        pricing: { package: { package_name: 'Cặp Đôi – Cao Cấp', price: 5200000 }, concept: { concept_name: 'Thanh Xuân Đôi', concept_code: 'CD02' }, totalAmount: 5200000, depositAmount: 1560000 },
-        bookingDate: '2026-09-15',
-        startTime: '10:00',
-        endTime: '12:30',
-        timeSlot: '10:00 – 12:30',
-        bookingStatus: 'Completed',
-        paymentStatus: 'Paid',
-        paidAmount: 5200000,
-        createdAt: '2026-09-10'
-      }
-    ];
-  }
-
-  private getMockConcepts(): any[] {
-    return [
-      { concept_code: 'AD01', concept_name: 'AD Trắng Trơn (Áo dài trắng trơn)', category: 'Áo dài', price_hint: 1500000, status: 'ACTIVE', thumbnail_url: 'assets/03.01. Home/Cá nhân.jpg' },
-      { concept_code: 'CP01', concept_name: 'Concept Nàng Thơ Vườn Hoa', category: 'Chân dung', price_hint: 2500000, status: 'ACTIVE', thumbnail_url: 'assets/03.01. Home/Cá nhân.jpg' },
-      { concept_code: 'CD02', concept_name: 'Cặp Đôi Thanh Xuân Cổ Điển', category: 'Cặp đôi', price_hint: 3500000, status: 'ACTIVE', thumbnail_url: 'assets/03.01. Home/Cặp đôi.jpg' },
-      { concept_code: 'GD01', concept_name: 'Gia Đình Sum Vầy Áo Dài', category: 'Gia đình', price_hint: 4500000, status: 'ACTIVE', thumbnail_url: 'assets/03.01. Home/Gia đình.jpg' }
-    ];
-  }
-
-  private getMockCustomers(): AdminCustomer[] {
-    return [
-      { _id: 'c01', fullName: 'Thanh Vy', phone: '0396581067', email: 'thanhvy@kyucstudio.vn', points: 1250, tier: 'VIP Vàng', bookingCount: 2, totalSpent: 7700000, isLocked: false, createdAt: '2026-09-01' },
-      { _id: 'c02', fullName: 'Trần Minh Anh', phone: '0912345678', email: 'minhanh@gmail.com', points: 850, tier: 'Bạc', bookingCount: 1, totalSpent: 5200000, isLocked: false, createdAt: '2026-09-10' },
-      { _id: 'c03', fullName: 'Nguyễn Thu Trang', phone: '0987654321', email: 'thutrang@gmail.com', points: 300, tier: 'Thành viên Mới', bookingCount: 1, totalSpent: 1500000, isLocked: false, createdAt: '2026-11-01' }
-    ];
-  }
-
-  private getMockReviews(): AdminReview[] {
-    return [
-      {
-        _id: 'rv01',
-        customerName: 'Hoàng Lan',
-        customerPhone: '0912345678',
-        conceptName: 'Áo Dài Trắng Trơn',
-        rating: 5,
-        comment: 'Studio chụp rất có tâm, nhân viên trang điểm nhẹ nhàng đúng ý mình. Ảnh thô đã rất đẹp rồi!',
-        images: ['assets/03.01. Home/Cá nhân.jpg', 'assets/03.01. Home/Cặp đôi.jpg'],
-        status: 'PENDING',
-        createdAt: '2026-11-05'
-      },
-      {
-        _id: 'rv02',
-        customerName: 'Trần Minh Anh',
-        customerPhone: '0988776655',
-        conceptName: 'Concept Nàng Thơ Vườn Hoa',
-        rating: 5,
-        comment: 'Nhiếp ảnh gia hướng dẫn tạo dáng rất nhiệt tình. Không gian studio rộng rãi ấm cúng.',
-        images: ['assets/03.01. Home/Cá nhân.jpg'],
-        status: 'APPROVED',
-        createdAt: '2026-11-03'
-      }
-    ];
   }
 }

@@ -16,7 +16,5 @@ router.get('/stats', adminCtrl.getStats);
 router.get('/users', authCtrl.listUsers);
 router.patch('/users/:id', authCtrl.updateUserByAdmin);
 router.post('/uploads', upload, adminCtrl.uploadImage);
-router.get('/reviews', adminCtrl.getReviews);
-router.patch('/reviews/:id', adminCtrl.updateReviewStatus);
 
 module.exports = router;

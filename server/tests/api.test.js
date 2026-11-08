@@ -255,6 +255,23 @@ test('luồng đặt lịch: giữ slot -> tạo đơn -> tra cứu -> thanh to�
   assert.equal(confirm.body.booking.paymentStatus, 'Deposit_Paid');
 });
 
+test('user đã đăng nhập: SĐT trong form khác SĐT lúc giữ slot vẫn tạo được đơn nhờ userId', async () => {
+  const dateDiffPhone = futureDate(12);
+  const hold = await api('POST', '/slots/hold', { packageId: 102, bookingDate: dateDiffPhone, startTime: '09:00', customerPhone: '0901234567' }, userToken);
+  assert.equal(hold.status, 201);
+
+  const created = await api('POST', '/bookings', {
+    holdId: hold.body.holdId,
+    conceptCode: 'BP01',
+    customerName: 'Người Được Đặt Hộ',
+    customerPhone: '0988888888'
+  }, userToken);
+
+  assert.equal(created.status, 201, 'Tạo đơn thành công nhờ khớp userId với slot đang giữ');
+  assert.equal(created.body.data.customer.phone, '0988888888');
+  assert.equal(created.body.data.bookingStatus, 'Pending');
+});
+
 test('đổi lịch: lùi 30 phút trong cùng ngày, không đè lên đơn khác', async () => {
   const other = await api('POST', '/slots/hold', { packageId: 201, bookingDate: DATE, startTime: '15:00', customerPhone: '0977777777' });
   await api('POST', '/bookings', { holdId: other.body.holdId, customerName: 'Khách B', customerPhone: '0977777777' });

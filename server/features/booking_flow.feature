@@ -49,6 +49,6 @@ Tính năng: Đặt lịch chụp ảnh Ký Ức Studio hoàn chỉnh (E2E Cucum
   @greybox @guest_flow
   Kịch bản: [Greybox] Khách vãng lai giữ slot rồi đăng nhập không bị mất tiến trình
     Cho Khách vãng lai chưa đăng nhập chọn concept "CD02" và lưu bản nháp đặt lịch
-    Khi Khách hàng thực hiện đăng nhập vào tài khoản "12345" mật khẩu "12345"
+    Khi Khách hàng thực hiện đăng nhập vào tài khoản "0396581067" mật khẩu "12345"
     Thì Hệ thống tự động cấp phát token bảo mật phiên đăng nhập
     Và Khi tải lại trang đặt lịch, thông tin ngày giờ và concept đã chọn vẫn được bảo toàn nguyên vẹn

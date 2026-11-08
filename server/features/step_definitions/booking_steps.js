@@ -144,8 +144,8 @@ Then('Popup modal xác nhận thông tin phải hiển thị', function () {
 });
 
 When('Khách hàng xác nhận trên popup modal', async function () {
-  // Login first as 12345 to obtain token
-  const loginRes = await apiCall('/auth/login', 'POST', { account: '12345', password: '12345' });
+  // Login first as 0396581067 to obtain token
+  const loginRes = await apiCall('/auth/login', 'POST', { account: '0396581067', password: '12345' });
   assert.strictEqual(loginRes.status, 200);
   this.userToken = loginRes.data.token;
 
@@ -242,7 +242,8 @@ Then('Hệ thống không cho phép tạo đơn hàng từ lượt giữ chỗ n
 // Kịch bản 3: [Greybox] Kiểm tra tính toàn vẹn dữ liệu trong CSDL MongoDB
 // ---------------------------------------------------------------------------
 Given('Một đơn hàng được tạo với mã concept {string}, gói {string}, số điện thoại {string}', async function (cCode, pkgId, phone) {
-  const loginRes = await apiCall('/auth/login', 'POST', { account: '12345', password: '12345' });
+  const loginRes = await apiCall('/auth/login', 'POST', { account: '0396581067', password: '12345' });
+  assert.strictEqual(loginRes.status, 200);
   this.greyboxToken = loginRes.data.token;
 
   const targetDate = new Date();

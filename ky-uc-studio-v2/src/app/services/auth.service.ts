@@ -57,9 +57,6 @@ export class AuthService {
     return this.http.post<AuthResponse>('/api/auth/register', data).pipe(
       tap((res) => {
         if (res && res.user) {
-          if (res.token && typeof window !== 'undefined') {
-            localStorage.setItem('kyuc_token', res.token);
-          }
           this.currentUserSubject.next(res.user);
         }
       })
@@ -70,9 +67,6 @@ export class AuthService {
     return this.http.post<AuthResponse>('/api/auth/login', data).pipe(
       tap((res) => {
         if (res && res.user) {
-          if (res.token && typeof window !== 'undefined') {
-            localStorage.setItem('kyuc_token', res.token);
-          }
           this.currentUserSubject.next(res.user);
         }
       })
@@ -86,10 +80,7 @@ export class AuthService {
           this.currentUserSubject.next(user);
         }
       }),
-      catchError((err) => {
-        if (err.status === 401 && typeof window !== 'undefined') {
-          localStorage.removeItem('kyuc_token');
-        }
+      catchError(() => {
         return of(null as any);
       })
     );
@@ -98,15 +89,9 @@ export class AuthService {
   logout(): Observable<any> {
     return this.http.post('/api/auth/logout', {}).pipe(
       tap(() => {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('kyuc_token');
-        }
         this.currentUserSubject.next(null);
       }),
       catchError(() => {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('kyuc_token');
-        }
         this.currentUserSubject.next(null);
         return of(null);
       })

@@ -10,7 +10,7 @@ import { ConceptComponent } from './pages/concept/concept.component';
 import { ConceptDetailComponent } from './pages/concept-detail/concept-detail.component';
 import { AccountComponent } from './pages/account/account.component';
 import { PaymentResultComponent } from './pages/payment-result/payment-result.component';
-import { AdminComponent } from './pages/admin/admin.component';
+import { adminGuard } from './guards/admin.guard';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -25,7 +25,11 @@ const routes: Routes = [
   { path: 've-chung-toi', component: AboutComponent },
   { path: 'login', component: AuthComponent },
   { path: 'register', component: AuthComponent },
-  { path: 'admin', component: AdminComponent },
+  { 
+    path: 'admin', 
+    loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent),
+    canActivate: [adminGuard]
+  },
   { path: 'thanh-toan/ket-qua', component: PaymentResultComponent },
   { path: '**', redirectTo: '' }
 ];
