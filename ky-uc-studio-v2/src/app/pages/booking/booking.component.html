@@ -1,0 +1,619 @@
+<!-- BOOKING & PAYMENT LIFECYCLE - MATCHING FIGMA 100% -->
+<div class="booking-page">
+  <div class="container booking-container">
+
+    <!-- 1. TOP HERO BANNER (Figma Frame 2650) -->
+    <div class="booking-hero-card">
+      <div class="hero-card-left">
+        <span class="hero-brand">KÝ ỨC</span>
+        <h1 class="hero-heading">
+          {{ currentStep === 3 ? 'THANH TOÁN TIỀN CỌC' : (bookingCreated ? 'THANH TOÁN TIỀN CỌC' : 'ĐẶT LỊCH CHỤP ẢNH') }}
+        </h1>
+        <p class="hero-desc">
+          {{ currentStep === 3 ? 'Xác nhận thông tin đơn đặt và thanh toán 30% tiền cọc để studio khóa lịch cho bạn.' : 'Chọn gói chụp, ngày và khung giờ mong muốn. Hệ thống sẽ giữ chỗ 10 phút để bạn hoàn tất đặt lịch.' }}
+        </p>
+      </div>
+      <div class="hero-card-right">
+        <div class="notice-outline-box">
+          <p class="notice-line">Ký Ức Studio (Linh Xuân, TP. Thủ Đức, TP.HCM)</p>
+          <p class="notice-line">
+            Thời gian giữ chỗ: 
+            <strong [class.timer-alert]="holdExpiresInSeconds > 0 && holdExpiresInSeconds < 120">
+              {{ holdId && !holdExpired ? formatHoldTimer : 'Chưa chọn slot' }}
+            </strong>
+          </p>
+          <p class="notice-line">Cọc trước 30% — Hỗ trợ đổi lịch miễn phí trước 48h</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Alert Banner -->
+    @if (bookingError) {
+      <div class="booking-alert-error">
+        <span>⚠ {{ bookingError }}</span>
+      </div>
+    }
+
+    <!-- 2. STEP BREADCRUMBS INDICATOR (Figma Reference) -->
+    @if (!bookingCreated) {
+      <div class="booking-steps-bar">
+        <button 
+          type="button" 
+          class="step-pill" 
+          [class.active]="currentStep === 1" 
+          (click)="goToStep(1)">
+          <span class="step-num">1</span>
+          <span class="step-name">Gói chụp & Concept</span>
+        </button>
+        <div class="step-divider" [class.done]="currentStep > 1"></div>
+        <button 
+          type="button" 
+          class="step-pill" 
+          [class.active]="currentStep === 2" 
+          (click)="goToStep(2)">
+          <span class="step-num">2</span>
+          <span class="step-name">Ngày & Giờ chụp</span>
+        </button>
+        <div class="step-divider" [class.done]="currentStep > 2"></div>
+        <button 
+          type="button" 
+          class="step-pill" 
+          [class.active]="currentStep === 3" 
+          (click)="goToStep(3)">
+          <span class="step-num">3</span>
+          <span class="step-name">Thanh toán cọc</span>
+        </button>
+      </div>
+    }
+
+    <!-- =========================================================================
+         BƯỚC 1: CHỌN GÓI CHỤP & CONCEPT (Figma Screen 2)
+         ========================================================================= -->
+    @if (currentStep === 1 && !bookingCreated) {
+      <div class="step-card step-packages-concept-card">
+
+        <!-- Selected Concept Summary Top Box (Figma Screen 2) -->
+        <div class="selected-concept-strip" *ngIf="selectedConcept">
+          <div class="strip-left">
+            <img [src]="selectedConcept.thumbnail_url" [alt]="selectedConcept.concept_name" class="strip-thumb">
+            <div class="strip-meta">
+              <span class="strip-tag">CONCEPT ĐANG CHỌN</span>
+              <h2 class="strip-name">{{ selectedConcept.concept_name }}</h2>
+              <span class="strip-cat">Thể loại: {{ selectedConcept.category || 'Chân dung' }}</span>
+            </div>
+          </div>
+          <div class="strip-right">
+            <button type="button" class="btn-change-concept" (click)="showConceptSelector = !showConceptSelector">
+              {{ showConceptSelector ? 'Đóng danh mục' : 'Đổi concept khác' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Concept Switcher Grid (Khi bấm Đổi Concept) -->
+        @if (showConceptSelector) {
+          <div class="concept-selection-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">Chọn Concept nghệ thuật</h3>
+              <div class="panel-search-wrap">
+                <input 
+                  type="text" 
+                  class="panel-search-input" 
+                  placeholder="Tìm concept (VD: Vườn hoa, Sen trắng, Áo dài...)" 
+                  [(ngModel)]="conceptSearch">
+              </div>
+            </div>
+            <div class="concepts-select-grid">
+              @for (c of displayConcepts; track c.concept_code) {
+                <div 
+                  class="concept-mini-card" 
+                  [class.selected]="selectedConceptCode === c.concept_code" 
+                  (click)="onConceptChange(c.concept_code)">
+                  <img [src]="c.thumbnail_url" [alt]="c.concept_name" class="mini-thumb">
+                  <div class="mini-meta">
+                    <strong class="mini-name">{{ c.concept_name }}</strong>
+                    <span class="mini-cat">{{ c.category }}</span>
+                  </div>
+                  <div class="mini-check" *ngIf="selectedConceptCode === c.concept_code">✓ Đang chọn</div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- 3 Horizontal Packages Cards (Figma Screen 2) -->
+        <div class="packages-section-wrap">
+          <h3 class="section-sub-title">CHỌN GÓI DỊCH VỤ</h3>
+          <div class="package-cards-grid">
+            @for (pkg of displayPackages; track (pkg.package_id || pkg.packageId)) {
+              <div 
+                class="package-choice-card" 
+                [class.active]="isPackageSelected(pkg)"
+                (click)="onPackageChange(pkg.package_id || pkg.packageId)">
+                <div class="pkg-header-row">
+                  <h4 class="pkg-title">{{ pkg.package_name || pkg.name }}</h4>
+                  <div class="pkg-badge" *ngIf="pkg.package_id === 102 || pkg.package_id === 202">Phổ biến nhất</div>
+                </div>
+                <div class="pkg-price-row">
+                  <span class="pkg-price">{{ pkg.price | number }}đ</span>
+                  <span class="pkg-duration">/ {{ pkg.duration_minutes || 90 }} phút</span>
+                </div>
+                <ul class="pkg-features-list">
+                  <li>Trang phục & makeup nghệ thuật trọn gói</li>
+                  <li>Không giới hạn số lượng ảnh chụp thô</li>
+                  <li>Chỉnh sửa chuyên sâu Photoshop cao cấp</li>
+                  <li>Trả toàn bộ ảnh qua Google Drive trong 48h</li>
+                </ul>
+                <div class="pkg-select-btn-wrap">
+                  <button type="button" class="btn-select-pkg" [class.selected]="isPackageSelected(pkg)">
+                    {{ isPackageSelected(pkg) ? '✓ Đã chọn gói này' : 'Chọn gói này' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Bottom Action Bar (Figma Screen 2) -->
+        <div class="step-bottom-bar">
+          <div class="bottom-price-summary">
+            <span class="sub-label">TẠM TÍNH:</span>
+            <strong class="total-bold">{{ (quote?.totalPrice || selectedPackage?.price || 2500000) | number }}đ</strong>
+            <span class="deposit-hint">(Cọc 30%: {{ (quote?.depositAmount || 750000) | number }}đ)</span>
+          </div>
+          <div class="bottom-actions">
+            <button type="button" class="btn-primary-brown btn-next-step" (click)="goToStep(2)">
+              <span>TIẾP THEO: CHỌN NGÀY GIỜ →</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- =========================================================================
+         BƯỚC 2: CHỌN NGÀY & KHUNG GIỜ (Figma Screen 3)
+         ========================================================================= -->
+    @if (currentStep === 2 && !bookingCreated) {
+      <div class="step-card step-datetime-card">
+
+        <!-- Selected Concept Summary Top Strip -->
+        <div class="selected-concept-strip mini" *ngIf="selectedConcept">
+          <div class="strip-left">
+            <img [src]="selectedConcept.thumbnail_url" [alt]="selectedConcept.concept_name" class="strip-thumb-sm">
+            <div class="strip-meta">
+              <span class="strip-tag">CONCEPT ĐANG CHỌN</span>
+              <strong class="strip-name-sm">{{ selectedConcept.concept_name }}</strong>
+              <span class="strip-pkg-badge">{{ selectedPackage?.package_name }} · {{ selectedPackage?.duration_minutes || 90 }} phút</span>
+            </div>
+          </div>
+          <div class="strip-right">
+            <button type="button" class="btn-edit-step" (click)="goToStep(1)">Đổi gói / concept</button>
+          </div>
+        </div>
+
+        <!-- 1. Horizontal Date Strips (Figma Screen 3) -->
+        <div class="date-picker-horizontal-section">
+          <div class="date-section-header">
+            <h3 class="section-sub-title">CHỌN NGÀY CHỤP</h3>
+            <div class="manual-date-picker">
+              <label for="manualDate">Chọn ngày khác:</label>
+              <input 
+                id="manualDate"
+                type="date" 
+                class="date-input-field" 
+                [(ngModel)]="bookingDate" 
+                [min]="minBookingDate" 
+                (change)="onDateChange()">
+            </div>
+          </div>
+
+          <div class="date-chips-scroll">
+            @for (chip of dateChips; track chip.dateStr) {
+              <div 
+                class="date-chip-item" 
+                [class.active]="bookingDate === chip.dateStr" 
+                [class.weekend]="chip.isWeekend"
+                (click)="selectDateChip(chip.dateStr)">
+                <span class="chip-dow">{{ chip.dayOfWeek }}</span>
+                <span class="chip-day">{{ chip.dayMonth }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- 2. Time Slots Grid (Figma Screen 3) -->
+        <div class="time-slots-section">
+          <div class="time-slots-header">
+            <h3 class="section-sub-title">KHUNG GIỜ CHỤP CÒN TRỐNG</h3>
+            <span class="time-note">Thời lượng: {{ selectedPackage?.duration_minutes || 90 }} phút · Giữ slot 10 phút</span>
+          </div>
+
+          @if (loadingSlots) {
+            <div class="slots-loading-box">
+              <p>Đang kiểm tra dữ liệu slot trống từ máy chủ...</p>
+            </div>
+          } @else {
+            @if (availableSlots.length === 0) {
+              <div class="slots-empty-box">
+                <p>Studio đã kín lịch trong ngày này. Quý khách vui lòng chọn ngày khác bên trên.</p>
+              </div>
+            } @else {
+              <div class="slots-grid-chips">
+                @for (s of availableSlots; track s.startTime) {
+                  <button 
+                    type="button" 
+                    class="time-slot-btn" 
+                    [class.active]="selectedSlot?.startTime === s.startTime" 
+                    [class.disabled]="!s.available && s.status !== 'AVAILABLE'"
+                    [disabled]="!s.available && s.status !== 'AVAILABLE'"
+                    (click)="selectSlot(s)">
+                    <span class="slot-start">{{ s.startTime }}</span>
+                    <span class="slot-badge">{{ s.status === 'AVAILABLE' ? 'Trống' : (s.status === 'HOLDING' ? 'Đang giữ' : 'Đã kín') }}</span>
+                  </button>
+                }
+              </div>
+            }
+          }
+        </div>
+
+        <!-- 3. Pre-fill Customer Phone for Slot Holding (Đồng bộ khách hàng) -->
+        <div class="slot-user-info-section">
+          <h4 class="info-section-title">Thông tin người đặt lịch (Dùng để giữ chỗ và liên hệ xác nhận)</h4>
+          <div class="form-row-grid">
+            <div class="form-group-col">
+              <label class="form-label-bold">Họ và tên *</label>
+              <input 
+                type="text" 
+                class="form-control-input" 
+                placeholder="VD: Nguyễn Thị Hoa" 
+                [(ngModel)]="customerName" 
+                (ngModelChange)="saveProgressDraft()">
+            </div>
+            <div class="form-group-col">
+              <label class="form-label-bold">Số điện thoại *</label>
+              <input 
+                type="tel" 
+                class="form-control-input" 
+                placeholder="VD: 0396581067" 
+                [(ngModel)]="customerPhone" 
+                (ngModelChange)="saveProgressDraft()">
+            </div>
+            <div class="form-group-col">
+              <label class="form-label-bold">Email</label>
+              <input 
+                type="email" 
+                class="form-control-input" 
+                placeholder="VD: hoa.nguyen@gmail.com" 
+                [(ngModel)]="customerEmail" 
+                (ngModelChange)="saveProgressDraft()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Action Bar (Figma Screen 3) -->
+        <div class="step-bottom-bar">
+          <div class="bottom-actions-left">
+            <button type="button" class="btn-back-step" (click)="goToStep(1)">← Quay lại chọn gói</button>
+          </div>
+          <div class="bottom-price-summary">
+            <span class="sub-label">GIỜ ĐÃ CHỌN:</span>
+            <strong class="total-bold">{{ selectedSlot ? (selectedSlot.timeSlot || selectedSlot.startTime) : 'Chưa chọn' }}</strong>
+            <span class="deposit-hint">({{ bookingDate }})</span>
+          </div>
+          <div class="bottom-actions">
+            <button type="button" class="btn-primary-brown btn-next-step" (click)="goToStep(3)">
+              <span>TIẾP THEO: THANH TOÁN CỌC →</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    }
+
+    <!-- =========================================================================
+         BƯỚC 3: 03.06 TRANG THANH TOÁN TIỀN CỌC (Figma Screen 4 - 2 Cột Chuẩn 100%)
+         ========================================================================= -->
+    @if (currentStep === 3 && !bookingCreated) {
+      <div class="deposit-payment-grid">
+
+        <!-- CỘT TRÁI: THẺ THÔNG TIN ĐƠN ĐẶT (Figma Screen 4) -->
+        <div class="deposit-card order-summary-card">
+          <h2 class="deposit-card-title">Thông tin đơn đặt</h2>
+
+          <!-- Large High-Resolution Concept Image of the Selected Concept (CD Vườn Hoa) -->
+          <div class="concept-hero-visual">
+            <img 
+              [src]="selectedConcept?.thumbnail_url || 'assets/03.03. Concept/Chân dung/CD Vườn hoa.png'" 
+              [alt]="selectedConcept?.concept_name || 'CD Vườn Hoa'" 
+              class="deposit-concept-img">
+          </div>
+
+          <!-- Concept Meta Details -->
+          <div class="deposit-concept-meta">
+            <span class="deposit-tag">CONCEPT</span>
+            <h3 class="deposit-concept-name">{{ (selectedConcept?.concept_name || 'CD VƯỜN HOA') | uppercase }}</h3>
+            <p class="deposit-pkg-line">
+              {{ (selectedPackage?.package_name || 'Gói Chân Dung – Nâng Cao') | uppercase }} · {{ selectedPackage?.duration_minutes || 90 }} PHÚT
+            </p>
+          </div>
+
+          <div class="deposit-divider"></div>
+
+          <!-- Order Schedule Info Table -->
+          <div class="deposit-info-rows">
+            <div class="info-line">
+              <span class="info-label">Ngày chụp:</span>
+              <strong class="info-value">{{ bookingDate }}</strong>
+            </div>
+            <div class="info-line">
+              <span class="info-label">Khung giờ:</span>
+              <strong class="info-value">{{ selectedSlot?.timeSlot || selectedSlot?.startTime || '09:30 - 11:00' }}</strong>
+            </div>
+            <div class="info-line">
+              <span class="info-label">Giá gói chụp:</span>
+              <span class="info-value">{{ (quote?.packagePrice || selectedPackage?.price || 2500000) | number }}đ</span>
+            </div>
+            @if (quote && quote.discountAmount > 0) {
+              <div class="info-line discount-line">
+                <span class="info-label">Giảm giá voucher:</span>
+                <span class="info-value discount-text">-{{ quote.discountAmount | number }}đ</span>
+              </div>
+            }
+            <div class="info-line total-line">
+              <span class="info-label">Tổng tiền đơn:</span>
+              <strong class="info-value total-num">{{ (quote?.totalPrice || selectedPackage?.price || 2500000) | number }}đ</strong>
+            </div>
+            <div class="info-line deposit-highlight-line">
+              <span class="info-label">Tiền cọc thanh toán (30%):</span>
+              <strong class="info-value deposit-price-num">{{ (quote?.depositAmount || 750000) | number }}đ</strong>
+            </div>
+          </div>
+
+          <div class="edit-schedule-action">
+            <button type="button" class="btn-link-edit" (click)="goToStep(2)">← Chỉnh sửa ngày & giờ chụp</button>
+          </div>
+        </div>
+
+        <!-- CỘT PHẢI: PHƯƠNG THỨC THANH TOÁN & THÔNG TIN KHÁCH (Figma Screen 4) -->
+        <div class="deposit-card payment-action-card">
+          <h2 class="deposit-card-title">Phương thức thanh toán</h2>
+
+          <!-- Customer Info Inputs -->
+          <div class="customer-fields-block">
+            <div class="field-item">
+              <label class="field-label-sm">Họ và tên người đặt *</label>
+              <input 
+                type="text" 
+                class="field-input-box" 
+                placeholder="VD: Nguyễn Thị Hoa" 
+                [(ngModel)]="customerName" 
+                (ngModelChange)="saveProgressDraft()">
+            </div>
+            <div class="field-item">
+              <label class="field-label-sm">Số điện thoại *</label>
+              <input 
+                type="tel" 
+                class="field-input-box" 
+                placeholder="VD: 0396581067" 
+                [(ngModel)]="customerPhone" 
+                (ngModelChange)="saveProgressDraft()">
+            </div>
+            <div class="field-item">
+              <label class="field-label-sm">Email nhận ảnh & xác nhận</label>
+              <input 
+                type="email" 
+                class="field-input-box" 
+                placeholder="VD: hoa.nguyen@gmail.com" 
+                [(ngModel)]="customerEmail" 
+                (ngModelChange)="saveProgressDraft()">
+            </div>
+            <div class="field-item">
+              <label class="field-label-sm">Ghi chú cho ekip</label>
+              <textarea 
+                rows="2" 
+                class="field-textarea-box" 
+                placeholder="VD: Makeup tự nhiên, tone ấm áp..." 
+                [(ngModel)]="note" 
+                (ngModelChange)="saveProgressDraft()"></textarea>
+            </div>
+          </div>
+
+          <!-- Voucher Application Box -->
+          <div class="voucher-box-wrap">
+            <div class="voucher-input-group">
+              <input 
+                type="text" 
+                class="voucher-input" 
+                placeholder="Nhập mã ưu đãi / Voucher" 
+                [(ngModel)]="voucherCode">
+              <button type="button" class="btn-apply-code" (click)="applyVoucher()">Áp dụng</button>
+            </div>
+            @if (voucherError) {
+              <span class="voucher-err-text">{{ voucherError }}</span>
+            }
+          </div>
+
+          <!-- Payment Options (VietQR / VNPay) -->
+          <div class="payment-methods-select">
+            <div 
+              class="pay-method-item" 
+              [class.checked]="selectedPaymentMethod === 'bank'" 
+              (click)="setPaymentMethod('bank')">
+              <div class="method-radio">
+                <span class="dot" *ngIf="selectedPaymentMethod === 'bank'"></span>
+              </div>
+              <div class="method-details">
+                <strong class="method-name">Chuyển khoản ngân hàng (VietQR)</strong>
+                <p class="method-desc">Quét mã QR tự động điền đúng số tài khoản, số tiền và nội dung chuyển khoản</p>
+              </div>
+            </div>
+
+            <div 
+              class="pay-method-item" 
+              [class.checked]="selectedPaymentMethod === 'vnpay'" 
+              (click)="setPaymentMethod('vnpay')">
+              <div class="method-radio">
+                <span class="dot" *ngIf="selectedPaymentMethod === 'vnpay'"></span>
+              </div>
+              <div class="method-details">
+                <strong class="method-name">Cổng thanh toán VNPay Sandbox</strong>
+                <p class="method-desc">Thanh toán tức thì qua ATM / Internet Banking / Visa / QRCode</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Auth Notice if Guest -->
+          @if (!authService.isLoggedIn) {
+            <div class="guest-auth-notice">
+              <span>ℹ Bạn đang đặt lịch với tư cách khách vãng lai. Khi bấm Tiếp tục, bạn sẽ được chuyển sang đăng nhập/đăng ký để lưu giữ lịch đặt chính thức.</span>
+            </div>
+          }
+
+          <!-- Submit / Proceed Button (Figma Screen 4 Brown Pill) -->
+          <div class="deposit-submit-wrap">
+            <button 
+              type="button" 
+              class="btn-primary-brown btn-proceed-deposit" 
+              [disabled]="submittingBooking"
+              (click)="confirmPayment()">
+              <span>{{ submittingBooking ? 'ĐANG XỬ LÝ...' : (authService.isLoggedIn ? 'TIẾP TỤC THANH TOÁN CỌC' : 'ĐĂNG NHẬP & TIẾP TỤC') }}</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    }
+
+    <!-- =========================================================================
+         BƯỚC 4: 03.06 MÀN HÌNH THANH TOÁN VIETQR (Figma Screen 6)
+         ========================================================================= -->
+    @if (bookingCreated && !transferConfirmed) {
+      <div class="vietqr-screen-card">
+        <div class="qr-notice-header text-center">
+          <span class="qr-tagline">VIETQR DEPOSIT PAYMENT</span>
+          <h2 class="qr-main-title">QUÉT MÃ VIETQR ĐỂ HOÀN TẤT ĐẶT CỌC</h2>
+          <p class="qr-desc">
+            Vui lòng chuyển đúng số tiền cọc <strong>{{ (paymentInfo?.amount || quote?.depositAmount || 750000) | number }}đ</strong> với mã đơn <strong>{{ createdBookingCode }}</strong> trong vòng 15 phút.
+          </p>
+        </div>
+
+        <div class="vietqr-grid-layout">
+          <!-- Left: Dynamic VietQR Image -->
+          <div class="qr-code-frame">
+            <img [src]="paymentInfo?.qrUrl" alt="VietQR Đặt cọc" class="qr-image-display">
+            <p class="qr-scan-guide">Mở App Ngân hàng của bạn và quét mã trên để thanh toán tức thì</p>
+          </div>
+
+          <!-- Right: Bank Transfer Account Details -->
+          <div class="qr-details-frame">
+            <h3 class="bank-details-title">Thông tin chuyển khoản chính thức</h3>
+            <div class="bank-row">
+              <span class="b-label">Ngân hàng thụ hưởng:</span>
+              <strong class="b-val">{{ paymentInfo?.bankId || 'Ngân hàng Quân Đội (MB Bank)' }}</strong>
+            </div>
+            <div class="bank-row">
+              <span class="b-label">Số tài khoản:</span>
+              <strong class="b-val highlight-acc">{{ paymentInfo?.bankAccount || '0396581067' }}</strong>
+            </div>
+            <div class="bank-row">
+              <span class="b-label">Chủ tài khoản:</span>
+              <strong class="b-val">{{ paymentInfo?.bankAccountName || 'NGUYEN TIEN DAT' }}</strong>
+            </div>
+            <div class="bank-row">
+              <span class="b-label">Số tiền đặt cọc:</span>
+              <strong class="b-val deposit-num">{{ (paymentInfo?.amount || quote?.depositAmount || 750000) | number }}đ</strong>
+            </div>
+            <div class="bank-row">
+              <span class="b-label">Nội dung chuyển khoản:</span>
+              <strong class="b-val highlight-content">{{ paymentInfo?.transferContent || ('DAT COC ' + createdBookingCode) }}</strong>
+            </div>
+
+            <div class="qr-confirm-action-box">
+              <button 
+                type="button" 
+                class="btn-primary-brown btn-transfer-done" 
+                [disabled]="transferLoading"
+                (click)="notifyBankTransferDone()">
+                <span>{{ transferLoading ? 'ĐANG GỬI XÁC NHẬN...' : 'TÔI ĐÃ CHUYỂN KHOẢN XONG' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- =========================================================================
+         BƯỚC 5: 03.06 THANH TOÁN THÀNH CÔNG (Figma Screen 7 - Kết Quả Hoàn Chỉnh)
+         ========================================================================= -->
+    @if (bookingCreated && transferConfirmed) {
+      <div class="success-screen-card text-center">
+        <!-- Green Round Checkmark Icon (Figma Screen 7) -->
+        <div class="success-check-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+
+        <h2 class="success-title">Thanh toán cọc thành công!</h2>
+        <p class="success-subtitle">
+          Cảm ơn bạn đã tin tưởng Ký Ức Studio! Chúng tôi đã ghi nhận lịch hẹn chụp của bạn và sẽ liên hệ chuẩn bị chu đáo nhất.
+        </p>
+
+        <!-- Order Summary Card with CD Vườn Hoa Image (Figma Screen 7) -->
+        <div class="success-order-box text-left">
+          <div class="order-box-grid">
+            <div class="order-img-col">
+              <img 
+                [src]="selectedConcept?.thumbnail_url || 'assets/03.03. Concept/Chân dung/CD Vườn hoa.png'" 
+                [alt]="selectedConcept?.concept_name || 'CD Vườn hoa'" 
+                class="success-concept-img">
+            </div>
+            <div class="order-info-col">
+              <span class="order-code-badge">MÃ ĐƠN: {{ createdBookingCode }}</span>
+              <h3 class="success-concept-name">{{ selectedConcept?.concept_name || 'CD Vườn Hoa' }}</h3>
+              <p class="success-pkg-name">{{ selectedPackage?.package_name }} · {{ selectedPackage?.duration_minutes || 90 }} phút</p>
+              <p class="success-time-line">
+                <strong>Thời gian:</strong> {{ selectedSlot?.timeSlot || selectedSlot?.startTime }} · {{ bookingDate }}
+              </p>
+              <div class="deposit-paid-badge">
+                <span>Đã ghi nhận tiền cọc: <strong>{{ (paymentInfo?.amount || quote?.depositAmount || 750000) | number }}đ</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Button (Figma Screen 7 Brown Button) -->
+        <div class="success-action-wrap">
+          <a routerLink="/account/bookings" class="btn-primary-brown btn-view-bookings">
+            <span>VỀ LỊCH ĐẶT CỦA TÔI</span>
+          </a>
+        </div>
+      </div>
+    }
+
+  </div>
+
+  <!-- =========================================================================
+       POPUP MODAL: XÁC NHẬN ĐẶT LỊCH TRƯỚC KHI THANH TOÁN (Figma Screen 5)
+       ========================================================================= -->
+  @if (showBookingNoticeModal) {
+    <div class="booking-notice-overlay" (click)="closeBookingNoticeModal()">
+      <div class="booking-notice-card" (click)="$event.stopPropagation()">
+        <div class="notice-card-header text-center">
+          <img src="assets/images/logo.png" alt="Ký Ức Studio" class="notice-logo-img">
+          <div class="notice-question-icon">?</div>
+          <h3 class="notice-modal-title">Xác nhận đặt lịch chụp?</h3>
+          <p class="notice-modal-desc">
+            Sau khi bấm tiếp tục, hệ thống sẽ tiến hành tạo đơn và mở màn hình thanh toán tiền cọc 30% cho <strong>{{ selectedConcept?.concept_name || 'CD Vườn hoa' }}</strong> vào ngày <strong>{{ bookingDate }}</strong> lúc <strong>{{ selectedSlot?.startTime }}</strong>.
+          </p>
+        </div>
+
+        <div class="notice-modal-actions">
+          <button type="button" class="btn-modal-back" (click)="closeBookingNoticeModal()">Xem lại thông tin</button>
+          <button type="button" class="btn-modal-proceed" (click)="confirmPaymentAfterNotice()">Xác nhận & Chuyển sang thanh toán</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

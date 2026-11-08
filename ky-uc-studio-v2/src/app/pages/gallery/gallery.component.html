@@ -1,0 +1,62 @@
+<div class="gallery-page">
+  <!-- 1. HERO SECTION (Figma 147:2486) -->
+  <section class="gallery-hero">
+    <div class="container hero-grid">
+      <!-- Left Narrative Column -->
+      <div class="hero-text-col">
+        <span class="hero-tag">BỘ SƯU TẬP</span>
+        <h1 class="hero-title">
+          Mỗi khung hình<br>lưu giữ một phần ký ức
+        </h1>
+        <div class="hero-story">
+          <p>
+            Có những khoảnh khắc chỉ đến một lần, có những người luôn muốn ở bên nhau và có những phiên bản của chính mình mà ta muốn lưu giữ mãi. Tại Ký Ức, mỗi bộ sưu tập là một cách kể chuyện bằng hình ảnh, để những điều bình dị hôm nay trở thành kỷ niệm đáng nhớ mai sau.
+          </p>
+          <p>
+            Khám phá bộ sưu tập phù hợp với câu chuyện của bạn và tìm thấy concept dành riêng cho khoảnh khắc ấy.
+          </p>
+        </div>
+        <p class="hero-quote">
+          Những bức ảnh không chỉ lưu giữ khoảnh khắc, mà còn giữ lại cảm xúc của bạn.
+        </p>
+      </div>
+
+      <!-- Right Visual Column (Polaroid & Camera) -->
+      <div class="hero-visual-col">
+        <div class="polaroid-frame">
+          <img src="assets/images/gallery-hero-clean.png" alt="Kho báu Ký Ức" class="polaroid-img">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. COLLECTIONS LIST (Numbered 01 -> 05) -->
+  <section class="collections-section container">
+    <div class="collections-list">
+      @for (col of collections; track col.number) {
+        <div class="collection-card">
+          <!-- Left: Numbered Image Frame -->
+          <div class="card-visual-col">
+            <div class="card-img-wrap">
+              <img [src]="col.image" [alt]="col.title" class="col-img">
+            </div>
+          </div>
+
+          <!-- Right: Narrative Content -->
+          <div class="card-content-col">
+            <h2 class="col-title">{{ col.title }}</h2>
+            <div class="col-sub">{{ col.subtitle }}</div>
+            <div class="col-slogan">{{ col.slogan }}</div>
+            <p class="col-desc">{{ col.description }}</p>
+            
+            <div class="col-action">
+              <button type="button" class="btn-explore" (click)="exploreCollection(col.conceptTarget)">
+                <span>Khám phá BST →</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+</div>

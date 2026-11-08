@@ -57,7 +57,11 @@ exports.createBooking = async (req, res) => {
 
   const hold = await collections.holdSlotCollection.findOne({ _id: toObjectId(holdId, "holdId"), expiresAt: { $gt: new Date() } });
   if (!hold) throw httpError(410, `Slot giữ chỗ không tồn tại hoặc đã quá ${C.HOLD_MINUTES} phút, vui lòng chọn lại giờ!`);
-  if (hold.customerPhone !== customerPhone) throw httpError(403, "Số điện thoại không khớp với slot đang giữ!");
+  const userPhone = req.user?.phone ? normalizePhone(req.user.phone) : null;
+  const isMatch = (hold.customerPhone === customerPhone) ||
+                  (req.user && hold.userId && String(hold.userId) === String(req.user.userId)) ||
+                  (userPhone && userPhone === hold.customerPhone);
+  if (!isMatch) throw httpError(403, "Số điện thoại không khớp với slot đang giữ!");
 
   const userId = req.user ? toObjectId(req.user.userId) : null;
   const quote = await calculateQuote({ packageId: String(hold.packageId), conceptCode, addons, voucherCode, userId: req.user?.userId });

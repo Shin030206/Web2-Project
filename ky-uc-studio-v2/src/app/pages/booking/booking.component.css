@@ -1,0 +1,2188 @@
+/* BOOKING & PAYMENT PAGE - FIGMA NODE 336:12299 */
+
+.booking-page {
+  background-color: #FAF8F5;
+  color: #2E1E17;
+  padding: 40px 0 80px;
+}
+
+.booking-container {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* 1. TOP BANNER */
+.booking-hero-card {
+  background-color: #9E7D4E;
+  color: #ffffff;
+  border-radius: 24px;
+  padding: 38px 46px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 36px;
+  align-items: center;
+  box-shadow: 0 8px 24px rgba(158, 125, 78, 0.22);
+}
+
+.hero-brand {
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.8);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.hero-heading {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 34px;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.hero-desc {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.notice-outline-box {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13.5px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.notice-line {
+  margin: 0;
+}
+
+/* 2. MAIN CONTENT GRID */
+.booking-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 32px;
+  margin-top: 36px;
+}
+
+.booking-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EFEAE2;
+  border-radius: 24px;
+  padding: 36px 38px;
+  box-shadow: 0 4px 18px rgba(46, 30, 23, 0.04);
+}
+
+.card-section-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin-bottom: 24px;
+}
+
+/* Left: Order Info */
+.concept-preview-box {
+  width: 100%;
+  height: 240px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.concept-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.concept-tag-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #8C6D46;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.concept-order-name {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0 0 6px;
+}
+
+.order-code-text {
+  font-size: 13px;
+  color: #7D6B5E;
+  margin: 0;
+}
+
+.card-line-divider {
+  height: 1px;
+  background-color: #EFEAE2;
+  margin: 22px 0;
+}
+
+.order-details-table {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14.5px;
+}
+
+.detail-label {
+  color: #6E5D53;
+}
+
+.detail-val {
+  font-weight: 600;
+  color: #2E1E17;
+}
+
+.detail-status-badge {
+  background-color: #EBF5EA;
+  color: #2E7D32;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.price-highlight-row {
+  padding-top: 10px;
+  border-top: 1px dashed #E5D8C7;
+}
+
+.detail-price-val {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: #9E7D4E;
+}
+
+/* Right: Payment Method */
+.payment-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.payment-option-box {
+  border: 1.5px solid #E2D7C8;
+  border-radius: 18px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-option-box:hover {
+  border-color: #9E7D4E;
+  background-color: #FAF7F2;
+}
+
+.payment-option-box.active {
+  border-color: #9E7D4E;
+  background-color: #FAF6EF;
+}
+
+.option-icon-col {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9E7D4E;
+}
+
+.pay-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.option-text-col {
+  flex: 1;
+}
+
+.option-title {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #2E1E17;
+  margin: 0 0 4px;
+}
+
+.option-desc {
+  font-size: 13px;
+  color: #7D6B5E;
+  margin: 0;
+}
+
+.check-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid #C5AC8D;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: transparent;
+}
+
+.check-circle.checked {
+  background-color: #9E7D4E;
+  border-color: #9E7D4E;
+  color: #ffffff;
+}
+
+.vietqr-inline-box {
+  background-color: #FAF7F2;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 10px 0;
+}
+
+.qr-img {
+  width: 170px;
+  height: 170px;
+  object-fit: contain;
+  margin: 0 auto 12px;
+  display: block;
+  border-radius: 8px;
+}
+
+.qr-hint {
+  font-size: 13px;
+  color: #5C4840;
+  margin-bottom: 12px;
+}
+
+.qr-bank-details {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #4A3A31;
+  text-align: left;
+  background: #ffffff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid #EFEAE2;
+}
+
+.btn-confirm-payment {
+  width: 100%;
+  background-color: #9E7D4E;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  padding: 16px 28px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(158, 125, 78, 0.3);
+}
+
+.btn-confirm-payment:hover {
+  background-color: #8C6D3F;
+}
+
+/* 3. BOTTOM CONSULTATION FORM */
+.booking-consult-section {
+  padding: 80px 0 20px;
+}
+
+.consult-container {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.consult-header {
+  margin-bottom: 30px;
+}
+
+.consult-tagline {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: #7D6B5E;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.consult-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 34px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #2E1E17;
+}
+
+.consult-card {
+  background-color: #FAF6EF;
+  border: 1px solid #E8DFD3;
+  border-radius: 28px;
+  padding: 44px 48px;
+  box-shadow: 0 4px 20px rgba(46, 30, 23, 0.05);
+}
+
+.consult-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #3C2A21;
+}
+
+.form-control {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #E2D7C8;
+  border-radius: 9999px;
+  padding: 13px 22px;
+  font-size: 14.5px;
+  color: #2E1E17;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: #9E7D4E;
+  box-shadow: 0 0 0 3px rgba(158, 125, 78, 0.15);
+}
+
+.select-control {
+  appearance: auto;
+}
+
+.textarea-control {
+  border-radius: 18px;
+  resize: vertical;
+}
+
+.btn-submit-consult {
+  width: 100%;
+  background-color: #9E7D4E;
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  padding: 15px 28px;
+  font-size: 15.5px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(158, 125, 78, 0.28);
+  transition: all 0.2s ease;
+}
+
+.btn-submit-consult:hover {
+  background-color: #8C6D3F;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .booking-hero-card {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 28px;
+  }
+  .booking-content-grid {
+    grid-template-columns: 1fr;
+  }
+  .consult-card {
+    padding: 28px 20px;
+  }
+}
+
+/* REAL BOOKING LIFECYCLE EXTENSIONS */
+.booking-alert-error {
+  background-color: #FDF2F2;
+  border: 1px solid #F8B4B4;
+  color: #9B1C1C;
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-size: 14.5px;
+  margin-top: 20px;
+  font-weight: 500;
+}
+
+.timer-alert {
+  color: #FFD2D2 !important;
+  font-weight: 700;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+.selection-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 600px) {
+  .selection-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3C2A21;
+}
+
+.form-select-control,
+.form-input-control,
+.form-date-input {
+  width: 100%;
+  background-color: #FAF8F5;
+  border: 1px solid #D8C7B5;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #2E1E17;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-textarea-control {
+  width: 100%;
+  background-color: #FAF8F5;
+  border: 1px solid #D8C7B5;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #2E1E17;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form-select-control:focus,
+.form-input-control:focus,
+.form-date-input:focus,
+.form-textarea-control:focus {
+  border-color: #9E7D4E;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(158, 125, 78, 0.15);
+}
+
+.concept-desc-sm {
+  font-size: 13px;
+  color: #6B5B53;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.slot-picker-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.slots-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slots-loading-text,
+.slots-empty-text {
+  font-size: 13.5px;
+  color: #7A6F68;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+.slots-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.slot-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border: 1.5px solid #D8C7B5;
+  border-radius: 12px;
+  background-color: #FAF8F5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slot-chip .slot-time {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2E1E17;
+}
+
+.slot-chip .slot-status {
+  font-size: 11px;
+  color: #27AE60;
+  margin-top: 2px;
+}
+
+.slot-chip:hover:not(.disabled) {
+  border-color: #9E7D4E;
+  background-color: rgba(158, 125, 78, 0.08);
+}
+
+.slot-chip.active {
+  border-color: #9E7D4E;
+  background-color: #9E7D4E;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(158, 125, 78, 0.3);
+}
+
+.slot-chip.active .slot-time,
+.slot-chip.active .slot-status {
+  color: #ffffff;
+}
+
+.slot-chip.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background-color: #EDE8E1;
+  border-color: #D3CCC2;
+}
+
+.slot-chip.disabled .slot-status {
+  color: #8C827A;
+}
+
+.customer-info-section {
+  margin: 18px 0;
+}
+
+.subsection-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2E1E17;
+  margin-bottom: 12px;
+}
+
+.customer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.customer-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .customer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.voucher-input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.voucher-code-input {
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.btn-apply-voucher {
+  background-color: #2E1E17;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 0 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.btn-apply-voucher:hover {
+  background-color: #4A3328;
+}
+
+.voucher-error-hint {
+  display: block;
+  font-size: 12.5px;
+  color: #C0392B;
+  margin-bottom: 10px;
+}
+
+.discount-row {
+  color: #27AE60;
+  font-weight: 500;
+}
+
+.total-row {
+  font-weight: 600;
+}
+
+.payment-hint-sub {
+  font-size: 14px;
+  color: #6B5B53;
+  margin-bottom: 18px;
+}
+
+.auth-gate-notice {
+  background-color: #FFF9E6;
+  border: 1px solid #F5DCA8;
+  color: #8A6517;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin: 18px 0;
+}
+
+.created-booking-success-box {
+  padding: 20px 0;
+}
+
+.success-badge {
+  display: inline-block;
+  background-color: #E8F8F0;
+  color: #1E824C;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  margin-bottom: 14px;
+}
+
+.order-code-heading {
+  font-size: 20px;
+  color: #2E1E17;
+  margin: 0 0 10px;
+}
+
+.order-code-heading span {
+  color: #9E7D4E;
+  font-weight: 700;
+}
+
+.deposit-notice-text {
+  font-size: 14.5px;
+  color: #55443D;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.btn-transfer-done {
+  margin-top: 18px;
+  background-color: #1E824C;
+}
+
+.btn-transfer-done:hover {
+  background-color: #16693C;
+}
+
+.transfer-confirmed-msg {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #F0FBF5;
+  border: 1px solid #C4EED8;
+  border-radius: 16px;
+}
+
+.confirm-p {
+  color: #16693C;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.btn-goto-account {
+  display: inline-block;
+  background-color: #9E7D4E;
+  color: #ffffff;
+  padding: 11px 26px;
+  border-radius: 9999px;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(158, 125, 78, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+.btn-goto-account:hover {
+  background-color: #8C6D3F;
+}
+
+/* =========================================================================
+   POPUP MODAL LƯU Ý KHI ĐẶT LỊCH (Figma Reference: Image 4 Screen 5)
+   ========================================================================= */
+.booking-notice-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(30, 20, 15, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeInNotice 0.25s ease-out;
+}
+
+.notice-modal-box {
+  background-color: #FAF6F0;
+  border: 1px solid #E6D7C3;
+  border-radius: 20px;
+  max-width: 520px;
+  width: 100%;
+  padding: 32px 30px;
+  box-shadow: 0 16px 40px rgba(46, 30, 23, 0.28);
+  animation: scaleUpNotice 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notice-modal-title {
+  font-family: 'Playfair Display', serif, Georgia;
+  font-size: 22px;
+  font-weight: 700;
+  color: #3C2A21;
+  text-align: center;
+  margin: 0 0 20px;
+  letter-spacing: 0.5px;
+}
+
+.notice-modal-content {
+  background-color: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #EFE5DA;
+  padding: 20px 22px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notice-p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #55443D;
+  margin: 0;
+}
+
+.notice-p strong {
+  color: #2E1E17;
+}
+
+.notice-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-notice-cancel {
+  flex: 1;
+  background-color: #ffffff;
+  border: 1px solid #D8C7B5;
+  color: #55443D;
+  padding: 12px 18px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-notice-cancel:hover {
+  background-color: #F5EFEB;
+  border-color: #B59B82;
+  color: #2E1E17;
+}
+
+.btn-notice-proceed {
+  flex: 1.2;
+  background-color: #9E7D4E;
+  border: 1px solid #9E7D4E;
+  color: #ffffff;
+  padding: 12px 18px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(158, 125, 78, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-notice-proceed:hover {
+  background-color: #8C6D3F;
+  border-color: #8C6D3F;
+  transform: translateY(-1px);
+}
+
+@keyframes fadeInNotice {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUpNotice {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* =========================================================================
+   FIGMA EXTENSIONS: SYNCHRONIZED MULTI-STEP FLOW & 03.06 DEPOSIT PAYMENT
+   ========================================================================= */
+
+/* Step Breadcrumbs */
+.booking-steps-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 28px 0;
+  flex-wrap: wrap;
+}
+
+.step-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #FFFFFF;
+  border: 1px solid #EAE0D5;
+  border-radius: 9999px;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.step-pill .step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #EFEAE2;
+  color: #5C4840;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.step-pill .step-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #5C4840;
+}
+
+.step-pill.active {
+  background-color: #5C4033;
+  border-color: #5C4033;
+  box-shadow: 0 4px 12px rgba(92, 64, 51, 0.25);
+}
+
+.step-pill.active .step-num {
+  background-color: #FFFFFF;
+  color: #5C4033;
+}
+
+.step-pill.active .step-name {
+  color: #FFFFFF;
+}
+
+.step-divider {
+  width: 32px;
+  height: 2px;
+  background-color: #E0D5C7;
+}
+
+.step-divider.done {
+  background-color: #5C4033;
+}
+
+/* Common Step Card */
+.step-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EFEAE2;
+  border-radius: 24px;
+  padding: 36px 40px;
+  box-shadow: 0 4px 20px rgba(46, 30, 23, 0.04);
+  margin-bottom: 40px;
+  animation: fadeInNotice 0.25s ease-out;
+}
+
+/* Selected Concept Top Strip */
+.selected-concept-strip {
+  background-color: #FAF8F5;
+  border: 1px solid #EAE0D5;
+  border-radius: 16px;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 20px;
+}
+
+.selected-concept-strip.mini {
+  padding: 14px 20px;
+  margin-bottom: 24px;
+}
+
+.strip-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.strip-thumb {
+  width: 74px;
+  height: 74px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid #D8C7B5;
+}
+
+.strip-thumb-sm {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #D8C7B5;
+}
+
+.strip-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.strip-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #9E7D4E;
+}
+
+.strip-name {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0;
+}
+
+.strip-name-sm {
+  font-size: 16px;
+  color: #2E1E17;
+}
+
+.strip-cat {
+  font-size: 13px;
+  color: #7A6960;
+}
+
+.strip-pkg-badge {
+  font-size: 12.5px;
+  color: #8C6D3F;
+  font-weight: 600;
+}
+
+.btn-change-concept,
+.btn-edit-step {
+  background-color: #FFFFFF;
+  border: 1px solid #D8C7B5;
+  color: #5C4033;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-change-concept:hover,
+.btn-edit-step:hover {
+  background-color: #F5EFEB;
+  border-color: #5C4033;
+}
+
+/* Concept Selection Panel */
+.concept-selection-panel {
+  background-color: #FCFAF7;
+  border: 1px dashed #D8C7B5;
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.panel-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 18px;
+  color: #2E1E17;
+  margin: 0;
+}
+
+.panel-search-input {
+  background-color: #FFFFFF;
+  border: 1px solid #D8C7B5;
+  border-radius: 9999px;
+  padding: 8px 18px;
+  font-size: 13px;
+  outline: none;
+  min-width: 260px;
+}
+
+.concepts-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.concept-mini-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EAE0D5;
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.concept-mini-card:hover {
+  border-color: #9E7D4E;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 30, 23, 0.08);
+}
+
+.concept-mini-card.selected {
+  border-color: #5C4033;
+  border-width: 2px;
+  background-color: #FAF5F0;
+}
+
+.mini-thumb {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.mini-name {
+  display: block;
+  font-size: 14px;
+  color: #2E1E17;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-cat {
+  font-size: 11.5px;
+  color: #8C6D3F;
+}
+
+.mini-check {
+  font-size: 11px;
+  font-weight: 700;
+  color: #2E7D32;
+  margin-top: 4px;
+}
+
+/* Packages 3 Cards Grid */
+.section-sub-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 19px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0 0 20px;
+}
+
+.package-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-bottom: 32px;
+}
+
+.package-choice-card {
+  background-color: #FFFFFF;
+  border: 1.5px solid #EAE0D5;
+  border-radius: 18px;
+  padding: 24px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  position: relative;
+}
+
+.package-choice-card:hover {
+  border-color: #9E7D4E;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(46, 30, 23, 0.08);
+}
+
+.package-choice-card.active {
+  border-color: #5C4033;
+  border-width: 2px;
+  background-color: #FAF8F5;
+  box-shadow: 0 8px 28px rgba(92, 64, 51, 0.12);
+}
+
+.pkg-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.pkg-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0;
+}
+
+.pkg-badge {
+  background-color: #5C4033;
+  color: #FFFFFF;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.pkg-price-row {
+  margin-bottom: 18px;
+}
+
+.pkg-price {
+  font-size: 24px;
+  font-weight: 800;
+  color: #5C4033;
+}
+
+.pkg-duration {
+  font-size: 13px;
+  color: #7A6960;
+  margin-left: 4px;
+}
+
+.pkg-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #55443D;
+  line-height: 1.5;
+}
+
+.pkg-features-list li::before {
+  content: '✓';
+  color: #8C6D3F;
+  font-weight: bold;
+  margin-right: 6px;
+}
+
+.btn-select-pkg {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid #D8C7B5;
+  color: #5C4033;
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 10px 16px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.package-choice-card.active .btn-select-pkg {
+  background-color: #5C4033;
+  border-color: #5C4033;
+  color: #FFFFFF;
+}
+
+/* Step Bottom Sticky Bar */
+.step-bottom-bar {
+  border-top: 1px solid #EFEAE2;
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.bottom-price-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.sub-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #7A6960;
+}
+
+.total-bold {
+  font-size: 22px;
+  font-weight: 800;
+  color: #5C4033;
+}
+
+.deposit-hint {
+  font-size: 13px;
+  color: #8C6D3F;
+}
+
+.btn-primary-brown {
+  background-color: #5C4033;
+  border: 1px solid #5C4033;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 13px 28px;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(92, 64, 51, 0.28);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary-brown:hover {
+  background-color: #4A3328;
+  border-color: #4A3328;
+  transform: translateY(-1px);
+}
+
+.btn-back-step {
+  background: none;
+  border: none;
+  color: #7A6960;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-back-step:hover {
+  color: #2E1E17;
+  text-decoration: underline;
+}
+
+/* Horizontal Date Chips */
+.date-picker-horizontal-section {
+  margin-bottom: 28px;
+}
+
+.date-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.manual-date-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #7A6960;
+}
+
+.date-input-field {
+  border: 1px solid #D8C7B5;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 13px;
+  outline: none;
+}
+
+.date-chips-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.date-chip-item {
+  flex: 0 0 68px;
+  height: 72px;
+  background-color: #FFFFFF;
+  border: 1px solid #EAE0D5;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-chip-item:hover {
+  border-color: #9E7D4E;
+}
+
+.date-chip-item .chip-dow {
+  font-size: 12px;
+  color: #8C6D3F;
+  font-weight: 600;
+}
+
+.date-chip-item .chip-day {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2E1E17;
+}
+
+.date-chip-item.active {
+  background-color: #5C4033;
+  border-color: #5C4033;
+  box-shadow: 0 4px 12px rgba(92, 64, 51, 0.25);
+}
+
+.date-chip-item.active .chip-dow,
+.date-chip-item.active .chip-day {
+  color: #FFFFFF;
+}
+
+/* Time Slots Section */
+.time-slots-section {
+  margin-bottom: 28px;
+}
+
+.time-slots-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.time-note {
+  font-size: 12.5px;
+  color: #7A6960;
+}
+
+.slots-grid-chips {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.time-slot-btn {
+  background-color: #FFFFFF;
+  border: 1px solid #EAE0D5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.time-slot-btn:hover:not(:disabled) {
+  border-color: #9E7D4E;
+  background-color: #FAF5F0;
+}
+
+.time-slot-btn.active {
+  background-color: #5C4033;
+  border-color: #5C4033;
+}
+
+.time-slot-btn.active .slot-start,
+.time-slot-btn.active .slot-badge {
+  color: #FFFFFF;
+}
+
+.time-slot-btn.disabled {
+  opacity: 0.45;
+  background-color: #F5EFEB;
+  cursor: not-allowed;
+}
+
+.slot-start {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2E1E17;
+}
+
+.slot-badge {
+  font-size: 11px;
+  color: #2E7D32;
+  font-weight: 600;
+}
+
+/* Customer Pre-fill Form Row */
+.slot-user-info-section {
+  background-color: #FAF8F5;
+  border: 1px solid #EAE0D5;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.info-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0 0 14px;
+}
+
+.form-row-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.form-label-bold {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #5C4840;
+  margin-bottom: 5px;
+}
+
+.form-control-input {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid #D8C7B5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  color: #2E1E17;
+  outline: none;
+}
+
+/* =========================================================================
+   BƯỚC 3: 03.06 TRANG THANH TOÁN TIỀN CỌC (2 CỘT CHUẨN FIGMA)
+   ========================================================================= */
+.deposit-payment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.deposit-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EFEAE2;
+  border-radius: 24px;
+  padding: 34px 36px;
+  box-shadow: 0 4px 20px rgba(46, 30, 23, 0.04);
+}
+
+.deposit-card-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 21px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0 0 20px;
+}
+
+/* Left Card: Order Summary Visual */
+.concept-hero-visual {
+  width: 100%;
+  height: 230px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 14px rgba(46, 30, 23, 0.08);
+}
+
+.deposit-concept-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.deposit-concept-meta {
+  margin-bottom: 18px;
+}
+
+.deposit-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #9E7D4E;
+}
+
+.deposit-concept-name {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 3px 0 6px;
+}
+
+.deposit-pkg-line {
+  font-size: 13.5px;
+  color: #7A6960;
+  font-weight: 600;
+  margin: 0;
+}
+
+.deposit-divider {
+  height: 1px;
+  background-color: #EFEAE2;
+  margin: 18px 0;
+}
+
+.deposit-info-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  font-size: 14px;
+}
+
+.info-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-label {
+  color: #7A6960;
+}
+
+.info-value {
+  color: #2E1E17;
+}
+
+.discount-line .discount-text {
+  color: #2E7D32;
+  font-weight: 600;
+}
+
+.total-line {
+  border-top: 1px dashed #EAE0D5;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+.total-line .total-num {
+  font-size: 17px;
+  color: #2E1E17;
+}
+
+.deposit-highlight-line {
+  background-color: #FAF5F0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 4px;
+}
+
+.deposit-price-num {
+  font-size: 20px;
+  font-weight: 800;
+  color: #5C4033;
+}
+
+.edit-schedule-action {
+  margin-top: 18px;
+}
+
+.btn-link-edit {
+  background: none;
+  border: none;
+  color: #8C6D3F;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-link-edit:hover {
+  text-decoration: underline;
+}
+
+/* Right Card: Customer Fields & Payment Options */
+.customer-fields-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.field-label-sm {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4A3B34;
+  margin-bottom: 5px;
+}
+
+.field-input-box,
+.field-textarea-box {
+  width: 100%;
+  background-color: #FFFFFF;
+  border: 1px solid #D8C7B5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #2E1E17;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.field-input-box:focus,
+.field-textarea-box:focus {
+  border-color: #5C4033;
+}
+
+/* Voucher Box */
+.voucher-box-wrap {
+  margin-bottom: 22px;
+}
+
+.voucher-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.voucher-input {
+  flex: 1;
+  background-color: #FFFFFF;
+  border: 1px solid #D8C7B5;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 13.5px;
+  outline: none;
+}
+
+.btn-apply-code {
+  background-color: #FAF5F0;
+  border: 1px solid #D8C7B5;
+  color: #5C4033;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 0 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-apply-code:hover {
+  background-color: #5C4033;
+  color: #FFFFFF;
+  border-color: #5C4033;
+}
+
+.voucher-err-text {
+  font-size: 12px;
+  color: #C62828;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Payment Methods Radio Selection */
+.payment-methods-select {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pay-method-item {
+  border: 1.5px solid #EAE0D5;
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pay-method-item:hover {
+  border-color: #9E7D4E;
+}
+
+.pay-method-item.checked {
+  border-color: #5C4033;
+  background-color: #FAF8F5;
+}
+
+.method-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #B59B82;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pay-method-item.checked .method-radio {
+  border-color: #5C4033;
+}
+
+.method-radio .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #5C4033;
+}
+
+.method-name {
+  display: block;
+  font-size: 14px;
+  color: #2E1E17;
+  margin-bottom: 2px;
+}
+
+.method-desc {
+  font-size: 12.5px;
+  color: #7A6960;
+  margin: 0;
+}
+
+.guest-auth-notice {
+  background-color: #FFF8E1;
+  border: 1px solid #FFE082;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: #795548;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.btn-proceed-deposit {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+}
+
+/* =========================================================================
+   BƯỚC 4: 03.06 MÀN HÌNH VIETQR (Figma Screen 6)
+   ========================================================================= */
+.vietqr-screen-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EFEAE2;
+  border-radius: 24px;
+  padding: 40px;
+  margin-top: 24px;
+  box-shadow: 0 4px 20px rgba(46, 30, 23, 0.04);
+}
+
+.qr-notice-header {
+  margin-bottom: 32px;
+}
+
+.qr-tagline {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #9E7D4E;
+}
+
+.qr-main-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 26px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 6px 0 10px;
+}
+
+.qr-desc {
+  font-size: 15px;
+  color: #55443D;
+  margin: 0;
+}
+
+.vietqr-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 36px;
+  align-items: center;
+}
+
+.qr-code-frame {
+  background-color: #FAF8F5;
+  border: 1px solid #EAE0D5;
+  border-radius: 18px;
+  padding: 24px;
+  text-align: center;
+}
+
+.qr-image-display {
+  width: 260px;
+  height: 260px;
+  object-fit: contain;
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  background-color: #FFFFFF;
+  padding: 8px;
+  border: 1px solid #EAE0D5;
+}
+
+.qr-scan-guide {
+  font-size: 13px;
+  color: #7A6960;
+  margin: 0;
+}
+
+.qr-details-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bank-details-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0 0 8px;
+}
+
+.bank-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid #F0EAE1;
+}
+
+.b-label {
+  color: #7A6960;
+}
+
+.b-val {
+  color: #2E1E17;
+}
+
+.highlight-acc,
+.highlight-content {
+  font-family: monospace;
+  font-size: 16px;
+  color: #5C4033;
+  background-color: #FAF5F0;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.deposit-num {
+  font-size: 18px;
+  font-weight: 800;
+  color: #2E7D32;
+}
+
+.qr-confirm-action-box {
+  margin-top: 18px;
+}
+
+.btn-transfer-done {
+  width: 100%;
+}
+
+/* =========================================================================
+   BƯỚC 5: 03.06 THANH TOÁN THÀNH CÔNG (Figma Screen 7)
+   ========================================================================= */
+.success-screen-card {
+  background-color: #FFFFFF;
+  border: 1px solid #EFEAE2;
+  border-radius: 24px;
+  padding: 50px 40px;
+  margin-top: 24px;
+  box-shadow: 0 4px 20px rgba(46, 30, 23, 0.04);
+}
+
+.success-check-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background-color: #2E7D32;
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 18px rgba(46, 125, 50, 0.28);
+}
+
+.success-check-icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.success-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 28px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0 0 10px;
+}
+
+.success-subtitle {
+  font-size: 15px;
+  color: #55443D;
+  max-width: 560px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+.success-order-box {
+  max-width: 620px;
+  margin: 0 auto 36px;
+  background-color: #FAF8F5;
+  border: 1px solid #EAE0D5;
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.order-box-grid {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+
+.success-concept-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid #D8C7B5;
+}
+
+.order-code-badge {
+  display: inline-block;
+  background-color: #5C4033;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  margin-bottom: 6px;
+}
+
+.success-concept-name {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0 0 4px;
+}
+
+.success-pkg-name {
+  font-size: 13.5px;
+  color: #7A6960;
+  margin: 0 0 6px;
+}
+
+.success-time-line {
+  font-size: 13.5px;
+  color: #4A3B34;
+  margin: 0 0 12px;
+}
+
+.deposit-paid-badge {
+  font-size: 13px;
+  color: #2E7D32;
+  background-color: #E8F5E9;
+  border: 1px solid #C8E6C9;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.btn-view-bookings {
+  padding: 13px 36px;
+  text-decoration: none;
+}
+
+/* =========================================================================
+   POPUP MODAL (Figma Screen 5)
+   ========================================================================= */
+.booking-notice-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(30, 20, 15, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeInNotice 0.2s ease-out;
+}
+
+.booking-notice-card {
+  background-color: #FAF5F0;
+  border: 1px solid #EAE0D5;
+  border-radius: 20px;
+  max-width: 440px;
+  width: 100%;
+  padding: 36px 32px 30px;
+  box-shadow: 0 16px 40px rgba(46, 30, 23, 0.28);
+  animation: scaleUpNotice 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.notice-logo-img {
+  height: 38px;
+  margin-bottom: 14px;
+}
+
+.notice-question-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #5C4033;
+  color: #FFFFFF;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.notice-modal-title {
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 21px;
+  font-weight: 700;
+  color: #2E1E17;
+  margin: 0 0 10px;
+}
+
+.notice-modal-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #5C4840;
+  margin: 0 0 24px;
+}
+
+.notice-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-modal-proceed {
+  background-color: #5C4033;
+  border: 1px solid #5C4033;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 20px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-proceed:hover {
+  background-color: #4A3328;
+}
+
+.btn-modal-back {
+  background-color: #FFFFFF;
+  border: 1px solid #D8C7B5;
+  color: #5C4033;
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-modal-back:hover {
+  background-color: #F5EFEB;
+}
+
+@media (max-width: 900px) {
+  .package-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .deposit-payment-grid {
+    grid-template-columns: 1fr;
+  }
+  .vietqr-grid-layout {
+    grid-template-columns: 1fr;
+  }
+  .form-row-grid {
+    grid-template-columns: 1fr;
+  }
+  .order-box-grid {
+    flex-direction: column;
+    text-align: center;
+  }
+}

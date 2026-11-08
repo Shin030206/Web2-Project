@@ -10,7 +10,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "seed": "node scripts/seed.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "test:cucumber": "cucumber-js features/**/*.feature --require features/step_definitions/**/*.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -25,6 +26,7 @@
     "nodemailer": "^10.3.1"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^13.3.0",
     "nodemon": "^3.1.14"
   }
 }
