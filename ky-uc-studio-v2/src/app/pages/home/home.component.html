@@ -112,7 +112,9 @@
           </div>
           <div class="card-inner-body">
             <div class="price-row">
-              <span class="old-price">{{ pkg.oldPrice }}</span>
+              @if (pkg.oldPrice) {
+                <span class="old-price">{{ pkg.oldPrice }}</span>
+              }
               <span class="cur-price">{{ pkg.price }}</span>
             </div>
             <div class="cat-label">{{ pkg.categoryName }}</div>

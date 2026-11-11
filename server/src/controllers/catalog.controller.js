@@ -39,8 +39,10 @@ exports.album = makeCrud({
     slogan: { type: "string" },
     introduction: { type: "string" },
     cover_url: { type: "string" },
+    display_order: { type: "number" },    // Thứ tự hiển thị ở trang Bộ sưu tập
     concepts: { type: "array", default: [] }
   },
+  sort: { display_order: 1, collection_id: 1 },
   buildFilter: ({ category }) => (category ? { category } : {})
 });
 

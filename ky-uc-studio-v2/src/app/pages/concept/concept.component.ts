@@ -26,7 +26,7 @@ export class ConceptComponent implements OnInit {
     { id: 'chan-dung', name: 'Chân dung', filter: 'Chân Dung' },
     { id: 'couple', name: 'Couple', filter: 'Couple' },
     { id: 'gia-dinh', name: 'Gia đình', filter: 'Gia Đình' },
-    { id: 'me-va-con', name: 'Mẹ và con', filter: 'Mẹ và con' },
+    { id: 'me-va-con', name: 'Mẹ và con', filter: 'Mẹ Và Bé' },
     { id: 'ao-dai', name: 'Áo dài', filter: 'Áo dài' },
     { id: 'ky-yeu', name: 'Kỷ yếu', filter: 'Kỷ yếu' }
   ];

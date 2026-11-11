@@ -175,7 +175,8 @@ export class AdminComponent implements OnInit {
     this.bookingError = '';
     const queryParams: string[] = [
       `page=${this.bookingPage}`,
-      `limit=${this.bookingLimit}`
+      `limit=${this.bookingLimit}`,
+      'sort=newest' // Đơn mới đặt hiện lên đầu (server sắp theo createdAt giảm dần)
     ];
 
     if (this.bookingFilter !== 'all') {

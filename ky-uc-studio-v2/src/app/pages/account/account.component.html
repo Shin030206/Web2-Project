@@ -346,21 +346,42 @@
             <input type="email" class="form-input" [(ngModel)]="profileForm.email" name="email">
           </div>
 
-          <div class="form-divider"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Lưu thay đổi</button>
+          </div>
+        </form>
+
+        <!-- Đổi mật khẩu: gọi PUT /api/auth/change-password -->
+        <form (ngSubmit)="changePassword()" class="profile-form password-form">
           <h3 class="section-subheading">Đổi mật khẩu</h3>
 
+          @if (passwordMessage) {
+            <div class="alert-success">{{ passwordMessage }}</div>
+          }
+          @if (passwordError) {
+            <div class="alert-error">{{ passwordError }}</div>
+          }
+
           <div class="form-group">
-            <label class="form-label">Mật khẩu mới</label>
-            <input type="password" class="form-input" placeholder="Tối thiểu 6 ký tự" [(ngModel)]="profileForm.newPassword" name="newPassword">
+            <label class="form-label">Mật khẩu hiện tại *</label>
+            <input type="password" class="form-input" placeholder="Nhập mật khẩu đang dùng" [(ngModel)]="passwordForm.oldPassword" name="oldPassword" autocomplete="current-password">
           </div>
 
           <div class="form-group">
-            <label class="form-label">Xác nhận mật khẩu mới</label>
-            <input type="password" class="form-input" placeholder="Nhập lại mật khẩu mới" [(ngModel)]="profileForm.confirmPassword" name="confirmPassword">
+            <label class="form-label">Mật khẩu mới *</label>
+            <input type="password" class="form-input" placeholder="8–32 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt" [(ngModel)]="passwordForm.newPassword" name="newPassword" autocomplete="new-password">
+            <small class="form-hint">Không dùng chữ có dấu hoặc khoảng trắng.</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Xác nhận mật khẩu mới *</label>
+            <input type="password" class="form-input" placeholder="Nhập lại mật khẩu mới" [(ngModel)]="passwordForm.confirmPassword" name="confirmPassword" autocomplete="new-password">
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="btn-primary">Lưu thay đổi</button>
+            <button type="submit" class="btn-primary" [disabled]="changingPassword">
+              {{ changingPassword ? 'Đang đổi mật khẩu...' : 'Đổi mật khẩu' }}
+            </button>
           </div>
         </form>
       </div>
