@@ -1,4 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
+import { PackageService } from '../../services/package.service';
+import { formatDuration, formatVnd } from '../../utils/format';
 
 interface HeroSlide {
   image: string;
@@ -33,6 +35,7 @@ interface MosaicPhoto {
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
+  private packageService = inject(PackageService);
 
   // 1. CAROUSEL SLIDER (❖ Slider Component Figma 82:158)
   heroSlides: HeroSlide[] = [
@@ -60,60 +63,42 @@ export class HomeComponent implements OnInit, OnDestroy {
   slideTimer: any = null;
   autoPlayInterval: number = 5000; // 5 seconds auto transition
 
-  // 2. SERVICE PACKAGES (Figma 64:26)
-  homePackages: PackageHome[] = [
-    {
-      id: 'personal',
-      categoryName: 'CÂU CHUYỆN CÁ NHÂN',
-      englishName: 'PERSONAL STORY',
-      oldPrice: '4.500.000đ',
-      price: '2.500.000đ',
-      image: 'assets/03.01. Home/Dịch vụ/Cá nhân.jpg',
-      features: [
-        '2 tiếng chụp ảnh cùng ê-kíp',
-        '30 ảnh đã chỉnh sửa kỹ lưỡng',
-        '1 concept trang phục chuẩn bị sẵn',
-        'Makeup & hair cơ bản theo concept',
-        'Studio indoor không giới hạn bối cảnh',
-        '30 ảnh retouched chất lượng cao',
-        'Toàn bộ file ảnh gốc trả trong ngày'
-      ]
-    },
-    {
-      id: 'couple',
-      categoryName: 'CÂU CHUYỆN CẶP ĐÔI',
-      englishName: 'COUPLE STORY',
-      oldPrice: '5.500.000đ',
-      price: '3.500.000đ',
-      image: 'assets/03.01. Home/Dịch vụ/Cặp đôi.jpg',
-      features: [
-        '2 tiếng chụp ảnh lãng mạn',
-        '30 ảnh đã chỉnh sửa kỹ lưỡng',
-        '1 concept trang phục đôi',
-        'Makeup & hair cơ bản cho cả hai',
-        'Studio indoor & bối cảnh ngoài trời',
-        '30 ảnh retouched chuyên sâu',
-        'Toàn bộ file ảnh gốc trả trong ngày'
-      ]
-    },
-    {
-      id: 'family',
-      categoryName: 'CÂU CHUYỆN GIA ĐÌNH',
-      englishName: 'FAMILY STORY',
-      oldPrice: '6.500.000đ',
-      price: '4.500.000đ',
-      image: 'assets/03.01. Home/Dịch vụ/Gia đình.jpg',
-      features: [
-        '3 tiếng chụp ảnh trọn gói',
-        '50 ảnh đã chỉnh sửa kỹ lưỡng',
-        'Tối đa 6 thành viên tham gia',
-        'Concept gia đình ấm áp, tự nhiên',
-        'Makeup & làm tóc cho 2 người lớn',
-        '50 ảnh retouched chất lượng in ấn',
-        'Tặng 01 ảnh ép gỗ kích thước 40×60'
-      ]
-    }
+  // 2. SERVICE PACKAGES (Figma 64:26): giá và quyền lợi lấy từ MongoDB (/api/packages), gói Nâng Cao của mỗi nhóm
+  homePackages: PackageHome[] = [];
+
+  // Phần trình bày của từng nhóm (tiêu đề, ảnh bìa) giữ ở frontend
+  private readonly homeCategoryCards = [
+    { category: 'chân dung', categoryName: 'CÂU CHUYỆN CÁ NHÂN', englishName: 'PERSONAL STORY', image: 'assets/03.01. Home/Dịch vụ/Cá nhân.jpg' },
+    { category: 'cặp đôi', categoryName: 'CÂU CHUYỆN CẶP ĐÔI', englishName: 'COUPLE STORY', image: 'assets/03.01. Home/Dịch vụ/Cặp đôi.jpg' },
+    { category: 'gia đình', categoryName: 'CÂU CHUYỆN GIA ĐÌNH', englishName: 'FAMILY STORY', image: 'assets/03.01. Home/Dịch vụ/Gia đình.jpg' }
   ];
+
+  private loadHomePackages(): void {
+    this.packageService.getPackages().subscribe({
+      next: (pkgs) => {
+        const active = (pkgs || []).filter(p => (p.status || 'ACTIVE') === 'ACTIVE');
+        this.homePackages = this.homeCategoryCards
+          .map(card => {
+            const inCategory = active.filter(p => (p.category || '').toLowerCase() === card.category);
+            const pkg = inCategory.find(p => (p.level || '').toLowerCase() === 'nâng cao') || inCategory[0];
+            if (!pkg) return null;
+            const duration = formatDuration(pkg.duration_minutes);
+            return {
+              id: String(pkg.package_id),
+              categoryName: card.categoryName,
+              englishName: card.englishName,
+              oldPrice: pkg.original_price && pkg.original_price > (pkg.price || 0) ? formatVnd(pkg.original_price) : '',
+              price: formatVnd(pkg.price),
+              image: pkg.image_url || card.image,
+              features: [...(duration ? [`${duration} chụp ảnh cùng ê-kíp`] : []), ...(pkg.includes || [])].slice(0, 7)
+            };
+          })
+          .filter((p): p is PackageHome => p !== null);
+        this.cdr.markForCheck();
+      },
+      error: () => this.cdr.markForCheck()
+    });
+  }
 
   // 3. MOSAIC GALLERY PREVIEW (Figma 64:26)
   selectedCategory: 'all' | 'family' | 'couple' | 'portrait' = 'all';
@@ -193,6 +178,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.startAutoPlay();
+    this.loadHomePackages();
   }
 
   ngOnDestroy(): void {

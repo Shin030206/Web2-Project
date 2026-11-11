@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, retry, throwError } from 'rxjs';
-import { Package } from '../models/package.model';
+import { Observable, catchError, throwError } from 'rxjs';
+import { Addon, Package } from '../models/package.model';
 
 @Injectable({
   providedIn: 'root'
@@ -9,17 +9,29 @@ import { Package } from '../models/package.model';
 export class PackageService {
   constructor(private http: HttpClient) {}
 
+  // Lấy gói chụp từ MongoDB, server lỗi thì dùng tạm assets/data/packages.json
   getPackages(): Observable<Package[]> {
     return this.http.get<Package[]>('/api/packages').pipe(
-      retry(3),
-      catchError(this.handleError)
+      catchError(() => {
+        console.warn('Backend /api/packages chưa kết nối, sử dụng assets/data/packages.json');
+        return this.http.get<Package[]>('assets/data/packages.json');
+      })
     );
   }
 
   getPackage(id: string): Observable<Package> {
     return this.http.get<Package>(`/api/packages/${id}`).pipe(
-      retry(3),
       catchError(this.handleError)
+    );
+  }
+
+  // Lấy dịch vụ thêm (add-ons) từ MongoDB, server lỗi thì dùng tạm assets/data/add-ons.json
+  getAddons(): Observable<Addon[]> {
+    return this.http.get<Addon[]>('/api/addons').pipe(
+      catchError(() => {
+        console.warn('Backend /api/addons chưa kết nối, sử dụng assets/data/add-ons.json');
+        return this.http.get<Addon[]>('assets/data/add-ons.json');
+      })
     );
   }
 

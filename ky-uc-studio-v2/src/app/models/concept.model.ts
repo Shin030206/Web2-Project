@@ -17,6 +17,8 @@ export interface CollectionItem {
   category: string;
   slogan: string;
   introduction: string;
+  cover_url?: string;
+  display_order?: number;
   concepts: {
     concept_code: string;
     concept_name: string;

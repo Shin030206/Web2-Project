@@ -15,6 +15,7 @@ const packageCrud = makeCrud({
     package_name: { type: "string", required: true },
     slug: { type: "string" },
     price: { type: "number", required: true },
+    original_price: { type: "number" },   // Giá gốc hiển thị gạch ngang ở trang chủ (không bắt buộc)
     duration_minutes: { type: "number", required: true },
     description: { type: "string" },
     includes: { type: "array", default: [] },

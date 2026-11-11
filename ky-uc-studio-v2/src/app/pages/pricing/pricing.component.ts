@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { PackageService } from '../../services/package.service';
+import { Package } from '../../models/package.model';
+import { formatDuration, formatVnd } from '../../utils/format';
 
 interface PricingTier {
   id: string;
@@ -21,204 +24,73 @@ interface AddOnService {
   templateUrl: './pricing.component.html',
   styleUrl: './pricing.component.css'
 })
-export class PricingComponent {
-  // Gói chụp Chân dung
-  portraitTiers: PricingTier[] = [
-    {
-      id: 'p-std',
-      name: 'Tiêu chuẩn',
-      subtitle: 'Ghi lại một khoảnh khắc đẹp — nhẹ nhàng, trọn vẹn',
-      price: '1.500.000đ',
-      features: [
-        '1 layout makeup và làm tóc dành cho nữ',
-        '1 layout trang phục của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '15 ảnh chỉnh sửa kỹ lưỡng (Retouch chuyên sâu)',
-        '1 giờ chụp ảnh cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc',
-        'Trả toàn bộ file ảnh gốc trong ngày'
-      ]
-    },
-    {
-      id: 'p-adv',
-      name: 'Nâng cao',
-      subtitle: 'Kể câu chuyện của bạn qua từng khung hình tinh tế',
-      price: '2.500.000đ',
-      highlighted: true,
-      features: [
-        '1 layout makeup và làm tóc cao cấp dành cho nữ',
-        '2 layout trang phục của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '30 ảnh chỉnh sửa kỹ lưỡng',
-        '1 giờ 30 phút chụp ảnh cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc',
-        'Trả toàn bộ file ảnh gốc trong ngày'
-      ]
-    },
-    {
-      id: 'p-vip',
-      name: 'Cao cấp',
-      subtitle: 'Tác phẩm để lưu giữ — không chỉ cho hôm nay',
-      price: '3.800.000đ',
-      features: [
-        '1 layout makeup và làm tóc CAO CẤP dành cho nữ',
-        '3 layout trang phục của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '50 ảnh chỉnh sửa kỹ lưỡng',
-        '2 giờ chụp ảnh cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc',
-        'Trả toàn bộ file ảnh gốc trong ngày'
-      ]
-    }
-  ];
+export class PricingComponent implements OnInit {
+  private packageService = inject(PackageService);
+  private cdr = inject(ChangeDetectorRef);
 
-  // Gói chụp Cặp đôi
-  coupleTiers: PricingTier[] = [
-    {
-      id: 'c-std',
-      name: 'Tiêu chuẩn',
-      subtitle: 'Ghi lại một khoảnh khắc đẹp — nhẹ nhàng, trọn vẹn',
-      price: '2.200.000đ',
-      features: [
-        '1 layout makeup và làm tóc dành cho nữ',
-        '1 layout trang phục đôi của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '20 ảnh chỉnh sửa kỹ lưỡng',
-        '1 giờ 30 phút chụp cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc',
-        'Trả toàn bộ file ảnh gốc trong ngày'
-      ]
-    },
-    {
-      id: 'c-adv',
-      name: 'Nâng cao',
-      subtitle: 'Kể câu chuyện của bạn qua từng khung hình tinh tế',
-      price: '3.500.000đ',
-      highlighted: true,
-      features: [
-        '1 layout makeup và làm tóc dành cho nữ',
-        '2 layout trang phục đôi của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '45 ảnh chỉnh sửa kỹ lưỡng',
-        '2 giờ chụp ảnh cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc',
-        'Trả toàn bộ file ảnh gốc trong ngày'
-      ]
-    },
-    {
-      id: 'c-vip',
-      name: 'Cao cấp',
-      subtitle: 'Tác phẩm để lưu giữ — không chỉ cho hôm nay',
-      price: '5.200.000đ',
-      features: [
-        '1 layout makeup và làm tóc CAO CẤP dành cho nữ',
-        '3 layout trang phục đôi của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '65 ảnh chỉnh sửa kỹ lưỡng',
-        '2 giờ 30 phút chụp ảnh cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc',
-        'Trả toàn bộ file ảnh gốc trong ngày'
-      ]
-    }
-  ];
+  // Giá, thời lượng, quyền lợi lấy từ MongoDB (/api/packages, /api/addons)
+  portraitTiers: PricingTier[] = [];
+  coupleTiers: PricingTier[] = [];
+  familyTiers: PricingTier[] = [];
+  addOns: AddOnService[] = [];
 
-  // Gói chụp Gia đình
-  familyTiers: PricingTier[] = [
-    {
-      id: 'f-std',
-      name: 'Tiêu chuẩn',
-      subtitle: 'Ghi lại một khoảnh khắc đẹp — nhẹ nhàng, trọn vẹn',
-      price: '3.000.000đ',
-      features: [
-        'Hỗ trợ tối đa 4 người',
-        '1 layout makeup và làm tóc dành cho nữ',
-        '1 layout trang phục của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '25 ảnh chỉnh sửa kỹ lưỡng',
-        '1 giờ 30 phút chụp ảnh cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc'
-      ]
-    },
-    {
-      id: 'f-adv',
-      name: 'Nâng cao',
-      subtitle: 'Kể câu chuyện của bạn qua từng khung hình tinh tế',
-      price: '4.500.000đ',
-      highlighted: true,
-      features: [
-        'Hỗ trợ tối đa 5 người',
-        '1 layout makeup và làm tóc dành cho nữ',
-        '2 layout trang phục của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '50 ảnh chỉnh sửa kỹ lưỡng',
-        '2 giờ chụp ảnh cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc'
-      ]
-    },
-    {
-      id: 'f-vip',
-      name: 'Cao cấp',
-      subtitle: 'Tác phẩm để lưu giữ — không chỉ cho hôm nay',
-      price: '6.800.000đ',
-      features: [
-        'Hỗ trợ tối đa 6 người',
-        '1 layout makeup và làm tóc CAO CẤP dành cho các thành viên',
-        'Layout trang phục của Ký Ức chuẩn bị & phụ kiện kèm theo concept',
-        '75 ảnh chỉnh sửa kỹ lưỡng',
-        '2 giờ 30 phút chụp ảnh cùng ekip KUS',
-        'Dịch vụ chăm sóc trước buổi chụp (đắp mặt nạ & massage chân)',
-        'Ekip hỗ trợ tạo dáng, chọn góc xuyên suốt buổi chụp',
-        'Không gian và bối cảnh chụp',
-        'Toàn bộ ảnh gốc',
-        'Xây dựng storyboard theo câu chuyện của gia đình'
-      ]
-    }
-  ];
+  // Câu giới thiệu ngắn theo cấp gói (nội dung marketing, không phải dữ liệu)
+  private readonly levelSubtitles: { [level: string]: string } = {
+    'tiêu chuẩn': 'Ghi lại một khoảnh khắc đẹp — nhẹ nhàng, trọn vẹn',
+    'nâng cao': 'Kể câu chuyện của bạn qua từng khung hình tinh tế',
+    'cao cấp': 'Tác phẩm để lưu giữ — không chỉ cho hôm nay'
+  };
+  private readonly levelOrder = ['tiêu chuẩn', 'nâng cao', 'cao cấp'];
 
-  // 5 Dịch vụ giá trị gia tăng
-  addOns: AddOnService[] = [
-    {
-      name: 'Thuê thêm trang phục Việt phục cách tân',
-      price: '150.000 / bộ / buổi',
-      desc: 'Trang phục được thiết kế riêng, kết hợp họa tiết truyền thống với form dáng hiện đại, đa dạng kích cỡ và phong cách.'
-    },
-    {
-      name: 'Trang điểm và làm tóc chuyên sâu',
-      price: '300.000 / người',
-      desc: 'Áp dụng cho khách hàng sử dụng gói Tiêu Chuẩn nhưng có nhu cầu nâng cấp phần trang điểm theo concept đặc biệt.'
-    },
-    {
-      name: 'Thuê bối cảnh studio theo giờ',
-      price: '400.000 / giờ',
-      desc: 'Dành cho các đơn vị sản xuất hình ảnh bên ngoài hoặc khách hàng có nhu cầu tự thực hiện buổi chụp với ê-kíp riêng.'
-    },
-    {
-      name: 'Album photobook cao cấp',
-      price: 'Từ 450.000 / cuốn',
-      desc: 'In ấn chất lượng cao trên giấy mỹ thuật, bìa da hoặc bìa vải tùy chọn, số trang và kích thước theo yêu cầu.'
-    },
-    {
-      name: 'Khung ảnh gỗ nghệ thuật',
-      price: 'Từ 200.000 / khung',
-      desc: 'Khung ảnh thủ công, nhiều kích thước, phù hợp trưng bày hoặc làm quà tặng lưu niệm.'
-    }
-  ];
+  ngOnInit(): void {
+    this.packageService.getPackages().subscribe({
+      next: (pkgs) => {
+        const active = (pkgs || []).filter(p => (p.status || 'ACTIVE') === 'ACTIVE');
+        this.portraitTiers = this.buildTiers(active, 'chân dung');
+        this.coupleTiers = this.buildTiers(active, 'cặp đôi');
+        this.familyTiers = this.buildTiers(active, 'gia đình');
+        this.cdr.markForCheck();
+      },
+      error: () => this.cdr.markForCheck()
+    });
+
+    this.packageService.getAddons().subscribe({
+      next: (addons) => {
+        this.addOns = (addons || [])
+          .filter(a => (a.status || 'ACTIVE') === 'ACTIVE')
+          .map(a => ({
+            name: a.addon_name,
+            price: formatVnd(a.price, false) + (a.unit ? ` / ${a.unit}` : ''),
+            desc: a.description || ''
+          }));
+        this.cdr.markForCheck();
+      },
+      error: () => this.cdr.markForCheck()
+    });
+  }
+
+  private buildTiers(pkgs: Package[], category: string): PricingTier[] {
+    return pkgs
+      .filter(p => (p.category || '').toLowerCase() === category)
+      .sort((a, b) => this.levelIndex(a.level) - this.levelIndex(b.level) || (a.price || 0) - (b.price || 0))
+      .map(p => {
+        const level = (p.level || '').toLowerCase();
+        const duration = formatDuration(p.duration_minutes);
+        return {
+          id: String(p.package_id),
+          name: p.level || p.package_name || '',
+          subtitle: this.levelSubtitles[level] || p.description || '',
+          price: formatVnd(p.price),
+          highlighted: level === 'nâng cao',
+          features: [...(duration ? [`${duration} chụp ảnh cùng ekip KUS`] : []), ...(p.includes || [])]
+        };
+      });
+  }
+
+  private levelIndex(level?: string): number {
+    const i = this.levelOrder.indexOf((level || '').toLowerCase());
+    return i === -1 ? this.levelOrder.length : i;
+  }
 
   // Consultation Form (Frame 46)
   consultForm = {
