@@ -98,6 +98,11 @@ export class AuthService {
     );
   }
 
+  // Đổi mật khẩu khi đã đăng nhập; server cấp lại cookie đăng nhập mới, các thiết bị khác bị đăng xuất
+  changePassword(data: { oldPassword: string; newPassword: string }): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>('/api/auth/change-password', data);
+  }
+
   forgotPassword(data: { phone?: string; email?: string; account?: string }): Observable<any> {
     return this.http.post('/api/auth/forgot-password', data);
   }

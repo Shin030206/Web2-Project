@@ -49,10 +49,18 @@ export class AccountComponent implements OnInit {
   profileForm = {
     name: '',
     phone: '',
-    email: '',
+    email: ''
+  };
+
+  // Đổi mật khẩu (PUT /api/auth/change-password)
+  passwordForm = {
+    oldPassword: '',
     newPassword: '',
     confirmPassword: ''
   };
+  changingPassword: boolean = false;
+  passwordMessage: string = '';
+  passwordError: string = '';
 
   bookings: BookingRecord[] = [];
 
@@ -167,6 +175,37 @@ export class AccountComponent implements OnInit {
       this.profileSaved = false;
       this.cdr.markForCheck();
     }, 3000);
+  }
+
+  changePassword(): void {
+    this.passwordMessage = '';
+    this.passwordError = '';
+    const { oldPassword, newPassword, confirmPassword } = this.passwordForm;
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      this.passwordError = 'Vui lòng nhập đủ mật khẩu hiện tại, mật khẩu mới và xác nhận mật khẩu mới!';
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      this.passwordError = 'Xác nhận mật khẩu mới không khớp!';
+      return;
+    }
+
+    // Server tự kiểm tra mật khẩu cũ và độ mạnh mật khẩu mới, lỗi trả về được hiện nguyên văn
+    this.changingPassword = true;
+    this.authService.changePassword({ oldPassword, newPassword }).subscribe({
+      next: (res) => {
+        this.changingPassword = false;
+        this.passwordMessage = res?.message || 'Đổi mật khẩu thành công!';
+        this.passwordForm = { oldPassword: '', newPassword: '', confirmPassword: '' };
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.changingPassword = false;
+        this.passwordError = err?.error?.error || 'Đổi mật khẩu thất bại, vui lòng thử lại!';
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   setTab(tab: 'overview' | 'bookings' | 'profile' | 'points'): void {
