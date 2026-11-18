@@ -246,10 +246,79 @@
             </span>
           </div>
 
+          @if (selectedBooking.rescheduleHistory && selectedBooking.rescheduleHistory.length > 0) {
+            <div class="card-line-divider"></div>
+            <h3 class="detail-section-title">Lịch sử đổi lịch</h3>
+            <ul class="reschedule-timeline">
+              @for (h of selectedBooking.rescheduleHistory; track h.at) {
+                <li>
+                  <span class="rt-change">{{ h.from }} → <strong>{{ h.to }}</strong></span>
+                  <span class="rt-meta">{{ h.at | date:'HH:mm dd/MM/yyyy' }} · {{ h.by === 'admin' ? 'Studio đổi' : 'Bạn đổi' }}</span>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (bookingActionMessage) {
+            <div class="alert-success">{{ bookingActionMessage }}</div>
+          }
+          @if (bookingActionError) {
+            <div class="alert-error">{{ bookingActionError }}</div>
+          }
+
+          <!-- Đổi lịch: chỉ 1 lần, trước giờ chụp ít nhất 24h -->
+          @if (showReschedule) {
+            <div class="reschedule-panel">
+              <h3 class="detail-section-title">Chọn lịch chụp mới</h3>
+              <p class="reschedule-note">Mỗi đơn chỉ được đổi lịch 1 lần và phải đổi trước giờ chụp ít nhất {{ selectedBooking.policy?.rescheduleMinHours || 24 }} tiếng.</p>
+              <label class="form-label">Ngày chụp mới</label>
+              <input type="date" class="form-input" [min]="minRescheduleDate" [(ngModel)]="rescheduleDate" (ngModelChange)="loadRescheduleSlots()" name="rescheduleDate">
+
+              @if (loadingRescheduleSlots) {
+                <p class="reschedule-note">Đang tải khung giờ trống...</p>
+              } @else if (rescheduleDate && rescheduleSlots.length === 0) {
+                <p class="reschedule-note">Ngày này không còn khung giờ trống, vui lòng chọn ngày khác.</p>
+              } @else if (rescheduleSlots.length > 0) {
+                <div class="reschedule-slots">
+                  @for (s of rescheduleSlots; track s.startTime) {
+                    <button type="button" class="reschedule-slot-btn"
+                      [class.selected]="selectedNewSlot?.startTime === s.startTime"
+                      [disabled]="s.status !== 'AVAILABLE'"
+                      (click)="chooseNewSlot(s)">
+                      {{ s.timeSlot }}
+                    </button>
+                  }
+                </div>
+              }
+
+              <div class="reschedule-actions">
+                <button type="button" class="btn-contact-action" (click)="closeReschedule()">Hủy bỏ</button>
+                <button type="button" class="btn-primary" [disabled]="!selectedNewSlot || submittingReschedule" (click)="submitReschedule()">
+                  {{ submittingReschedule ? 'Đang đổi lịch...' : 'Xác nhận đổi lịch' }}
+                </button>
+              </div>
+            </div>
+          }
+
           <div class="detail-actions-footer">
-            <button type="button" class="btn-cancel-action" (click)="alertContact()">Hủy lịch đặt</button>
+            @if (selectedBooking.policy?.canCancel) {
+              <button type="button" class="btn-cancel-action" (click)="cancelSelectedBooking()">Hủy lịch đặt</button>
+            }
+            @if (selectedBooking.policy?.canCancel) {
+              <button type="button" class="btn-reschedule-action"
+                [disabled]="!selectedBooking.policy?.canReschedule || showReschedule"
+                (click)="openReschedule()">
+                Đổi lịch
+              </button>
+            }
             <a href="tel:0396581067" class="btn-contact-action">Liên hệ Studio: 0396581067</a>
           </div>
+          @if (selectedBooking.policy?.canCancel && selectedBooking.policy?.rescheduleBlockedReason) {
+            <p class="action-warning">⚠️ {{ selectedBooking.policy?.rescheduleBlockedReason }}</p>
+          }
+          @if (selectedBooking.policy?.cancelLosesDeposit) {
+            <p class="action-warning">⚠️ Còn dưới {{ selectedBooking.policy?.refundMinHours }} giờ trước giờ chụp: hủy lúc này sẽ mất tiền cọc.</p>
+          }
         </div>
       </div>
     }
