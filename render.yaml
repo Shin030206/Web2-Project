@@ -1,0 +1,64 @@
+# Cấu hình server (thư mục server/) trên Render. Hướng dẫn: DEPLOY.md
+# Biến có "sync: false" thì Render hỏi giá trị lúc tạo, KHÔNG ghi giá trị thật vào file này (repo public).
+services:
+  - type: web
+    name: ky-uc-studio-api          # URL sẽ là https://ky-uc-studio-api.onrender.com (đổi tên thì sửa cả ky-uc-studio-v2/vercel.json)
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true          # Render tự sinh chuỗi ngẫu nhiên
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: REQUIRE_LOGIN_TO_BOOK
+        value: "true"
+      - key: SMS_PROVIDER
+        value: console
+      - key: VNP_URL
+        value: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      # ----- Điền lúc tạo trên Render -----
+      - key: MONGO_URI
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: CLIENT_URL                # https://<tên-project>.vercel.app
+        sync: false
+      - key: VNP_RETURN_URL            # https://<tên-project>.vercel.app/thanh-toan/ket-qua
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_PHONE
+        sync: false
+      - key: BANK_ID
+        sync: false
+      - key: BANK_ACCOUNT
+        sync: false
+      - key: BANK_ACCOUNT_NAME
+        sync: false
+      - key: VNP_TMN_CODE
+        sync: false
+      - key: VNP_HASH_SECRET
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
