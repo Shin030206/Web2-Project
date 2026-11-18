@@ -42,11 +42,11 @@ export interface QuotePayload {
 }
 
 export interface QuoteResponse {
-  packagePrice: number;
-  conceptPrice: number;
-  addonsPrice: number;
+  // Đúng tên trường server trả về (publicQuote trong server/src/services/pricing.service.js)
+  package?: { package_id: number; package_name: string; price: number; duration_minutes?: number };
+  subtotal?: number;
   discountAmount: number;
-  totalPrice: number;
+  totalAmount: number;   // Tổng sau khi trừ voucher
   depositAmount: number;
   remainingAmount: number;
   voucher?: any;

@@ -51,11 +51,11 @@ export class ConceptDetailComponent implements OnInit {
     this.loading = true;
     this.conceptService.getConcepts().subscribe({
       next: (concepts) => {
+        // Chỉ khớp đúng mã concept (vd /concept/cd02) hoặc đúng slug của tên, không khớp gần đúng
         const clean = codeOrSlug.toLowerCase().trim();
-        const found = concepts.find(c => 
+        const found = concepts.find(c =>
           c.concept_code.toLowerCase() === clean ||
-          c.concept_name.toLowerCase().replace(/\s+/g, '-') === clean ||
-          c.concept_name.toLowerCase().includes(clean)
+          c.concept_name.toLowerCase().replace(/\s+/g, '-') === clean
         );
 
         if (found) {
@@ -66,9 +66,9 @@ export class ConceptDetailComponent implements OnInit {
             .filter(c => c.category === found.category && c.concept_code !== found.concept_code)
             .slice(0, 4);
         } else {
-          // Default to first concept if not found
-          this.concept = concepts[0];
-          this.relatedConcepts = concepts.slice(1, 5);
+          // Không tìm thấy: để trống để trang hiện thông báo "Không tìm thấy concept"
+          this.concept = null;
+          this.relatedConcepts = [];
         }
         this.loading = false;
         this.cdr.markForCheck();

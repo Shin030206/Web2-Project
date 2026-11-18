@@ -11,11 +11,27 @@ interface BookingRecord {
   timeSlot: string;
   totalPrice: number;
   depositAmount: number;
-  status: 'PENDING' | 'DEPOSITED' | 'COMPLETED' | 'CANCELLED';
+  status: BookingUiStatus;
   statusText: string;
   image: string;
   shootForm?: string;
   note?: string;
+}
+
+type BookingUiStatus = 'PENDING' | 'DEPOSITED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+
+// Server lưu trạng thái dạng "Pending", "Confirmed", "Completed", "Cancelled", "No_Show"
+// (BOOKING_STATUS trong server/src/config/constants.js). So sánh không phân biệt hoa thường.
+const BOOKING_STATUS_MAP: { [serverStatus: string]: { status: BookingUiStatus; statusText: string } } = {
+  pending: { status: 'PENDING', statusText: 'Chờ xác nhận' },
+  confirmed: { status: 'DEPOSITED', statusText: 'Đã đặt cọc' },
+  completed: { status: 'COMPLETED', statusText: 'Hoàn thành' },
+  cancelled: { status: 'CANCELLED', statusText: 'Đã hủy' },
+  no_show: { status: 'NO_SHOW', statusText: 'Vắng mặt' }
+};
+
+function mapBookingStatus(serverStatus?: string): { status: BookingUiStatus; statusText: string } {
+  return BOOKING_STATUS_MAP[String(serverStatus || '').toLowerCase()] || BOOKING_STATUS_MAP['pending'];
 }
 
 @Component({
@@ -34,6 +50,8 @@ export class AccountComponent implements OnInit {
   currentUser: User | null = null;
   loading: boolean = true;
   profileSaved: boolean = false;
+  savingProfile: boolean = false;
+  profileError: string = '';
   selectedBooking: BookingRecord | null = null;
 
   // User Profile
@@ -132,8 +150,7 @@ export class AccountComponent implements OnInit {
             timeSlot: b.timeSlot || (b.startTime + ' – ' + b.endTime),
             totalPrice: b.pricing?.totalPrice || b.pricing?.totalAmount || 2500000,
             depositAmount: b.pricing?.depositAmount || 750000,
-            status: b.bookingStatus === 'CONFIRMED' ? 'DEPOSITED' : (b.bookingStatus === 'CANCELLED' ? 'CANCELLED' : (b.bookingStatus === 'COMPLETED' ? 'COMPLETED' : 'PENDING')),
-            statusText: b.statusText || (b.bookingStatus === 'CONFIRMED' ? 'Đã đặt cọc' : (b.bookingStatus === 'CANCELLED' ? 'Đã hủy' : (b.bookingStatus === 'COMPLETED' ? 'Hoàn thành' : 'Chờ xác nhận'))),
+            ...mapBookingStatus(b.bookingStatus),
             image: b.conceptCode === 'CP01' ? 'assets/images/gallery-bst-02.png' : 'assets/images/gallery-bst-01.png',
             shootForm: b.shootForm || 'Chân dung',
             note: b.customer?.note || b.note || 'Yêu cầu concept nhẹ nhàng'
@@ -166,15 +183,39 @@ export class AccountComponent implements OnInit {
     return this.pointTransactions;
   }
 
+  // Lưu họ tên và email lên server (PUT /api/auth/me); SĐT không cho tự đổi
   saveProfile(): void {
-    this.user.name = this.profileForm.name;
-    this.user.email = this.profileForm.email;
-    this.profileSaved = true;
-    this.cdr.markForCheck();
-    setTimeout(() => {
-      this.profileSaved = false;
-      this.cdr.markForCheck();
-    }, 3000);
+    this.profileSaved = false;
+    this.profileError = '';
+    const fullName = (this.profileForm.name || '').trim();
+    const email = (this.profileForm.email || '').trim();
+    if (!fullName) {
+      this.profileError = 'Vui lòng nhập họ và tên!';
+      return;
+    }
+
+    this.savingProfile = true;
+    this.authService.updateMe({ fullName, ...(email ? { email } : {}) }).subscribe({
+      next: (res) => {
+        this.savingProfile = false;
+        const user = res?.user;
+        this.user.name = user?.fullName || fullName;
+        this.user.email = user?.email || email;
+        this.profileForm.name = this.user.name;
+        this.profileForm.email = this.user.email;
+        this.profileSaved = true;
+        this.cdr.markForCheck();
+        setTimeout(() => {
+          this.profileSaved = false;
+          this.cdr.markForCheck();
+        }, 3000);
+      },
+      error: (err) => {
+        this.savingProfile = false;
+        this.profileError = err?.error?.error || 'Cập nhật thông tin thất bại, vui lòng thử lại!';
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   changePassword(): void {

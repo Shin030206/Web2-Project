@@ -65,13 +65,12 @@ export class ConceptComponent implements OnInit {
     this.loadCollections();
 
     // Check query params
+    // Query param đổi khi đang ở sẵn trang này (vd bấm link "Mẹ và con" ở footer) thì component không tạo lại,
+    // nên phải tự cập nhật bộ lọc và báo Angular vẽ lại (app chạy zoneless + OnPush)
     this.route.queryParams.subscribe(params => {
-      if (params['category']) {
-        this.activeCategory = params['category'];
-      }
-      if (params['collection']) {
-        this.activeCollectionId = params['collection'];
-      }
+      this.activeCategory = params['category'] || 'all';
+      this.activeCollectionId = params['collection'] || 'all';
+      this.cdr.markForCheck();
     });
   }
 

@@ -328,6 +328,9 @@
         @if (profileSaved) {
           <div class="alert-success">Cập nhật thông tin thành công!</div>
         }
+        @if (profileError) {
+          <div class="alert-error">{{ profileError }}</div>
+        }
 
         <form (ngSubmit)="saveProfile()" class="profile-form">
           <div class="form-group">
@@ -347,7 +350,9 @@
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="btn-primary">Lưu thay đổi</button>
+            <button type="submit" class="btn-primary" [disabled]="savingProfile">
+              {{ savingProfile ? 'Đang lưu...' : 'Lưu thay đổi' }}
+            </button>
           </div>
         </form>
 
