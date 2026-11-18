@@ -176,7 +176,8 @@ exports.createVnpayPayment = async (req, res) => {
     txnRef,
     amount,
     orderInfo,
-    ipAddr: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+    // Sau proxy (Vercel -> Render) header có dạng "ip-khách, ip-proxy, ...": VNPay chỉ nhận 1 IP
+    ipAddr: String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.socket.remoteAddress,
     bankCode: req.body.bankCode,
     locale: req.body.locale,
     createdAt: now
