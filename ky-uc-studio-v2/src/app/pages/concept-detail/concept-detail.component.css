@@ -260,3 +260,19 @@
     padding: 28px 20px;
   }
 }
+
+/* Trang báo không tìm thấy concept */
+.concept-not-found {
+  text-align: center;
+  padding: 80px 16px;
+}
+
+.concept-not-found p {
+  color: #7A6F68;
+  margin: 12px 0 28px;
+}
+
+.concept-not-found .btn-book-concept {
+  display: inline-block;
+  width: auto;
+}

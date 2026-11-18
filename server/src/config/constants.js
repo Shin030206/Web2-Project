@@ -12,9 +12,9 @@ module.exports = {
   MIN_LEAD_HOURS: 2,             // Phải đặt trước giờ chụp ít nhất 2 tiếng
   DEPOSIT_RATE: 0.3,
   DEPOSIT_DEADLINE_HOURS: 24,    // Quá 24h chưa cọc thì đơn tự hủy để nhả slot
-  RESCHEDULE_MIN_HOURS: 24,
-  MAX_RESCHEDULES: 2,
-  REFUND_MIN_HOURS: 48,
+  RESCHEDULE_MIN_HOURS: 24,     // Khách chỉ được đổi lịch khi còn ít nhất 24h trước giờ chụp
+  MAX_RESCHEDULES: 1,           // Mỗi đơn khách chỉ được tự đổi lịch 1 lần (admin không giới hạn)
+  REFUND_MIN_HOURS: 48,         // Hủy khi còn ít nhất 48h thì hoàn cọc, dưới 48h vẫn hủy được nhưng mất cọc
 
   // Ký Ức Xu: hoàn thành buổi chụp được 1 xu cho mỗi 10.000đ thanh toán
   POINT_PER_VND: 10000,

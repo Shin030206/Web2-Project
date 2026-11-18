@@ -29,14 +29,9 @@
           <h1 class="concept-title">{{ concept.concept_name | uppercase }}</h1>
 
           <!-- Deep 3-Paragraph Narrative Essay from Figma 217:3089 -->
+          <!-- Mô tả theo đúng concept đang xem: bài viết riêng (conceptEssays) nếu có, không thì lấy description từ DB -->
           <div class="concept-narrative-story">
-            <p>Có những ngày phố xá sũng ướt, lòng người chỉ muốn nép lại một góc tĩnh lặng.</p>
-            <p>
-              CD Ngày Mưa là như thế. Một chiếc cardigan len dệt kim mỏng, tóc xõa lơi tự nhiên bên ô cửa kính đọng nước. Tông màu phim trầm ấm, độ tương phản dịu nhẹ đủ để ánh nhìn sâu đằm chiếu và viền vai gầy hiện lên thật mộc. Bố cục gồm một khung cận mặt đong đầy cảm xúc kết hợp các góc trung cảnh bên bàn gỗ, tách trà ấm và trang sách mở dở.
-            </p>
-            <p>
-              Phù hợp cho những ai đang tìm kiếm một khoảng không riêng tư, muốn lưu giữ một nốt trầm dịu dàng hay đơn giản là muốn trò chuyện với chính mình. Không cần tạo dáng cầu kỳ, không đòi hỏi biểu cảm gượng gạo. Bộ ảnh này là nơi bạn thả lỏng tâm trí và tự do chìm đọng trong cảm xúc thật nhất.
-            </p>
+            <p>{{ conceptStory }}</p>
           </div>
 
           <!-- Pricing Banner Card (Figma 217:3089) -->
@@ -133,6 +128,13 @@
           </form>
         </div>
       </div>
+    </section>
+  } @else if (!loading) {
+    <!-- Mã concept không tồn tại: báo không tìm thấy, không hiển thị concept khác -->
+    <section class="detail-main-section container concept-not-found">
+      <h1 class="concept-title">KHÔNG TÌM THẤY CONCEPT</h1>
+      <p>Concept bạn tìm không tồn tại hoặc đã ngừng hoạt động.</p>
+      <a routerLink="/concept" class="btn-book-concept">Xem tất cả concept</a>
     </section>
   }
 </div>

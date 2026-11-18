@@ -62,6 +62,21 @@ exports.holdSlot = async (req, res) => {
   };
   await collections.holdSlotCollection.insertOne(newHold);
 
+  // Hai yêu cầu giữ chỗ cùng SĐT gửi đồng thời có thể cùng lọt qua bước xóa lượt giữ cũ ở trên.
+  // Kiểm tra lại sau khi ghi: chỉ lượt giữ mới nhất (holdId lớn nhất) được giữ lại, các lượt khác bị hủy.
+  const activeHolds = await collections.holdSlotCollection
+    .find({ customerPhone, expiresAt: { $gt: new Date() } })
+    .sort({ _id: -1 })
+    .toArray();
+  const [newest, ...older] = activeHolds;
+  for (const hold of older) {
+    await slotService.releaseLocks(hold._id);
+    await collections.holdSlotCollection.deleteOne({ _id: hold._id });
+  }
+  if (!newest || !newest._id.equals(holdId)) {
+    throw httpError(409, "Số điện thoại này vừa giữ một khung giờ khác, vui lòng thử lại!");
+  }
+
   res.status(201).send({
     message: `Giữ slot thành công ${C.HOLD_MINUTES} phút!`,
     holdId,

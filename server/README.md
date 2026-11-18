@@ -51,7 +51,7 @@ server/
 | Đặt trước tối thiểu / tối đa | 2 tiếng / 90 ngày |
 | Tiền cọc | 30% tổng tiền (làm tròn nghìn) |
 | Hạn thanh toán cọc | 24h sau khi đặt, quá hạn tự hủy đơn & nhả slot |
-| Đổi lịch | trước giờ chụp ≥ 24h, tối đa 2 lần (admin không giới hạn) |
+| Đổi lịch | trước giờ chụp ≥ 24h, chỉ 1 lần (admin không giới hạn) |
 | Hủy lịch | trước ≥ 48h hoàn 100% cọc, dưới 48h mất cọc; studio hủy luôn hoàn tiền |
 | Ký Ức Xu | hoàn thành buổi chụp được 1 xu / 10.000đ; dùng xu đổi voucher, hủy đơn (không mất cọc) được hoàn xu |
 
@@ -162,6 +162,16 @@ Server kiểm tra chữ ký HMAC-SHA512, số tiền, mã giao dịch; mỗi gia
 3. Chọn ngân hàng **NCB**, nhập thẻ test: số thẻ `9704198526191432198`, tên `NGUYEN VAN A`, ngày phát hành `07/15`, OTP `123456`.
 4. VNPay chuyển về `VNP_RETURN_URL?vnp_...` → frontend gọi `GET /api/payments/vnpay/return` + nguyên query string đó để hiện kết quả.
 5. IPN chỉ chạy khi server có địa chỉ public (deploy hoặc dùng ngrok) và đã khai báo IPN URL `https://<domain>/api/payments/vnpay/ipn` trong trang quản trị merchant VNPay. Chạy local không có IPN vẫn được vì Return URL cũng ghi nhận kết quả.
+
+**Chuyển sang VNPay thật (trừ tiền thật):** code không cần sửa, chỉ đổi cấu hình.
+1. Ký hợp đồng merchant với VNPay (cần pháp nhân: doanh nghiệp hoặc hộ kinh doanh, tài khoản ngân hàng nhận tiền, website đã chạy trên domain thật có HTTPS và có trang chính sách). VNPay kiểm thử tích hợp rồi cấp `vnp_TmnCode` + `vnp_HashSecret` bản thật.
+2. Deploy server và frontend lên domain thật có HTTPS.
+3. Trong `.env` của server production:
+   - `VNP_TMN_CODE`, `VNP_HASH_SECRET`: mã thật VNPay cấp (không commit lên git).
+   - `VNP_URL=https://pay.vnpay.vn/vpcpay.html`
+   - `VNP_RETURN_URL=https://<domain>/thanh-toan/ket-qua`
+4. Khai báo IPN URL `https://<domain>/api/payments/vnpay/ipn` với VNPay. Bản thật bắt buộc có IPN: nếu khách đóng trình duyệt trước khi quay về web, chỉ IPN báo được kết quả cho server.
+5. Thử 1 giao dịch nhỏ bằng thẻ thật, kiểm tra đơn chuyển sang Đã đặt cọc và đối soát trên trang quản trị merchant VNPay.
 
 ### Admin – `/api/admin` 🛡️
 | Method | URL | Ghi chú |

@@ -580,8 +580,10 @@ export class BookingComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // If holdId is missing or held with another phone, re-hold with cleanPhone
-    if (!this.holdId || this.holdExpired || this.heldPhone !== cleanPhone) {
+    // Chỉ giữ chỗ lại khi chưa có lượt giữ hoặc lượt giữ đã hết hạn.
+    // Không giữ lại khi SĐT đổi: lượt giữ cũ vẫn khóa khung giờ nên giữ lại sẽ bị báo "không còn trống",
+    // trong khi server đã chấp nhận lượt giữ cũ của chính tài khoản này (khớp theo userId, xem createBooking).
+    if (!this.holdId || this.holdExpired) {
       this.bookingService.holdSlot({
         packageId: this.selectedPackageId,
         bookingDate: this.bookingDate,

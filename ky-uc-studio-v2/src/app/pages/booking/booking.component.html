@@ -157,7 +157,7 @@
         <div class="step-bottom-bar">
           <div class="bottom-price-summary">
             <span class="sub-label">TẠM TÍNH:</span>
-            <strong class="total-bold">{{ (quote?.totalPrice || selectedPackage?.price || 2500000) | number }}đ</strong>
+            <strong class="total-bold">{{ (quote?.totalAmount ?? selectedPackage?.price ?? 2500000) | number }}đ</strong>
             <span class="deposit-hint">(Cọc 30%: {{ (quote?.depositAmount || 750000) | number }}đ)</span>
           </div>
           <div class="bottom-actions">
@@ -351,7 +351,7 @@
             </div>
             <div class="info-line">
               <span class="info-label">Giá gói chụp:</span>
-              <span class="info-value">{{ (quote?.packagePrice || selectedPackage?.price || 2500000) | number }}đ</span>
+              <span class="info-value">{{ (quote?.package?.price ?? selectedPackage?.price ?? 2500000) | number }}đ</span>
             </div>
             @if (quote && quote.discountAmount > 0) {
               <div class="info-line discount-line">
@@ -361,7 +361,7 @@
             }
             <div class="info-line total-line">
               <span class="info-label">Tổng tiền đơn:</span>
-              <strong class="info-value total-num">{{ (quote?.totalPrice || selectedPackage?.price || 2500000) | number }}đ</strong>
+              <strong class="info-value total-num">{{ (quote?.totalAmount ?? selectedPackage?.price ?? 2500000) | number }}đ</strong>
             </div>
             <div class="info-line deposit-highlight-line">
               <span class="info-label">Tiền cọc thanh toán (30%):</span>

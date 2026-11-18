@@ -272,6 +272,24 @@ test('user đã đăng nhập: SĐT trong form khác SĐT lúc giữ slot vẫn 
   assert.equal(created.body.data.bookingStatus, 'Pending');
 });
 
+test('cùng SĐT gửi 2 yêu cầu giữ chỗ đồng thời: chỉ còn đúng 1 lượt giữ hiệu lực', async () => {
+  const date = futureDate(14);
+  const phone = '0966666001';
+  const [a, b] = await Promise.all([
+    api('POST', '/slots/hold', { packageId: 102, bookingDate: date, startTime: '09:00', customerPhone: phone }),
+    api('POST', '/slots/hold', { packageId: 102, bookingDate: date, startTime: '15:00', customerPhone: phone })
+  ]);
+  const ok = [a, b].filter(r => r.status === 201);
+  assert.equal(ok.length >= 1, true, 'ít nhất 1 yêu cầu giữ chỗ thành công: ' + JSON.stringify([a, b].map(r => [r.status, r.body])));
+
+  const alive = [];
+  for (const r of ok) {
+    const check = await api('GET', `/slots/hold/${r.body.holdId}`);
+    if (check.status === 200) alive.push(r.body.holdId);
+  }
+  assert.equal(alive.length, 1, 'một SĐT chỉ được giữ tối đa 1 khung giờ còn hiệu lực');
+});
+
 test('đổi lịch: lùi 30 phút trong cùng ngày, không đè lên đơn khác', async () => {
   const other = await api('POST', '/slots/hold', { packageId: 201, bookingDate: DATE, startTime: '15:00', customerPhone: '0977777777' });
   await api('POST', '/bookings', { holdId: other.body.holdId, customerName: 'Khách B', customerPhone: '0977777777' });
@@ -284,7 +302,13 @@ test('đổi lịch: lùi 30 phút trong cùng ngày, không đè lên đơn kh�
   assert.equal(moved.body.data.timeSlot, '11:00 - 12:30');
   assert.equal(moved.body.data.rescheduleCount, 1);
 
-  const clash = await api('PUT', `/bookings/${booking._id}/reschedule`, { bookingDate: DATE, startTime: '14:00' }, userToken);
+  // Khách chỉ được tự đổi lịch 1 lần
+  const second = await api('PUT', `/bookings/${booking._id}/reschedule`, { bookingDate: DATE, startTime: '09:00' }, userToken);
+  assert.equal(second.status, 400);
+  assert.match(second.body.error, /tối đa 1 lần/);
+
+  // Admin không bị giới hạn số lần, nhưng vẫn không được đè lên đơn khác
+  const clash = await api('PUT', `/bookings/${booking._id}/reschedule`, { bookingDate: DATE, startTime: '14:00' }, adminToken);
   assert.equal(clash.status, 409);
 
   const occupied = await api('GET', `/slots/occupied?date=${DATE}`);

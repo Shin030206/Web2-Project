@@ -42,11 +42,11 @@ export interface QuotePayload {
 }
 
 export interface QuoteResponse {
-  packagePrice: number;
-  conceptPrice: number;
-  addonsPrice: number;
+  // Đúng tên trường server trả về (publicQuote trong server/src/services/pricing.service.js)
+  package?: { package_id: number; package_name: string; price: number; duration_minutes?: number };
+  subtotal?: number;
   discountAmount: number;
-  totalPrice: number;
+  totalAmount: number;   // Tổng sau khi trừ voucher
   depositAmount: number;
   remainingAmount: number;
   voucher?: any;
@@ -188,6 +188,16 @@ export class BookingService {
   }
 
   // 12. Tra cứu đơn hàng của tài khoản
+  // Khách đổi lịch: chỉ 1 lần, trước giờ chụp ít nhất 24h (server kiểm tra lại)
+  rescheduleBooking(bookingId: string, data: { bookingDate: string; startTime: string }): Observable<any> {
+    return this.http.put<any>(`/api/bookings/${bookingId}/reschedule`, data);
+  }
+
+  // Khách hủy lịch: trước 48h được hoàn cọc, dưới 48h vẫn hủy được nhưng mất cọc
+  cancelBooking(bookingId: string, reason?: string): Observable<any> {
+    return this.http.put<any>(`/api/bookings/${bookingId}/cancel`, { reason });
+  }
+
   getMyBookings(): Observable<any> {
     return this.http.get<any>('/api/bookings/my').pipe(
       catchError(this.handleError)

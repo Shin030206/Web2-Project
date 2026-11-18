@@ -142,8 +142,30 @@ exports.getMyBookings = async (req, res) => {
   const filter = { userId: toObjectId(req.user.userId) };
   if (req.query.status) filter.bookingStatus = req.query.status;
   const result = await collections.bookingCollection.find(filter).sort({ shootAt: -1 }).toArray();
-  res.send(result);
+  res.send(result.map(b => ({ ...b, policy: customerPolicy(b) })));
 };
+
+// Khách được đổi/hủy đơn này không, và vì sao (để web khóa nút, hiện cảnh báo).
+// Server vẫn tự kiểm tra lại trong rescheduleBooking / cancelBooking.
+function customerPolicy(booking) {
+  const active = [S.PENDING, S.CONFIRMED].includes(booking.bookingStatus);
+  const hoursLeft = hoursUntil(booking.shootAt);
+  let rescheduleBlockedReason = null;
+  if (!active) rescheduleBlockedReason = "Đơn này không còn đổi lịch được.";
+  else if ((booking.rescheduleCount || 0) >= C.MAX_RESCHEDULES) rescheduleBlockedReason = `Mỗi đơn chỉ được đổi lịch ${C.MAX_RESCHEDULES} lần, đơn này đã đổi rồi.`;
+  else if (hoursLeft < C.RESCHEDULE_MIN_HOURS) rescheduleBlockedReason = `Chỉ được đổi lịch trước giờ chụp ít nhất ${C.RESCHEDULE_MIN_HOURS} tiếng.`;
+
+  const paid = [C.PAYMENT_STATUS.DEPOSIT_PAID, C.PAYMENT_STATUS.FULLY_PAID].includes(booking.paymentStatus);
+  return {
+    canReschedule: !rescheduleBlockedReason,
+    rescheduleBlockedReason,
+    canCancel: active,
+    // Hủy lúc này có bị mất tiền đã cọc không (dưới REFUND_MIN_HOURS)
+    cancelLosesDeposit: active && paid && hoursLeft < C.REFUND_MIN_HOURS,
+    rescheduleMinHours: C.RESCHEDULE_MIN_HOURS,
+    refundMinHours: C.REFUND_MIN_HOURS
+  };
+}
 
 exports.getBookingById = async (req, res) => {
   const booking = await loadBookingForActor(req);
@@ -176,7 +198,7 @@ exports.getBookings = async (req, res) => {
   res.send({ data, page, limit, total });
 };
 
-// Đổi lịch (trước 24h, tối đa 2 lần; admin không bị giới hạn)
+// Đổi lịch (khách: trước 24h, tối đa MAX_RESCHEDULES lần; admin không bị giới hạn)
 exports.rescheduleBooking = async (req, res) => {
   const booking = await loadBookingForActor(req);
   const admin = isAdmin(req);

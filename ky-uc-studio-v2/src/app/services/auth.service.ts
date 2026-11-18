@@ -98,6 +98,15 @@ export class AuthService {
     );
   }
 
+  // Cập nhật hồ sơ (họ tên, email) của tài khoản đang đăng nhập
+  updateMe(data: { fullName?: string; email?: string }): Observable<{ message: string; user: User }> {
+    return this.http.put<{ message: string; user: User }>('/api/auth/me', data).pipe(
+      tap((res) => {
+        if (res?.user) this.currentUserSubject.next(res.user);
+      })
+    );
+  }
+
   // Đổi mật khẩu khi đã đăng nhập; server cấp lại cookie đăng nhập mới, các thiết bị khác bị đăng xuất
   changePassword(data: { oldPassword: string; newPassword: string }): Observable<{ message: string }> {
     return this.http.put<{ message: string }>('/api/auth/change-password', data);
