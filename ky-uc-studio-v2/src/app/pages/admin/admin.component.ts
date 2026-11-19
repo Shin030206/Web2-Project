@@ -75,6 +75,8 @@ export class AdminComponent implements OnInit {
   bookings: AdminBooking[] = [];
   bookingFilter: 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show' = 'all';
   bookingSearchText: string = '';
+  // Sắp xếp danh sách đơn (server: GET /api/bookings?sort=...). Mặc định đơn mới đặt lên đầu để dễ truy vết.
+  bookingSort: 'created_desc' | 'created_asc' | 'shoot_asc' | 'shoot_desc' = 'created_desc';
   bookingPage: number = 1;
   bookingLimit: number = 10;
   bookingTotal: number = 0;
@@ -176,7 +178,7 @@ export class AdminComponent implements OnInit {
     const queryParams: string[] = [
       `page=${this.bookingPage}`,
       `limit=${this.bookingLimit}`,
-      'sort=newest' // Đơn mới đặt hiện lên đầu (server sắp theo createdAt giảm dần)
+      `sort=${this.bookingSort}`
     ];
 
     if (this.bookingFilter !== 'all') {
@@ -235,6 +237,11 @@ export class AdminComponent implements OnInit {
 
   setBookingFilter(filter: 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'): void {
     this.bookingFilter = filter;
+    this.bookingPage = 1;
+    this.loadBookings();
+  }
+
+  setBookingSort(): void {
     this.bookingPage = 1;
     this.loadBookings();
   }

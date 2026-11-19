@@ -380,6 +380,22 @@ test('lỗi đầu vào trả mã lỗi rõ ràng thay vì 500', async () => {
   assert.equal(res.status, 400);
 });
 
+test('admin xem đơn: sắp theo thời gian tạo đơn hoặc giờ chụp', async () => {
+  const get = async (sort) => (await api('GET', `/bookings?limit=100${sort ? `&sort=${sort}` : ''}`, null, adminToken)).body.data;
+  const createdDesc = await get('created_desc');
+  assert.ok(createdDesc.length >= 2, 'cần ít nhất 2 đơn để so thứ tự');
+  const times = createdDesc.map(b => new Date(b.createdAt).getTime());
+  assert.deepEqual(times, [...times].sort((a, b) => b - a), 'created_desc: đơn mới tạo đứng trước');
+  assert.deepEqual((await get('newest')).map(b => b._id), createdDesc.map(b => b._id), 'newest giữ nghĩa cũ = created_desc');
+  assert.deepEqual((await get('created_asc')).map(b => b._id), [...createdDesc].reverse().map(b => b._id));
+
+  const shootAsc = (await get('shoot_asc')).map(b => new Date(b.shootAt).getTime());
+  assert.deepEqual(shootAsc, [...shootAsc].sort((a, b) => a - b), 'shoot_asc: lịch chụp gần nhất trước');
+  const shootDesc = (await get('shoot_desc')).map(b => new Date(b.shootAt).getTime());
+  assert.deepEqual(shootDesc, [...shootDesc].sort((a, b) => b - a));
+  assert.deepEqual((await get('')).map(b => new Date(b.shootAt).getTime()), shootAsc, 'không truyền sort: mặc định theo giờ chụp như cũ');
+});
+
 test('thống kê admin', async () => {
   const stats = await api('GET', '/admin/stats', null, adminToken);
   assert.equal(stats.status, 200);
