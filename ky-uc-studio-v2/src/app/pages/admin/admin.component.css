@@ -1148,3 +1148,10 @@ input:checked + .slider:before {
   to { opacity: 1; transform: scale(1); }
 }
 
+
+/* Lọc trạng thái + sắp xếp đơn đặt lịch nằm cạnh nhau */
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

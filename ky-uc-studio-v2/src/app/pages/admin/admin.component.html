@@ -246,6 +246,12 @@
                 <option value="no_show">Khách không đến ({{ bookingStatusCounts.no_show }})</option>
                 <option value="cancelled">Đã hủy ({{ bookingStatusCounts.cancelled }})</option>
               </select>
+              <select class="filter-select" [(ngModel)]="bookingSort" (change)="setBookingSort()" title="Sắp xếp">
+                <option value="created_desc">Mới đặt nhất</option>
+                <option value="created_asc">Đặt sớm nhất</option>
+                <option value="shoot_asc">Lịch chụp gần nhất</option>
+                <option value="shoot_desc">Lịch chụp xa nhất</option>
+              </select>
             </div>
           </div>
 
@@ -262,9 +268,10 @@
                   <tr>
                     <th>STT</th>
                     <th>Mã đơn</th>
+                    <th>Thời gian đặt</th>
                     <th>Khách hàng</th>
                     <th>Gói & Concept</th>
-                    <th>Ngày & Giờ</th>
+                    <th>Lịch chụp</th>
                     <th>Cọc / Tổng</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
@@ -274,6 +281,10 @@
                   <tr *ngFor="let b of filteredBookings; let i = index">
                     <td>{{ (bookingPage - 1) * bookingLimit + i + 1 }}</td>
                     <td><strong class="code-link" (click)="openBookingModal(b)">{{ b.bookingCode }}</strong></td>
+                    <td>
+                      <div>{{ b.createdAt | date:'dd/MM/yyyy' }}</div>
+                      <small class="text-muted">{{ b.createdAt | date:'HH:mm:ss' }}</small>
+                    </td>
                     <td>
                       <div class="cust-name">{{ b.customer?.name }}</div>
                       <div class="cust-phone">{{ b.customer?.phone }}</div>
@@ -303,7 +314,7 @@
                     </td>
                   </tr>
                   <tr *ngIf="filteredBookings.length === 0 && !bookingError">
-                    <td colspan="8" class="text-center" style="padding: 30px; color: #8C7E77;">Không tìm thấy đơn đặt lịch nào phù hợp</td>
+                    <td colspan="9" class="text-center" style="padding: 30px; color: #8C7E77;">Không tìm thấy đơn đặt lịch nào phù hợp</td>
                   </tr>
                 </tbody>
               </table>
@@ -518,6 +529,7 @@
             <div class="meta-list">
               <div class="meta-row"><span class="lbl">Gói chụp:</span> <strong>{{ selectedBooking.pricing?.package?.package_name || 'Gói Chân dung' }}</strong></div>
               <div class="meta-row"><span class="lbl">Concept:</span> <span>{{ selectedBooking.pricing?.concept?.concept_name || 'Concept tự chọn' }}</span></div>
+              <div class="meta-row"><span class="lbl">Thời gian đặt:</span> <strong>{{ selectedBooking.createdAt | date:'HH:mm:ss dd/MM/yyyy' }}</strong></div>
               <div class="meta-row"><span class="lbl">Ngày chụp:</span> <strong>{{ selectedBooking.bookingDate }}</strong></div>
               <div class="meta-row"><span class="lbl">Khung giờ:</span> <span>{{ selectedBooking.timeSlot || selectedBooking.startTime }}</span></div>
             </div>

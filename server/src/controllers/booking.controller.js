@@ -190,7 +190,15 @@ exports.getBookings = async (req, res) => {
   if (paymentStatus) filter.paymentStatus = { $in: String(paymentStatus).split(",") };
   if (packageId) filter["pricing.package.package_id"] = Number(packageId);
 
-  const sort = req.query.sort === "newest" ? { createdAt: -1 } : { shootAt: 1 };
+  // sort: created_desc (mới đặt trước, "newest" là tên cũ), created_asc, shoot_asc (mặc định), shoot_desc
+  const SORTS = {
+    newest: { createdAt: -1, _id: -1 },
+    created_desc: { createdAt: -1, _id: -1 },
+    created_asc: { createdAt: 1, _id: 1 },
+    shoot_asc: { shootAt: 1, _id: 1 },
+    shoot_desc: { shootAt: -1, _id: -1 }
+  };
+  const sort = SORTS[req.query.sort] || SORTS.shoot_asc;
   const [data, total] = await Promise.all([
     collections.bookingCollection.find(filter).sort(sort).skip(skip).limit(limit).toArray(),
     collections.bookingCollection.countDocuments(filter)
