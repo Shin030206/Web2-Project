@@ -290,6 +290,9 @@
           </div>
         </div>
 
+        @if (bookingError) {
+          <div class="booking-alert-error inline-step-error"><span>⚠ {{ bookingError }}</span></div>
+        }
         <!-- Bottom Action Bar (Figma Screen 3) -->
         <div class="step-bottom-bar">
           <div class="bottom-actions-left">
@@ -470,6 +473,9 @@
           }
 
           <!-- Submit / Proceed Button (Figma Screen 4 Brown Pill) -->
+          @if (bookingError) {
+            <div class="booking-alert-error inline-step-error"><span>⚠ {{ bookingError }}</span></div>
+          }
           <div class="deposit-submit-wrap">
             <button 
               type="button" 
@@ -501,8 +507,16 @@
         <div class="vietqr-grid-layout">
           <!-- Left: Dynamic VietQR Image -->
           <div class="qr-code-frame">
-            <img [src]="paymentInfo?.qrUrl" alt="VietQR Đặt cọc" class="qr-image-display">
-            <p class="qr-scan-guide">Mở App Ngân hàng của bạn và quét mã trên để thanh toán tức thì</p>
+            @if (paymentInfo?.qrUrl) {
+              <img [src]="paymentInfo?.qrUrl" alt="VietQR Đặt cọc" class="qr-image-display">
+              <p class="qr-scan-guide">Mở App Ngân hàng của bạn và quét mã trên để thanh toán tức thì</p>
+            } @else {
+              <!-- Server chưa có BANK_ID / BANK_ACCOUNT nên không tạo được mã QR -->
+              <div class="qr-missing-box">
+                <p><strong>Studio chưa cấu hình tài khoản nhận cọc.</strong></p>
+                <p>Vui lòng liên hệ hotline 0396581067 để được hướng dẫn chuyển khoản, hoặc quay lại chọn thanh toán VNPay.</p>
+              </div>
+            }
           </div>
 
           <!-- Right: Bank Transfer Account Details -->
@@ -510,15 +524,15 @@
             <h3 class="bank-details-title">Thông tin chuyển khoản chính thức</h3>
             <div class="bank-row">
               <span class="b-label">Ngân hàng thụ hưởng:</span>
-              <strong class="b-val">{{ paymentInfo?.bankId || 'Ngân hàng Quân Đội (MB Bank)' }}</strong>
+              <strong class="b-val">{{ paymentInfo?.bankId || '—' }}</strong>
             </div>
             <div class="bank-row">
               <span class="b-label">Số tài khoản:</span>
-              <strong class="b-val highlight-acc">{{ paymentInfo?.bankAccount || '0396581067' }}</strong>
+              <strong class="b-val highlight-acc">{{ paymentInfo?.bankAccount || '—' }}</strong>
             </div>
             <div class="bank-row">
               <span class="b-label">Chủ tài khoản:</span>
-              <strong class="b-val">{{ paymentInfo?.bankAccountName || 'NGUYEN TIEN DAT' }}</strong>
+              <strong class="b-val">{{ paymentInfo?.bankAccountName || '—' }}</strong>
             </div>
             <div class="bank-row">
               <span class="b-label">Số tiền đặt cọc:</span>
@@ -533,7 +547,7 @@
               <button 
                 type="button" 
                 class="btn-primary-brown btn-transfer-done" 
-                [disabled]="transferLoading"
+                [disabled]="transferLoading || !paymentInfo?.qrUrl"
                 (click)="notifyBankTransferDone()">
                 <span>{{ transferLoading ? 'ĐANG GỬI XÁC NHẬN...' : 'TÔI ĐÃ CHUYỂN KHOẢN XONG' }}</span>
               </button>
@@ -555,9 +569,10 @@
           </svg>
         </div>
 
-        <h2 class="success-title">Thanh toán cọc thành công!</h2>
+        <h2 class="success-title">Giao dịch đang chờ xác nhận</h2>
         <p class="success-subtitle">
-          Cảm ơn bạn đã tin tưởng Ký Ức Studio! Chúng tôi đã ghi nhận lịch hẹn chụp của bạn và sẽ liên hệ chuẩn bị chu đáo nhất.
+          Ký Ức Studio đã nhận thông báo chuyển khoản của bạn. Studio sẽ đối soát và xác nhận tiền cọc trong thời gian sớm nhất,
+          trạng thái đơn sẽ chuyển sang "Đã đặt cọc" trong mục Lịch đặt của tôi.
         </p>
 
         <!-- Order Summary Card with CD Vườn Hoa Image (Figma Screen 7) -->
@@ -577,7 +592,7 @@
                 <strong>Thời gian:</strong> {{ selectedSlot?.timeSlot || selectedSlot?.startTime }} · {{ bookingDate }}
               </p>
               <div class="deposit-paid-badge">
-                <span>Đã ghi nhận tiền cọc: <strong>{{ (paymentInfo?.amount || quote?.depositAmount || 750000) | number }}đ</strong></span>
+                <span>Tiền cọc chờ xác nhận: <strong>{{ (paymentInfo?.amount || quote?.depositAmount || 750000) | number }}đ</strong></span>
               </div>
             </div>
           </div>

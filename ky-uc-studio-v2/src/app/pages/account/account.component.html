@@ -177,7 +177,7 @@
                 <h3 class="item-concept-name">{{ item.conceptName }}</h3>
                 <p class="item-detail-line"><strong>Gói dịch vụ:</strong> {{ item.packageName }}</p>
                 <p class="item-detail-line"><strong>Thời gian chụp:</strong> {{ item.bookingDate }} ({{ item.timeSlot }})</p>
-                <p class="item-detail-line"><strong>Tổng chi phí:</strong> {{ item.totalPrice | number }}đ (Đã cọc 30%: {{ item.depositAmount | number }}đ)</p>
+                <p class="item-detail-line"><strong>Tổng chi phí:</strong> {{ item.totalPrice | number }}đ ({{ depositLabel(item) }}: {{ item.depositAmount | number }}đ)</p>
               </div>
 
               <div class="item-action-col">
@@ -234,7 +234,7 @@
             </div>
             <div class="dc-price-col">
               <span class="dc-price-main">{{ selectedBooking.totalPrice | number }}đ</span>
-              <small class="dc-deposit-note">Đã cọc 30%: {{ selectedBooking.depositAmount | number }}đ</small>
+              <small class="dc-deposit-note">{{ depositLabel(selectedBooking) }}: {{ selectedBooking.depositAmount | number }}đ</small>
             </div>
           </div>
 
