@@ -412,7 +412,13 @@ export class BookingComponent implements OnInit, OnDestroy {
       this.customerName = this.authService.currentUser.fullName;
     }
 
-    const phone = (this.customerPhone || '0987654321').trim().replace(/\s/g, '');
+    // Giữ chỗ cần SĐT thật của khách (trước đây tự điền số giả 0987654321 nên bỏ qua được ô bắt buộc)
+    const phone = (this.customerPhone || '').trim().replace(/\s/g, '');
+    if (!/^[0-9]{9,11}$/.test(phone)) {
+      this.bookingError = 'Vui lòng nhập Số điện thoại hợp lệ ở phần Thông tin người đặt trước khi chọn giờ chụp!';
+      this.cdr.markForCheck();
+      return;
+    }
     this.bookingError = '';
     this.selectedSlot = slot;
     this.heldPhone = phone;
@@ -533,6 +539,18 @@ export class BookingComponent implements OnInit, OnDestroy {
     } else if (step === 3) {
       if (!this.selectedSlot) {
         this.bookingError = 'Vui lòng chọn một khung giờ chụp trước khi thanh toán cọc!';
+        this.cdr.markForCheck();
+        return;
+      }
+      // Các ô có dấu * phải nhập trước khi sang bước thanh toán cọc
+      if (!this.customerName.trim()) {
+        this.bookingError = 'Vui lòng nhập Họ và tên người đặt lịch!';
+        this.cdr.markForCheck();
+        return;
+      }
+      if (!/^[0-9]{9,11}$/.test(this.customerPhone.trim().replace(/\s/g, ''))) {
+        this.bookingError = 'Vui lòng nhập Số điện thoại hợp lệ (9 - 11 chữ số)!';
+        this.cdr.markForCheck();
         return;
       }
       this.currentStep = 3;
@@ -676,9 +694,9 @@ export class BookingComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       },
       error: (err) => {
+        // Gửi thất bại thì báo lỗi và cho bấm lại, không chuyển sang màn hình đã gửi
         this.transferLoading = false;
-        this.bookingError = err.message || 'Lỗi gửi xác nhận, studio sẽ đối soát giao dịch tự động.';
-        this.transferConfirmed = true;
+        this.bookingError = err?.error?.error || err?.message || 'Gửi xác nhận chuyển khoản thất bại, vui lòng thử lại!';
         this.cdr.markForCheck();
       }
     });

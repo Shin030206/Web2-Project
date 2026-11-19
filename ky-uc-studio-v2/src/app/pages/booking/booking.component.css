@@ -2186,3 +2186,28 @@
     text-align: center;
   }
 }
+
+/* Chưa cấu hình tài khoản nhận cọc (thiếu BANK_ID / BANK_ACCOUNT trên server) */
+.qr-missing-box {
+  padding: 28px 16px;
+  border: 1px dashed #E0B4A0;
+  border-radius: 12px;
+  background: #FFF7F3;
+  color: #7A3E22;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.qr-missing-box p {
+  margin: 0 0 8px;
+}
+
+.inline-step-error {
+  margin: 12px 0;
+}
+
+.btn-transfer-done:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}

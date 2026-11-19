@@ -2,11 +2,13 @@ import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
+import { ConceptService } from '../../services/concept.service';
 
 interface BookingRecord {
   orderCode: string;
   packageName: string;
   conceptName: string;
+  conceptCode?: string;
   bookingDate: string;
   timeSlot: string;
   totalPrice: number;
@@ -57,6 +59,7 @@ function mapBookingStatus(serverStatus?: string): { status: BookingUiStatus; sta
 })
 export class AccountComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
+  private conceptService = inject(ConceptService);
 
   activeTab: 'overview' | 'bookings' | 'booking-detail' | 'profile' | 'points' = 'overview';
   bookingFilter: 'all' | 'pending' | 'deposited' | 'completed' | 'cancelled' = 'all';
@@ -122,6 +125,7 @@ export class AccountComponent implements OnInit {
     });
 
     this.loadUserData();
+    this.loadConceptThumbs();
   }
 
   loadUserData(): void {
@@ -151,6 +155,30 @@ export class AccountComponent implements OnInit {
     });
   }
 
+  // Ảnh minh họa của từng đơn = ảnh concept khách đã chọn (lấy từ /api/concepts)
+  private conceptThumbs: { [code: string]: string } = {};
+  private readonly defaultBookingImage = 'assets/images/gallery-bst-01.png';
+
+  private conceptImage(code?: string): string {
+    return (code && this.conceptThumbs[code]) || this.defaultBookingImage;
+  }
+
+  // Chỉ ghi "Đã cọc" khi đơn thật sự đã cọc
+  depositLabel(b: BookingRecord): string {
+    return b.status === 'DEPOSITED' || b.status === 'COMPLETED' ? 'Đã cọc 30%' : 'Tiền cọc 30%';
+  }
+
+  private loadConceptThumbs(): void {
+    this.conceptService.getConcepts().subscribe({
+      next: (concepts) => {
+        this.conceptThumbs = Object.fromEntries((concepts || []).map(c => [c.concept_code, c.thumbnail_url]));
+        // Danh sách đơn có thể đã tải xong trước: gắn lại ảnh đúng
+        this.bookings.forEach(bk => bk.image = this.conceptImage(bk.conceptCode));
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
   loadBookings(): void {
     this.bookingService.getMyBookings().subscribe({
       next: (res) => {
@@ -158,17 +186,20 @@ export class AccountComponent implements OnInit {
         const list = res.data || res || [];
         if (Array.isArray(list) && list.length > 0) {
           this.bookings = list.map((b: any) => ({
+            // Đọc đúng dữ liệu đơn lưu trên server (pricing.package, pricing.concept, customer.note),
+            // không dùng chữ / số mặc định để tránh đơn nào cũng hiện giống nhau
             orderCode: b.bookingCode || 'KU' + (b._id || '').slice(-6),
-            packageName: b.packageName || b.pricing?.packageName || 'Gói Chân dung nâng cao',
-            conceptName: b.conceptName || b.conceptCode || 'Concept chụp chân dung',
-            bookingDate: b.bookingDate || '30/10/2026',
-            timeSlot: b.timeSlot || (b.startTime + ' – ' + b.endTime),
-            totalPrice: b.pricing?.totalPrice || b.pricing?.totalAmount || 2500000,
-            depositAmount: b.pricing?.depositAmount || 750000,
+            packageName: b.pricing?.package?.package_name || '—',
+            conceptName: b.pricing?.concept?.concept_name || 'Chưa chọn concept',
+            conceptCode: b.pricing?.concept?.concept_code || '',
+            bookingDate: b.bookingDate || '—',
+            timeSlot: b.timeSlot || [b.startTime, b.endTime].filter(Boolean).join(' – '),
+            totalPrice: b.pricing?.totalAmount ?? 0,
+            depositAmount: b.pricing?.depositAmount ?? 0,
             ...mapBookingStatus(b.bookingStatus),
-            image: b.conceptCode === 'CP01' ? 'assets/images/gallery-bst-02.png' : 'assets/images/gallery-bst-01.png',
-            shootForm: b.shootForm || 'Chân dung',
-            note: b.customer?.note || b.note || 'Yêu cầu concept nhẹ nhàng',
+            image: this.conceptImage(b.pricing?.concept?.concept_code),
+            shootForm: b.pricing?.package?.category || '—',
+            note: b.customer?.note || '',
             id: b._id,
             packageId: b.pricing?.package?.package_id,
             policy: b.policy,
@@ -400,6 +431,8 @@ export class AccountComponent implements OnInit {
   }
 
   logout(): void {
+    // Hỏi lại trước khi đăng xuất để tránh bấm nhầm
+    if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/login']);
     });

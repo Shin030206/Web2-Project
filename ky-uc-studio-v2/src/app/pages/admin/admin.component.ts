@@ -508,6 +508,8 @@ export class AdminComponent implements OnInit {
   }
 
   logout(): void {
+    // Hỏi lại trước khi đăng xuất để tránh bấm nhầm
+    if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) return;
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/login']);
     });
